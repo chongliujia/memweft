@@ -1,37 +1,23 @@
-# Engram Python SDK
+# MemWeft Python SDK
 
-This package provides a thin Python wrapper around the Engram Rust core.
+This package provides a thin Python wrapper around the MemWeft Rust core.
 
 ## Quick start
 
 ```python
-from engram import Memory
+from memweft import Memory
 
-mem = Memory(path="data/engram.db")
-scope = {
-    "tenant_id": "default",
-    "user_id": "u1",
-    "agent_id": "a1",
-    "session_id": "s1",
-    "run_id": "r1",
-}
-
-mem.append_event(
-    {
-        "event_id": "e1",
-        "scope": scope,
-        "ts": "2024-01-01T00:00:00Z",
-        "kind": "message",
-        "payload": {"role": "user", "content": "hello"},
-        "tags": ["intro"],
-        "entities": [],
-    }
-)
-
-packet = mem.build_memory_packet(
-    {"scope": scope, "purpose": "planner", "task_type": "generic"}
-)
+with Memory("data/memweft.db") as memory:
+    alice = memory.user("alice")
+    alice.remember("Prefers concise answers", key="reply_style")
+    chat = alice.session("chat-001")
+    chat.add_message("user", "Explain Rust ownership", event_id="question-1")
+    print(chat.context(max_tokens=1000).text)
 ```
+
+The high-level API supports SQLite and an optional evaluated-learning workflow.
+See the [repository guide](../README.md) for `AsyncMemory`, LangGraph `BaseStore`,
+learning jobs, budget semantics and the existing low-level interface.
 
 ## Install (with database backends)
 
@@ -64,32 +50,32 @@ maturin develop --features mysql,postgres
 ```python
 mem = Memory(
     backend="mysql",
-    dsn="mysql://user:pass@localhost:3306/engram",
+    dsn="mysql://user:pass@localhost:3306/memweft",
 )
 
 mem = Memory(
     backend="postgres",
-    dsn="postgres://user:pass@localhost:5432/engram",
+    dsn="postgres://user:pass@localhost:5432/memweft",
 )
 
 # Use a separate database name
 mem = Memory(
     backend="mysql",
     dsn="mysql://user:pass@localhost:3306",
-    database="engram",
+    database="memweft",
 )
 ```
 
 Notes:
-- If the DSN omits a database name, it defaults to `engram`.
+- If the DSN omits a database name, it defaults to `memweft`.
 - If the database does not exist, it will be created on first connect.
 
 ## Tests
 
 ```bash
 maturin develop --features mysql,postgres
-ENGRAM_TEST_MYSQL_DSN="mysql://user:pass@localhost:3306/engram" \
-ENGRAM_TEST_POSTGRES_DSN="postgres://user:pass@localhost:5432/engram" \
+MEMWEFT_TEST_MYSQL_DSN="mysql://user:pass@localhost:3306/memweft" \
+MEMWEFT_TEST_POSTGRES_DSN="postgres://user:pass@localhost:5432/memweft" \
 python -m unittest python/tests/test_backends.py
 ```
 
@@ -97,8 +83,8 @@ python -m unittest python/tests/test_backends.py
 
 ```bash
 maturin develop --features mysql,postgres
-ENGRAM_BENCH_MYSQL_DSN="mysql://user:pass@localhost:3306/engram" \
-ENGRAM_BENCH_POSTGRES_DSN="postgres://user:pass@localhost:5432/engram" \
+MEMWEFT_BENCH_MYSQL_DSN="mysql://user:pass@localhost:3306/memweft" \
+MEMWEFT_BENCH_POSTGRES_DSN="postgres://user:pass@localhost:5432/memweft" \
 python python/scripts/bench_backends.py
 ```
 
@@ -109,16 +95,16 @@ Outputs:
 
 Config file (optional):
 
-- Copy `bench/engram_bench.env.example` to `bench/engram_bench.env`.
-- Set `ENGRAM_BENCH_CONFIG=/path/to/engram_bench.env` to use a custom path.
+- Copy `bench/memweft_bench.env.example` to `bench/memweft_bench.env`.
+- Set `MEMWEFT_BENCH_CONFIG=/path/to/memweft_bench.env` to use a custom path.
 - The Python benchmark scripts read this file for defaults if present.
 
 ## Load test (Python)
 
 ```bash
 maturin develop --features mysql,postgres
-ENGRAM_LOAD_MYSQL_DSN="mysql://user:pass@localhost:3306/engram" \
-ENGRAM_LOAD_POSTGRES_DSN="postgres://user:pass@localhost:5432/engram" \
+MEMWEFT_LOAD_MYSQL_DSN="mysql://user:pass@localhost:3306/memweft" \
+MEMWEFT_LOAD_POSTGRES_DSN="postgres://user:pass@localhost:5432/memweft" \
 python python/scripts/load_test.py --duration 60 --concurrency 8
 ```
 
@@ -130,8 +116,8 @@ Outputs:
 
 ```bash
 maturin develop --features mysql,postgres
-ENGRAM_SOAK_MYSQL_DSN="mysql://user:pass@localhost:3306/engram" \
-ENGRAM_SOAK_POSTGRES_DSN="postgres://user:pass@localhost:5432/engram" \
+MEMWEFT_SOAK_MYSQL_DSN="mysql://user:pass@localhost:3306/memweft" \
+MEMWEFT_SOAK_POSTGRES_DSN="postgres://user:pass@localhost:5432/memweft" \
 python python/scripts/soak_test.py --duration 600 --interval 60
 ```
 

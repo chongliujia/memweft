@@ -1,5 +1,6 @@
 [workspace]
-members = ["crates/engram-types", "crates/engram-store", "crates/engram-ffi"]
+members = ["crates/memweft-types", "crates/memweft-store", "crates/memweft-ffi", "crates/memweft", "crates/memweft-learning", "crates/memweft-node"]
+default-members = ["crates/memweft-types", "crates/memweft-store", "crates/memweft", "crates/memweft-learning"]
 resolver = "2"
 
 [workspace.package]

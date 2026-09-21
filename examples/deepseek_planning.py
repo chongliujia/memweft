@@ -1,6 +1,6 @@
 import os
 from openai import OpenAI
-from engram import Memory
+from memweft import Memory
 
 # 配置
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "your_api_key_here")
@@ -48,7 +48,7 @@ def task_planning_demo():
         "state_version": 2
     })
 
-    # 3. 让 DeepSeek 根据 Engram 维护的状态做出决策
+    # 3. 让 DeepSeek 根据 MemWeft 维护的状态做出决策
     print("\n--- 3. 正在请求 DeepSeek 决定下一步行动 ---")
     
     packet = mem.build_memory_packet({"scope": scope, "purpose": "planner"})

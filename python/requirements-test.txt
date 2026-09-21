@@ -1,0 +1,2 @@
+# Framework versions used by the integration suite.
+langgraph==1.2.11

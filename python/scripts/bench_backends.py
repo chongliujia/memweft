@@ -9,7 +9,7 @@ from pathlib import Path
 import shutil
 import sys
 
-from engram import Memory
+from memweft import Memory
 from bench_config import (
     env_int,
     env_str,
@@ -137,7 +137,7 @@ def write_html(results, output_path):
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Engram Python Benchmarks</title>
+  <title>MemWeft Python Benchmarks</title>
   <style>
     body {{
       font-family: Arial, sans-serif;
@@ -163,7 +163,7 @@ def write_html(results, output_path):
   </style>
 </head>
 <body>
-  <h1>Engram Python Benchmarks</h1>
+  <h1>MemWeft Python Benchmarks</h1>
   <div class="chart">{chart_append}</div>
   <div class="chart">{chart_list}</div>
   <div class="chart">{chart_build}</div>
@@ -194,7 +194,7 @@ def main():
     repo_root = Path(__file__).resolve().parents[2]
     default_output = repo_root / "target" / "python_bench.json"
     default_html = repo_root / "target" / "python_bench.html"
-    parser = argparse.ArgumentParser(description="Benchmark Engram Python backends.")
+    parser = argparse.ArgumentParser(description="Benchmark MemWeft Python backends.")
     parser.add_argument(
         "--config",
         default=config_arg,
@@ -203,19 +203,19 @@ def main():
     parser.add_argument(
         "--events",
         type=int,
-        default=env_int("ENGRAM_BENCH_EVENTS", 2000),
+        default=env_int("MEMWEFT_BENCH_EVENTS", 2000),
         help="Events to insert per backend.",
     )
     parser.add_argument(
         "--iterations",
         type=int,
-        default=env_int("ENGRAM_BENCH_ITERATIONS", 30),
+        default=env_int("MEMWEFT_BENCH_ITERATIONS", 30),
         help="Iterations for list/build.",
     )
     parser.add_argument(
         "--list-limit",
         type=int,
-        default=env_int("ENGRAM_BENCH_LIST_LIMIT", 0) or None,
+        default=env_int("MEMWEFT_BENCH_LIST_LIMIT", 0) or None,
         help="Optional limit for list_events.",
     )
     parser.add_argument("--output", default=str(default_output), help="Output JSON path.")
@@ -229,23 +229,23 @@ def main():
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        path = os.path.join(tmpdir, "engram.db")
+        path = os.path.join(tmpdir, "memweft.db")
         mem = Memory(path=path)
         results.append(
             run_backend("sqlite-file", mem, args.events, args.iterations, args.list_limit)
         )
 
-    mysql_dsn = env_str("ENGRAM_BENCH_MYSQL_DSN")
+    mysql_dsn = env_str("MEMWEFT_BENCH_MYSQL_DSN")
     if mysql_dsn:
-        database = env_str("ENGRAM_BENCH_MYSQL_DB")
+        database = env_str("MEMWEFT_BENCH_MYSQL_DB")
         mem = Memory(backend="mysql", dsn=mysql_dsn, database=database)
         results.append(
             run_backend("mysql", mem, args.events, args.iterations, args.list_limit)
         )
 
-    postgres_dsn = env_str("ENGRAM_BENCH_POSTGRES_DSN")
+    postgres_dsn = env_str("MEMWEFT_BENCH_POSTGRES_DSN")
     if postgres_dsn:
-        database = env_str("ENGRAM_BENCH_POSTGRES_DB")
+        database = env_str("MEMWEFT_BENCH_POSTGRES_DB")
         mem = Memory(backend="postgres", dsn=postgres_dsn, database=database)
         results.append(
             run_backend("postgres", mem, args.events, args.iterations, args.list_limit)

@@ -1,0 +1,19 @@
+[
+  {"request":{"op":"remember","scope":{"user_id":"alice"},"key":"style","value":"brief"},"checks":{"/fact_key":"style","/value":"brief"}},
+  {"request":{"op":"remember","scope":{"user_id":"alice"},"key":"style","value":"concise"},"checks":{"/value":"concise"}},
+  {"request":{"op":"memories","scope":{"user_id":"alice"}},"checks":{"/0/value":"concise"}},
+  {"request":{"op":"memories","scope":{"user_id":"bob"}},"checks":{"":[]}},
+  {"request":{"op":"add_message","scope":{"user_id":"alice"},"session_id":"s","event_id":"event-1","role":"user","content":"你好"},"checks":{"/key":"event-1","/value/content":"你好"}},
+  {"request":{"op":"add_message","scope":{"user_id":"alice"},"session_id":"s","event_id":"event-1","role":"user","content":"你好"},"checks":{"/key":"event-1"}},
+  {"request":{"op":"context","scope":{"user_id":"alice"},"session_id":"s","options":{}},"checks":{"/memories/0/value":"concise","/messages/0/key":"event-1","/report/model_token_limit_guaranteed":false}},
+  {"request":{"op":"context","scope":{"user_id":"alice"},"session_id":"s","options":{"max_tokens":0}},"checks":{"/text":"","/memories":[],"/messages":[]}},
+  {"request":{"op":"store_batch","scope":{"user_id":"alice"},"operations":[{"kind":"put","namespace":["notes"],"key":"x","value":{"score":2}},{"kind":"get","namespace":["notes"],"key":"x"}]},"checks":{"/0":null,"/1":null}},
+  {"request":{"op":"store_batch","scope":{"user_id":"alice"},"operations":[{"kind":"search","prefix":[],"filter":{"score":{"$gt":1}},"limit":10,"offset":0}]},"checks":{"/0/0/key":"x","/0/0/value/score":2}},
+  {"request":{"op":"learning_start","scope":{"user_id":"alice"},"id":"v1","proposal":{"task_type":"answer","content":"Be concise","proposer_version":"p1","source_keys":["style"]},"dataset_version":"d1","evaluator_version":"e1","case_ids":["a","b","c"]},"checks":{"/status":"evaluating","/baseline":null}},
+  {"request":{"op":"learning_submit","scope":{"user_id":"alice"},"id":"v1","evaluation":{"dataset_version":"d1","evaluator_version":"e1","cases":[{"case_id":"a","baseline_score":0.5,"candidate_score":0.8,"candidate_cost":0.01,"candidate_latency_ms":10},{"case_id":"b","baseline_score":0.5,"candidate_score":0.8,"candidate_cost":0.01,"candidate_latency_ms":10},{"case_id":"c","baseline_score":0.5,"candidate_score":0.8,"candidate_cost":0.01,"candidate_latency_ms":10}]}},"checks":{"/status":"accepted"}},
+  {"request":{"op":"learning_active","scope":{"user_id":"alice"},"task_type":"answer"},"checks":{"/version":"v1"}},
+  {"request":{"op":"forget","scope":{"user_id":"alice"},"key":"style"},"checks":{"":true}},
+  {"request":{"op":"learning_active","scope":{"user_id":"alice"},"task_type":"answer"},"checks":{"":null}},
+  {"request":{"op":"clear_session","scope":{"user_id":"alice"},"session_id":"s"},"checks":{"":1}},
+  {"request":{"op":"messages","scope":{"user_id":"alice"},"session_id":"s"},"checks":{"":[]}}
+]

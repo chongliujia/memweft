@@ -1,4 +1,4 @@
-# Engram 架构内幕：基于 Rust 的高性能 AI 记忆系统详解
+# MemWeft 架构内幕：基于 Rust 的高性能 AI 记忆系统详解
 
 **作者**：Chongliu Jia  
 **发布日期**：2026-01-28  
@@ -6,11 +6,11 @@
 
 ---
 
-## 1. 为什么需要 Engram？
+## 1. 为什么需要 MemWeft？
 
 在 LLM 应用开发中，"Memory"（记忆）通常被简化为 "Vector Database"（向量数据库）。然而，这种简化忽略了人类认知的复杂性。一个真正的智能体（Agent）需要的不仅仅是语义检索，它需要一个**结构化的认知状态机**。
 
-**Engram** 是一个为 Agent 设计的**可持久化认知状态层**。它不只是存储数据，而是管理 Agent 的**注意力（Attention）**。
+**MemWeft** 是一个为 Agent 设计的**可持久化认知状态层**。它不只是存储数据，而是管理 Agent 的**注意力（Attention）**。
 
 它解决的核心问题是：**如何在有限的 Context Window 预算内，精确、确定性地提供与当前任务最相关的信息？**
 
@@ -18,15 +18,15 @@
 
 ## 2. 系统架构：Rust 与 Python 的共舞
 
-Engram 采用 "Rust Core, Python Shell" 的架构。这保证了核心逻辑的**高性能**（零 GC、高并发）和**类型安全**，同时保留了 Python 生态的**易用性**。
+MemWeft 采用 "Rust Core, Python Shell" 的架构。这保证了核心逻辑的**高性能**（零 GC、高并发）和**类型安全**，同时保留了 Python 生态的**易用性**。
 
 ### 2.1 Crate 组织结构
 
 Rust 侧采用 Workspace 模式管理，职责分明：
 
-*   `crates/engram-types`: **领域原语**。定义了所有的记忆实体（Fact, Episode, Packet），这是 Rust 和 Python 共享的 Schema 契约。
-*   `crates/engram-store`: **核心引擎**。包含存储后端（SQLite/Postgres/MySQL）和最核心的算法逻辑（Context Composer）。
-*   `crates/engram-ffi`: **FFI 边界**。利用 `PyO3` 将 Rust 类型暴露给 Python，处理 GIL（全局解释器锁）和异步运行时桥接。
+*   `crates/memweft-types`: **领域原语**。定义了所有的记忆实体（Fact, Episode, Packet），这是 Rust 和 Python 共享的 Schema 契约。
+*   `crates/memweft-store`: **核心引擎**。包含存储后端（SQLite/Postgres/MySQL）和最核心的算法逻辑（Context Composer）。
+*   `crates/memweft-ffi`: **FFI 边界**。利用 `PyO3` 将 Rust 类型暴露给 Python，处理 GIL（全局解释器锁）和异步运行时桥接。
 
 ### 2.2 数据流向图
 
@@ -34,7 +34,7 @@ Rust 侧采用 Workspace 模式管理，职责分明：
 graph TD
     subgraph "Python Process (Main Thread)"
         User[User Application]
-        SDK[Engram Python SDK]
+        SDK[MemWeft Python SDK]
         AsyncIO[AsyncIO Event Loop]
     end
 
@@ -82,7 +82,7 @@ graph TD
 
 ## 3. 记忆分层与数据结构设计
 
-Engram 的核心创新在于其**仿生记忆模型**。我们来看一下 Rust 中的具体定义（`crates/engram-types/src/lib.rs`）。
+MemWeft 的核心创新在于其**仿生记忆模型**。我们来看一下 Rust 中的具体定义（`crates/memweft-types/src/lib.rs`）。
 
 ### 3.1 工作记忆 (Working Memory) —— Agent 的 "RAM"
 
@@ -104,7 +104,7 @@ pub struct WorkingState {
 LTM 被细分为三类，每类有不同的索引和召回策略。
 
 #### A. 语义事实 (Facts)
-这是 Engram 最强的地方。我们不存储模糊的文本块，而是存储**结构化的事实**。
+这是 MemWeft 最强的地方。我们不存储模糊的文本块，而是存储**结构化的事实**。
 
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -136,7 +136,7 @@ pub struct Episode {
 
 ### 4. 核心算法：Context Composer 与 预算控制
 
-这是 Engram 的“大脑”。`build_memory_packet` 函数负责决定给 LLM 看什么。
+这是 MemWeft 的“大脑”。`build_memory_packet` 函数负责决定给 LLM 看什么。
 
 ```mermaid
 sequenceDiagram
@@ -174,7 +174,7 @@ sequenceDiagram
     FFI-->>User: Return MemoryPacket Dict
 ```
 
-代码位置：`crates/engram-store/src/composer.rs`
+代码位置：`crates/memweft-store/src/composer.rs`
 
 ### 4.1 召回与评分 (Recall & Scoring)
 
@@ -201,7 +201,7 @@ fn load_episodes(...) -> Vec<Episode> {
 
 ### 4.2 严格的 Token 预算 (Hard Token Budgeting)
 
-这是 RAG 系统常被忽视的一点：**LLM 的 Context Window 是有限且昂贵的**。Engram 在 Rust 层实现了严格的裁剪逻辑。
+这是 RAG 系统常被忽视的一点：**LLM 的 Context Window 是有限且昂贵的**。MemWeft 在 Rust 层实现了严格的裁剪逻辑。
 
 ```rust
 fn trim_to_budget(packet: &mut MemoryPacket, max_tokens: u32) {
@@ -234,7 +234,7 @@ fn trim_to_budget(packet: &mut MemoryPacket, max_tokens: u32) {
 采用 **"工兵模式"**。在初始化连接池之前，先建立一个独立的单连接，完成所有配置和迁移，销毁该连接后，再启动连接池。
 
 ```rust
-// crates/engram-store/src/sqlite.rs
+// crates/memweft-store/src/sqlite.rs
 
 pub fn new(path: PathBuf) -> StoreResult<Self> {
     // 1. 关键优化：先用单连接完成初始化
@@ -308,11 +308,11 @@ while total > budget {
 
 ## 6. 总结
 
-Engram 的架构设计遵循了以下原则：
+MemWeft 的架构设计遵循了以下原则：
 1.  **Memory as Code**：记忆是结构化的、有类型的，而不是随意的文本块。
 2.  **Performance by Default**：通过 Rust 和连接池优化，保证系统级性能。
 3.  **Control Plane**：给予开发者对 Context Window 的绝对控制权（Budgeting & Policies）。
 
-如果你正在构建生产级的 AI Agent，Engram 提供了一个比纯 Vector DB 更聪明、更可控的大脑基础设施。
+如果你正在构建生产级的 AI Agent，MemWeft 提供了一个比纯 Vector DB 更聪明、更可控的大脑基础设施。
 
 欢迎在 [examples/](../examples/) 目录中查看如何集成 DeepSeek 模型的实战代码。

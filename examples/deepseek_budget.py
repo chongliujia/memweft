@@ -2,14 +2,14 @@ import time
 import os
 import sys
 from openai import OpenAI
-from engram import Memory
+from memweft import Memory
 
 # 优先读取环境变量
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "your_api_key_here")
 BASE_URL = "https://api.deepseek.com"
 
 def test_optimization_impact():
-    print("🚀 启动 Engram 性能与预算测试 (AI 评审版)")
+    print("🚀 启动 MemWeft 性能与预算测试 (AI 评审版)")
     
     # 检查 Key
     if API_KEY == "your_api_key_here":
@@ -59,7 +59,7 @@ def test_optimization_impact():
     print("\n🤖 正在生成性能报告，请求 DeepSeek 评审...")
 
     report_prompt = f"""
-    你是一个系统架构师，请根据以下性能测试数据，评价 Engram 系统的优化效果。
+    你是一个系统架构师，请根据以下性能测试数据，评价 MemWeft 系统的优化效果。
 
     【测试指标】
     1. 数据库查询下推 (Limit 5):

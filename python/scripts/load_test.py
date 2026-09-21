@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 import sys
 
-from engram import Memory
+from memweft import Memory
 from bench_config import (
     env_float,
     env_int,
@@ -171,9 +171,9 @@ def resolve_backends(args):
         backends.append(args.backend)
         return backends
     backends.extend(["sqlite-memory", "sqlite-file"])
-    if env_str("ENGRAM_LOAD_MYSQL_DSN"):
+    if env_str("MEMWEFT_LOAD_MYSQL_DSN"):
         backends.append("mysql")
-    if env_str("ENGRAM_LOAD_POSTGRES_DSN"):
+    if env_str("MEMWEFT_LOAD_POSTGRES_DSN"):
         backends.append("postgres")
     return backends
 
@@ -185,14 +185,14 @@ def build_memory_for_backend(name, args):
         if args.sqlite_path:
             return Memory(path=args.sqlite_path)
         tmpdir = tempfile.mkdtemp()
-        return Memory(path=os.path.join(tmpdir, "engram.db"))
+        return Memory(path=os.path.join(tmpdir, "memweft.db"))
     if name == "mysql":
-        dsn = env_str("ENGRAM_LOAD_MYSQL_DSN")
-        database = env_str("ENGRAM_LOAD_MYSQL_DB")
+        dsn = env_str("MEMWEFT_LOAD_MYSQL_DSN")
+        database = env_str("MEMWEFT_LOAD_MYSQL_DB")
         return Memory(backend="mysql", dsn=dsn, database=database)
     if name == "postgres":
-        dsn = env_str("ENGRAM_LOAD_POSTGRES_DSN")
-        database = env_str("ENGRAM_LOAD_POSTGRES_DB")
+        dsn = env_str("MEMWEFT_LOAD_POSTGRES_DSN")
+        database = env_str("MEMWEFT_LOAD_POSTGRES_DB")
         return Memory(backend="postgres", dsn=dsn, database=database)
     raise ValueError(f"unknown backend: {name}")
 
@@ -203,7 +203,7 @@ def main():
     repo_root = Path(__file__).resolve().parents[2]
     default_output = repo_root / "target" / "python_load.json"
 
-    parser = argparse.ArgumentParser(description="Concurrent load test for Engram backends.")
+    parser = argparse.ArgumentParser(description="Concurrent load test for MemWeft backends.")
     parser.add_argument(
         "--config",
         default=config_arg,
@@ -211,60 +211,60 @@ def main():
     )
     parser.add_argument(
         "--backend",
-        default=env_str("ENGRAM_LOAD_BACKEND"),
+        default=env_str("MEMWEFT_LOAD_BACKEND"),
         help="Optional single backend to test.",
     )
     parser.add_argument(
         "--duration",
         type=int,
-        default=env_int("ENGRAM_LOAD_DURATION", 60),
+        default=env_int("MEMWEFT_LOAD_DURATION", 60),
         help="Test duration (seconds).",
     )
     parser.add_argument(
         "--concurrency",
         type=int,
-        default=env_int("ENGRAM_LOAD_CONCURRENCY", 8),
+        default=env_int("MEMWEFT_LOAD_CONCURRENCY", 8),
         help="Worker threads.",
     )
     parser.add_argument(
         "--seed-events",
         type=int,
-        default=env_int("ENGRAM_LOAD_SEED_EVENTS", 2000),
+        default=env_int("MEMWEFT_LOAD_SEED_EVENTS", 2000),
         help="Seed events per backend.",
     )
     parser.add_argument(
         "--list-limit",
         type=int,
-        default=env_int("ENGRAM_LOAD_LIST_LIMIT", 50),
+        default=env_int("MEMWEFT_LOAD_LIST_LIMIT", 50),
         help="list_events limit.",
     )
     parser.add_argument(
         "--append-ratio",
         type=float,
-        default=env_float("ENGRAM_LOAD_APPEND_RATIO", 0.3),
+        default=env_float("MEMWEFT_LOAD_APPEND_RATIO", 0.3),
         help="Append ratio.",
     )
     parser.add_argument(
         "--list-ratio",
         type=float,
-        default=env_float("ENGRAM_LOAD_LIST_RATIO", 0.4),
+        default=env_float("MEMWEFT_LOAD_LIST_RATIO", 0.4),
         help="List ratio.",
     )
     parser.add_argument(
         "--build-ratio",
         type=float,
-        default=env_float("ENGRAM_LOAD_BUILD_RATIO", 0.3),
+        default=env_float("MEMWEFT_LOAD_BUILD_RATIO", 0.3),
         help="Build ratio.",
     )
     parser.add_argument(
         "--max-samples",
         type=int,
-        default=env_int("ENGRAM_LOAD_MAX_SAMPLES", 10000),
+        default=env_int("MEMWEFT_LOAD_MAX_SAMPLES", 10000),
         help="Max latency samples.",
     )
     parser.add_argument(
         "--sqlite-path",
-        default=env_str("ENGRAM_LOAD_SQLITE_PATH"),
+        default=env_str("MEMWEFT_LOAD_SQLITE_PATH"),
         help="Optional SQLite file path.",
     )
     parser.add_argument("--output", default=str(default_output), help="Output JSON path.")

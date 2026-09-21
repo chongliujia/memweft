@@ -258,7 +258,7 @@ Layer 3: Assemble & Budget Trim (O(n) with small n)
 - 提供 DSN 或环境变量自动切换
 - 多租户/审计/团队协作
 - 与 SQLite 保持一致的排序与裁剪规则（deterministic）
-- 数据库不存在时自动创建；未指定库名默认 `engram`
+- 数据库不存在时自动创建；未指定库名默认 `memweft`
 
 ## 9.3 存储抽象契约（关键）
 
@@ -357,7 +357,7 @@ Total Memory (can grow)  ──────────────────�
 ## 项目目录结构
 
 ```jsx
-engram/
+memweft/
 ├─ README.md
 ├─ LICENSE
 ├─ .gitignore
@@ -365,18 +365,18 @@ engram/
 ├─ rust-toolchain.toml
 ├─ Cargo.toml                  # Rust workspace
 ├─ crates/
-│  ├─ engram-core/             # 核心引擎：Composer/Consolidation/Policies（无DB细节）
-│  ├─ engram-store/            # Storage trait + 通用查询原语
-│  ├─ engram-store-sqlite/     # SQLite 实现（默认）
-│  ├─ engram-store-postgres/   # Postgres 实现（升级）
-│  ├─ engram-store-mysql/      # MySQL 实现（升级）
-│  ├─ engram-types/            # MemoryPacket/事件/实体类型与 schema（Rust side）
-│  ├─ engram-metrics/          # 指标与 tracing（可选，建议单独）
-│  └─ engram-ffi/              # PyO3 暴露的 API（最薄层）
+│  ├─ memweft-core/             # 核心引擎：Composer/Consolidation/Policies（无DB细节）
+│  ├─ memweft-store/            # Storage trait + 通用查询原语
+│  ├─ memweft-store-sqlite/     # SQLite 实现（默认）
+│  ├─ memweft-store-postgres/   # Postgres 实现（升级）
+│  ├─ memweft-store-mysql/      # MySQL 实现（升级）
+│  ├─ memweft-types/            # MemoryPacket/事件/实体类型与 schema（Rust side）
+│  ├─ memweft-metrics/          # 指标与 tracing（可选，建议单独）
+│  └─ memweft-ffi/              # PyO3 暴露的 API（最薄层）
 ├─ python/
 │  ├─ pyproject.toml           # maturin 配置 + python 包元数据
 │  ├─ src/
-│  │  └─ engram/               # Python SDK（对外 API）
+│  │  └─ memweft/               # Python SDK（对外 API）
 │  │     ├─ __init__.py
 │  │     ├─ client.py          # Memory() / from_env() 等入口
 │  │     ├─ policy.py          # 注入模板与策略（planner/tool/responder）

@@ -1,7 +1,7 @@
 import asyncio
 import os
 from openai import OpenAI
-from engram import AsyncMemory
+from memweft import AsyncMemory
 
 # 读取环境变量
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "your_api_key_here")
@@ -30,7 +30,7 @@ async def test_integrated_recall():
     # 存入几条非常关键的核心事实
     important_facts = [
         "核心事实 A：用户的真实姓名是 Jiachong，他住在上海。",
-        "核心事实 B：用户正在使用 Rust 语言开发一个名为 Engram 的项目。",
+        "核心事实 B：用户正在使用 Rust 语言开发一个名为 MemWeft 的项目。",
         "核心事实 C：用户对系统的响应延迟极其敏感，目标是 10ms 以内。"
     ]
     for i, fact in enumerate(important_facts):
@@ -38,11 +38,11 @@ async def test_integrated_recall():
             "fact_id": f"imp_{i}", 
             "fact_key": f"key_info_{i}", 
             "value": fact, 
-            "confidence": 1.0 # 高置信度，Engram 会优先保留
+            "confidence": 1.0 # 高置信度，MemWeft 会优先保留
         })
 
-    # 2. 核心：设置极小的预算，强制 Engram 剔除那 90 条闲聊，只保留重要事实
-    print("\n⚖️  设置 Token 预算为 600 (强制触发 Engram 智能裁剪)...")
+    # 2. 核心：设置极小的预算，强制 MemWeft 剔除那 90 条闲聊，只保留重要事实
+    print("\n⚖️  设置 Token 预算为 600 (强制触发 MemWeft 智能裁剪)...")
     packet = await mem.build_memory_packet({
         "scope": scope,
         "purpose": "responder",
@@ -51,7 +51,7 @@ async def test_integrated_recall():
 
     # 提取最终留下的事实
     final_facts = [f['value'] for f in packet['long_term']['facts']]
-    print(f"📊 Engram 最终保留了 {len(final_facts)} 条事实送往 DeepSeek。")
+    print(f"📊 MemWeft 最终保留了 {len(final_facts)} 条事实送往 DeepSeek。")
 
     # 3. 让 DeepSeek 验证结果
     print("\n🤖 正在请求 DeepSeek 进行总结验证...")

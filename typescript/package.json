@@ -1,0 +1,49 @@
+{
+  "name": "memweft",
+  "version": "0.1.0",
+  "description": "Structured memory and evaluated learning backed by Rust",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./langgraph": {
+      "types": "./dist/langgraph.d.ts",
+      "import": "./dist/langgraph.js"
+    }
+  },
+  "files": [
+    "dist",
+    "native/*.node",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:native": "cargo build --release --locked --manifest-path ../crates/memweft-node/Cargo.toml && node scripts/copy-native.mjs",
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@langchain/langgraph": "^1.0.0",
+    "@langchain/langgraph-checkpoint": "^1.1.5"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/langgraph": {
+      "optional": true
+    },
+    "@langchain/langgraph-checkpoint": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@langchain/langgraph": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "license": "Apache-2.0"
+}

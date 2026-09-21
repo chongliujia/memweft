@@ -693,7 +693,7 @@ def main() -> None:
         default="target/python_soak_prev.json",
         help="Optional previous Python soak JSON path.",
     )
-    parser.add_argument("--title", default="Engram build_memory_packet benchmark")
+    parser.add_argument("--title", default="MemWeft build_memory_packet benchmark")
     args = parser.parse_args()
 
     input_dir = Path(args.input)

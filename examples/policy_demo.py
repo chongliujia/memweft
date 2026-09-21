@@ -1,5 +1,5 @@
 import json
-from engram import Memory
+from memweft import Memory
 
 def main():
     mem = Memory(in_memory=True)

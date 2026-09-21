@@ -1,0 +1,30 @@
+[package]
+name = "memweft-store"
+version = "0.1.0"
+edition = "2024"
+license.workspace = true
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+serde = "1"
+serde_json = "1"
+memweft-types = { path = "../memweft-types" }
+rusqlite = { version = "0.31", features = ["bundled"] }
+r2d2_sqlite = "0.24"
+postgres = { version = "0.19", optional = true }
+r2d2 = "0.8"
+r2d2_postgres = { version = "0.18", optional = true }
+mysql = { version = "25", optional = true }
+tracing = { version = "0.1", features = ["log"] }
+
+[features]
+postgres = ["dep:postgres", "dep:r2d2_postgres"]
+mysql = ["dep:mysql"]
+
+[dev-dependencies]
+criterion = "0.5"
+rand = "0.8"
+
+[[bench]]
+name = "build_memory_packet"
+harness = false

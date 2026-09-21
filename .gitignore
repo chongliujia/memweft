@@ -16,11 +16,13 @@ env/
 .ruff_cache/
 build/
 dist/
+node_modules/
+typescript/native/*.node
 *.egg-info/
 
 # --- Maturin / Binary Extensions ---
 # 忽略 Python 源码目录下的原生二进制模块
-python/src/engram/_core.*
+python/src/memweft/_core.*
 
 # --- Databases & Data ---
 # 忽略本地 SQLite 数据库及临时日志
@@ -41,7 +43,7 @@ python/data/
 target/criterion/
 target/*.json
 target/*.html
-engram_bench.env
+memweft_bench.env
 
 # --- OS Specific ---
 .DS_Store

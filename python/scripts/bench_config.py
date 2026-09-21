@@ -11,7 +11,7 @@ def repo_root() -> Path:
 
 
 def default_config_path() -> Path:
-    return repo_root() / "bench" / "engram_bench.env"
+    return repo_root() / "bench" / "memweft_bench.env"
 
 
 def load_env_file(path: Path) -> dict[str, str]:
@@ -42,7 +42,7 @@ def load_bench_env(path: Optional[str] = None) -> Optional[Path]:
     if path:
         config_path = Path(path)
     else:
-        env_path = os.getenv("ENGRAM_BENCH_CONFIG")
+        env_path = os.getenv("MEMWEFT_BENCH_CONFIG")
         if env_path:
             config_path = Path(env_path)
         else:

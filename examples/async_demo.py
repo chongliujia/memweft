@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 import json
-from engram import AsyncMemory
+from memweft import AsyncMemory
 
 async def main():
     # Initialize asynchronous memory (using in-memory SQLite for this demo)

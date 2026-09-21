@@ -1,0 +1,18 @@
+[package]
+name = "memweft-node"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+memweft = { path = "../memweft" }
+napi = { version = "2", features = ["napi6", "tokio_rt"] }
+napi-derive = "2"
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+
+[build-dependencies]
+napi-build = "2"

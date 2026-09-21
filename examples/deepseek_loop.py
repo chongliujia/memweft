@@ -1,7 +1,7 @@
 import asyncio
 import os
 from openai import OpenAI
-from engram import AsyncMemory
+from memweft import AsyncMemory
 
 # ==========================================
 # CONFIGURATION
@@ -23,8 +23,8 @@ async def chat_with_memory():
     if os.path.exists(db_path):
         os.remove(db_path)
 
-    # Initialize Engram (Rust Backend)
-    print(f"🧠 Initializing Engram at {db_path}...")
+    # Initialize MemWeft (Rust Backend)
+    print(f"🧠 Initializing MemWeft at {db_path}...")
     mem = AsyncMemory(path=db_path)
     
     # Define Context Scope
@@ -80,7 +80,7 @@ async def chat_with_memory():
     print(f"📚 Retrieved {len(facts)} relevant facts: {facts}")
 
     print("\n--- Step 4: LLM Generation ---")
-    # 4. Construct System Prompt with Engram Context
+    # 4. Construct System Prompt with MemWeft Context
     system_prompt = f"""
     You are a helpful assistant.
     

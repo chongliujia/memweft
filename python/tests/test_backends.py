@@ -4,7 +4,7 @@ import time
 import unittest
 import uuid
 
-from engram import Memory
+from memweft import Memory
 
 
 def unique_suffix():
@@ -56,30 +56,31 @@ class BackendSmokeTests(unittest.TestCase):
 
     def test_sqlite_file(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = os.path.join(tmpdir, "engram.db")
+            path = os.path.join(tmpdir, "memweft.db")
             mem = Memory(path=path)
-            roundtrip_memory(mem, self)
+            with mem:
+                roundtrip_memory(mem, self)
 
     def test_mysql(self):
-        dsn = os.getenv("ENGRAM_TEST_MYSQL_DSN")
+        dsn = os.getenv("MEMWEFT_TEST_MYSQL_DSN")
         if not dsn:
-            self.skipTest("ENGRAM_TEST_MYSQL_DSN not set")
-        database = os.getenv("ENGRAM_TEST_MYSQL_DB")
+            self.skipTest("MEMWEFT_TEST_MYSQL_DSN not set")
+        database = os.getenv("MEMWEFT_TEST_MYSQL_DB")
         mem = Memory(backend="mysql", dsn=dsn, database=database)
         roundtrip_memory(mem, self)
 
     def test_postgres(self):
-        dsn = os.getenv("ENGRAM_TEST_POSTGRES_DSN")
+        dsn = os.getenv("MEMWEFT_TEST_POSTGRES_DSN")
         if not dsn:
-            self.skipTest("ENGRAM_TEST_POSTGRES_DSN not set")
-        database = os.getenv("ENGRAM_TEST_POSTGRES_DB")
+            self.skipTest("MEMWEFT_TEST_POSTGRES_DSN not set")
+        database = os.getenv("MEMWEFT_TEST_POSTGRES_DB")
         mem = Memory(backend="postgres", dsn=dsn, database=database)
         roundtrip_memory(mem, self)
 
 
 class AsyncTests(unittest.IsolatedAsyncioTestCase):
     async def test_async_sqlite_memory(self):
-        from engram import AsyncMemory
+        from memweft import AsyncMemory
 
         mem = AsyncMemory(in_memory=True)
         scope = sample_scope()

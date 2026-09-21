@@ -2,8 +2,8 @@ import json
 import os
 from pathlib import Path
 
-from engram import Memory
-from engram.adapters.langchain import EngramChatMessageHistory, EngramContextInjector
+from memweft import Memory
+from memweft.adapters.langchain import MemWeftChatMessageHistory, MemWeftContextInjector
 
 try:
     from langchain_openai import ChatOpenAI
@@ -48,7 +48,7 @@ def main() -> None:
     base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
     model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
-    memory = Memory(path="data/engram.db")
+    memory = Memory(path="data/memweft.db")
     scope = {
         "tenant_id": "default",
         "user_id": "u1",
@@ -57,10 +57,10 @@ def main() -> None:
         "run_id": "r1",
     }
 
-    history = EngramChatMessageHistory(memory, scope, limit=10)
-    injector = EngramContextInjector(memory, scope)
+    history = MemWeftChatMessageHistory(memory, scope, limit=10)
+    injector = MemWeftContextInjector(memory, scope)
 
-    user_text = "请用一句话总结 Engram 的核心目标。"
+    user_text = "请用一句话总结 MemWeft 的核心目标。"
     history.add_message(HumanMessage(content=user_text))
 
     packet = injector.build_packet(purpose="planner", task_type="summary")

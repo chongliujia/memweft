@@ -1,6 +1,6 @@
 import logging
 import sys
-from engram import Memory
+from memweft import Memory
 
 # Configure standard Python logging
 # Rust logs (via pyo3-log) will be forwarded here.
@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 
 # You can set specific levels for the Rust crate
-logging.getLogger("engram_store").setLevel(logging.DEBUG)
+logging.getLogger("memweft_store").setLevel(logging.DEBUG)
 
 def main():
     print("🕵️‍♂️  Initializing Memory with Tracing enabled...\n")
