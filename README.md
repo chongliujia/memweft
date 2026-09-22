@@ -1,34 +1,42 @@
+<div align="center">
+
 # MemWeft
 
-**Persistent memory and evaluated strategy improvement for AI agents.**
+**Persistent memory. Shared knowledge. Evaluated learning.**
 
-MemWeft provides a Rust core with Python and TypeScript SDKs. Give an agent persistent facts, conversation history and relevant context; let multiple agents share selected memory pools; evaluate candidate strategies before adopting them.
+A Rust memory engine for agents, with Python and TypeScript SDKs.
 
-The high-level memory, document and learning APIs currently use **SQLite**. Optional PostgreSQL and MySQL backends are available through the older low-level API. Basic memory operations run locally without a model service or API key.
+[![CI](https://github.com/chongliujia/memweft/actions/workflows/verify.yml/badge.svg)](https://github.com/chongliujia/memweft/actions/workflows/verify.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-2563eb.svg)](LICENSE)
+[![Rust 1.89+](https://img.shields.io/badge/Rust-1.89%2B-000000?logo=rust)](Cargo.toml)
+[![Python 3.10–3.12](https://img.shields.io/badge/Python-3.10–3.12-3776ab?logo=python&logoColor=white)](python/README.md)
+[![Node 20+](https://img.shields.io/badge/Node-20%2B-339933?logo=nodedotjs&logoColor=white)](typescript/README.md)
 
-[Quickstart](#quickstart) · [Memory pools](#private-and-shared-memory-pools) · [Agent integration](#langgraph-and-local-agent-testing) · [Measured results](#measured-results) · [Development](#development-and-verification) · [Guides](#guides-and-project-layout)
+[Quickstart](#quickstart) · [Architecture](#architecture) · [Performance](#performance) · [Agent evaluations](#agent-evaluations) · [Guides](#guides) · [Contributing](#contributing)
 
-## What works today
+</div>
 
-| Capability | Available behavior |
-| --- | --- |
-| Persistent facts | Remember, update, inspect and forget facts within tenant/user/agent scopes |
-| Configurable memory pools | Private, shared or mixed facts; per-pool read/write access, conflict policies and revision checks |
-| Conversations and context | Persistent sessions, idempotent message IDs, estimated context budgets and selection explanations |
-| Indexed retrieval | Exact lexical ranking, bounded candidate loading and safe fallback when early stopping cannot be proven |
-| Evaluated learning | Feedback, pinned evaluation cases, acceptance gates, strategy versions, source invalidation and rollback |
-| Agent integration | Python LangGraph and LangGraph.js context helpers and `BaseStore` adapters |
-| SQLite maintenance | Optional background checkpointing, one active maintainer per database, crash takeover, reclamation backoff and diagnostics |
+MemWeft gives agents persistent facts, resumable conversations and relevant model context. Keep one agent's memory private, share selected facts across agents, and adopt learned strategies only after evaluation.
 
-**Enterprise deployment is the development target, not a completed certification.** Current evidence includes real local-model Agent runs and million-fact storage tests. Distributed sharding, hot-data preloading, RDMA and a complete query/loading/compression pipeline remain design work. Automatic conversation extraction is not a bundled SDK capability; applications currently supply facts explicitly.
+**Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
-## Build and install
+## What you can build
 
-Build from this repository. Native extensions require **Rust 1.89+** and a C toolchain. Registry publishing and automatic platform package selection remain future work.
+| Need | Available today |
+|---|---|
+| An agent that remembers | Persistent facts, updates, forgetting and idempotent session messages |
+| A team of agents | Private/shared/mixed pools, read/write permissions, precedence and revision checks |
+| Relevant context at scale | Indexed lexical retrieval, bounded candidate loading and selection explanations |
+| Measurable improvement | Feedback, evaluation gates, strategy versioning, source invalidation and rollback |
+| Framework integration | Python LangGraph and LangGraph.js context helpers and `BaseStore` adapters |
+| Controlled model inputs | Optional Python reference projection and audited sandbox execution examples |
+| Observable local storage | Optional background checkpointing, coordinated maintenance, takeover and diagnostics |
 
-### Python
+Enterprise deployment is the target. Distributed sharding, hot-data preloading, RDMA, automatic conversation extraction and a full query/loading/compression pipeline remain future work.
 
-Use Python 3.10–3.12 with the current PyO3 binding. From the repository root:
+## Quickstart
+
+Build from source with **Rust 1.89+**, a C toolchain and Python 3.10–3.12:
 
 ```bash
 python -m venv .venv
@@ -37,39 +45,9 @@ python -m pip install maturin
 cd python
 maturin develop
 cd ..
-python examples/quickstart.py
 ```
 
-On Windows, activate with `.venv\Scripts\activate`. Use one active Python environment when building and running the extension. See the [Python SDK guide](python/README.md).
-
-### TypeScript / Node.js
-
-Use Node.js 20+; local validation uses Node 20. From the repository root:
-
-```bash
-cd typescript
-npm ci
-npm run build:native
-npm run build
-npm test
-cd ..
-```
-
-The native addon targets Node.js. Browser/Edge access and an HTTP service remain future work. See the [TypeScript SDK guide](typescript/README.md).
-
-### Rust / CLI
-
-```bash
-cargo run --locked -p memweft -- remember alice reply_style "Prefers concise answers"
-cargo run --locked -p memweft -- context alice chat-001
-cargo run --locked -p memweft -- memories alice
-```
-
-Put `--db PATH` before the subcommand to choose a database. `memweft request FILE.json` executes the shared JSON request interface, including learning operations. The CLI does not call a model automatically.
-
-## Quickstart
-
-### Python
+On Windows, activate with `.venv\Scripts\activate`. Registry publishing and automatic platform package selection remain future work.
 
 ```python
 from memweft import Memory
@@ -85,9 +63,21 @@ with Memory("./memory.db") as memory:
     print(context.explain())
 ```
 
-Run it twice: the fact is updated by key, and the stable event ID prevents a duplicate message. Use `alice.memories()` to inspect facts, `alice.forget("reply_style")` to delete a fact, and `chat.clear()` to clear session messages.
+Run it twice: the preference updates by key, and the event ID prevents duplicate messages. `memories()` inspects facts, `forget(key)` removes them, and `chat.clear()` clears session messages. Python also provides `AsyncMemory`.
 
-### TypeScript
+<details>
+<summary><b>TypeScript / Node.js</b></summary>
+
+From the repository root:
+
+```bash
+cd typescript
+npm ci
+npm run build:native
+npm run build
+npm test
+cd ..
+```
 
 ```typescript
 import { Memory } from "memweft";
@@ -96,23 +86,59 @@ const memory = await Memory.open({ path: "./memory.db" });
 try {
   const alice = memory.user("alice", { tenantId: "my-app", agentId: "assistant" });
   await alice.remember("Prefers concise answers", { key: "reply_style" });
-
   const chat = alice.session("chat-001");
   await chat.addMessage("user", "Explain Rust ownership", { eventId: "question-1" });
-  const context = await chat.context({ query: "reply style", maxTokens: 1000 });
-  console.log(context.text);
+  console.log((await chat.context({ query: "reply style", maxTokens: 1000 })).text);
 } finally {
-  await memory.close();
+  memory.close();
 }
 ```
 
-Python also supports `async with AsyncMemory(...)`; its I/O methods are awaitable. TypeScript I/O methods return promises. Rust applications use the workspace `memweft` crate; see the [Rust example](crates/memweft/examples/learning.rs).
+The native addon targets Node.js 20+. Browser/Edge access and an HTTP service remain future work. See the [TypeScript guide](typescript/README.md).
 
-The `query` option prioritizes facts before count and budget limits are applied. Ranking uses distinct word/number matches and adjacent Chinese ideograph pairs, with key matches weighted twice. This is lexical retrieval; BM25 and vector search are not implemented. Without a query, facts use stable key order. See [retrieval behavior and migration](docs/indexed_retrieval.md).
+</details>
 
-## Private and shared memory pools
+<details>
+<summary><b>Rust / CLI</b></summary>
 
-Distinct `agent_id` values have independent facts by default. Add named pools to share facts between agents within the same tenant/user scope:
+```bash
+cargo run --locked -p memweft -- remember alice reply_style "Prefers concise answers"
+cargo run --locked -p memweft -- context alice chat-001
+cargo run --locked -p memweft -- memories alice
+```
+
+Put `--db PATH` before the subcommand to select a database. `memweft request FILE.json` executes the shared JSON request interface. Rust applications use the workspace `memweft` crate; see the [learning example](crates/memweft/examples/learning.rs).
+
+</details>
+
+## Architecture
+
+```mermaid
+flowchart TB
+    A[Agent A] --> SDK[Python / TypeScript / Rust API]
+    B[Agent B] --> SDK
+    subgraph Core[MemWeft Rust core]
+        Scope[Tenant / user / agent scope]
+        Scope --> Private[Private facts]
+        Scope --> Shared[Shared pools]
+        Private --> DB[(SQLite WAL + inverted index)]
+        Shared --> DB
+        DB --> Context[Ranked context + selection report]
+        Learning[Evaluation gates + strategy versions] --> Context
+        Learning --> DB
+        Maintenance[Optional coordinated maintenance] <--> DB
+    end
+    SDK --> Scope
+    Context --> App[Application model call]
+    App --> Feedback[Measured task feedback]
+    Feedback --> Learning
+```
+
+The application supplies model calls, identity and tool authorization. MemWeft handles storage, scoped retrieval, context construction and learning decisions. Learning adapts prompt strategies; it does not train model weights.
+
+## Private and shared memory
+
+Different `agent_id` values have independent facts by default. Add named pools to share facts within a tenant/user scope:
 
 ```python
 from memweft import Memory
@@ -129,26 +155,77 @@ config = {
 with Memory("./team.db") as memory:
     planner = memory.user("alice", agent_id="planner", memory_config=config)
     executor = memory.user("alice", agent_id="executor", memory_config=config)
-
-    planner.remember("Plan before executing", key="work_style")  # private
-    planner.remember(8002, key="service_port", pool_id="project")  # shared
+    planner.remember("Plan before executing", key="work_style")
+    planner.remember(8002, key="service_port", pool_id="project")
     print(executor.session("deploy").context(query="service_port").text)
 ```
 
-The executor can recall the shared port; the planner's private work style remains isolated. Sessions and learning records remain agent-specific even when facts are shared.
+The executor sees the shared port, while the planner's work style stays private. Conversations and learning records remain agent-specific. Configure read-only access, explicit write targets, conflict policies and `expected_revision` checks in the [pool guide](docs/memory_pools.md).
 
-Configure read-only bindings, explicit write targets, `private_first` / `read_order` / `error` conflict handling, and `expected_revision` checks for concurrent shared updates. TypeScript uses `memoryConfig`. Scope IDs must come from your application's trusted identity boundary. See the [pool guide](docs/memory_pools.md) or run `python examples/shared_pools.py`.
+## Performance
 
-## LangGraph and local Agent testing
+Measurements below are from local runs on **2026-09-22**, with source/build hashes and raw-result summaries. They describe tested workloads, not production SLOs.
 
-Two framework adapters are available in Python and JavaScript:
+### One million facts: mixed reads and writes
 
-- `LangGraphMemory` supplies long-term context and accepts task feedback. It excludes MemWeft's message window so framework-managed history is not duplicated.
-- `MemWeftStore` implements `BaseStore` for scoped JSON documents: CRUD, filtering, pagination, namespace listing and batches. Documents are separate from context-visible facts; search does not support vectors or TTL.
+![Before/after SQLite maintenance: write p99 33.58 to 4.32 ms, query p95 3.00 to 2.92 ms, WAL peak 107.45 to 117.33 MiB.](docs/assets/maintenance-performance.svg)
 
-Use an existing framework checkpointer for graph execution state. The deprecated `MemWeftCheckpointer` wraps working state and is not a LangGraph checkpoint saver.
+| Metric | Before coordination | Coordinated maintenance |
+|---|---:|---:|
+| Actual queries/second | 953.45 | 964.71 |
+| Query p95 | 3.00 ms | 2.92 ms |
+| Write p99 | 33.58 ms | **4.32 ms** |
+| Completed writes / offered | 14,109 / 15,000 | 14,942 / 15,000 |
+| Slowest write | 523.71 ms | 218.33 ms |
+| Observed WAL peak | 107.45 MiB | 117.33 MiB |
 
-Runnable framework examples, without model credentials:
+**Conditions:** independent million-fact database copies, 8 reader processes + 1 writer, 5 minutes/run, target 1,000 queries/s and 50 writes/s. An extra reader held a snapshot for 90 seconds. Latency covers completed requests; missed scheduling slots are reported separately.
+
+Write p99 fell **87.1%**, but both new runs recorded **zero successful WAL truncations** during measurement. The 16 MiB threshold is soft, and proactive reclamation remains opt-in. Runs were sequential on a shared local machine; read paths were selected fast paths. [Full report and both new runs](evals/reports/2026-09-22-wal-coordination.md) · [JSON](evals/reports/2026-09-22-wal-coordination.json)
+
+### Query shape matters
+
+![Million-fact retrieval p95 on a logarithmic axis: fast paths around 1–2 ms, difficult two-term query around 338 ms.](docs/assets/retrieval-performance.svg)
+
+The SDK query includes retrieval, context construction and serialization. Exact lexical ranking uses word/number matches and Chinese ideograph pairs; it is not BM25 or vector search. Difficult queries still inspect many index entries. The comparison preserved complete context output and includes **1,273 differential ranking checks**. [Query report](evals/reports/2026-09-22-wal-and-agent.md) · [Index behavior and migration](docs/indexed_retrieval.md)
+
+Figures are generated from versioned JSON by [`evals/plot_readme_metrics.py`](evals/plot_readme_metrics.py). Million-fact tests do not establish ten-million or hundred-million scale support.
+
+## Agent evaluations
+
+We test with **real LangGraph + the Python SDK + a locally deployed `qwen3-8b`**. Business inputs and tool effects are synthetic; failures and interrupted runs are retained.
+
+| Evaluation | Measured result | What it establishes |
+|---|---|---|
+| Memory lifecycle | 44/44 checks; 284 model calls in the complete lifecycle/learning replay | Updates, pool isolation, deletion, reopening and strategy invalidation; [report](evals/reports/2026-09-22-wal-and-agent.md) |
+| Fresh access boundaries | No memory **49/60** → memory **54/60** → learned strategy **60/60** | 30 new same-domain cases, each repeated twice; [report](evals/reports/2026-09-22-access-holdout-tools.md) |
+| Audited sandbox tools | 27 injection-induced unsafe proposals blocked; no unauthorized grants in 240 executions | Deterministic execution checks work for these fixtures; model injection failures remain |
+| Reference projection | 972 calls; preference checks **4/12 → 12/12** with restricted inputs | Reduced exposure, but legitimate completion regressed in the learned mode and current-question attacks remained; [report](evals/reports/2026-09-22-reference-boundary.md) |
+| Confirmed commands | 1,272 calls; **0 unauthorized grants** across 1,200 audited sandbox decisions | Fresh learned-mode accuracy: rules + quoted input **42/56**, input omitted **28/56**. Command guards block unsafe effects; input omission is not an overall model-quality improvement; [report](evals/reports/2026-09-22-confirmed-command.md) |
+
+A passing schema or a learned strategy is not authorization. Optional [reference projection](docs/reference_boundaries.md) filters model inputs; application-side checks must still validate actions against current state. Evaluator scores are trusted application inputs, so adoption gates cannot independently prove their truth.
+
+<details>
+<summary><b>Run a local Agent evaluation</b></summary>
+
+After building the Python extension, run on the machine hosting the model:
+
+```bash
+python -m pip install -r python/requirements-test.txt
+PYTHONPATH=python/src python evals/run_agent_lifecycle.py \
+  --output data/evals/agent-lifecycle-new-run \
+  --base-url http://127.0.0.1:8002/v1 --model qwen3-8b --repeats 2
+```
+
+The API key defaults to `EMPTY`. The runner requires supported Qwen request options and strict JSON Schema output. Use a new output directory for every run. Raw requests, responses, contexts and scores stay under Git-ignored `data/evals/`; summaries are versioned in `evals/reports/`.
+
+[All evaluation commands](evals/README.md) · [Agent example](examples/local_memory_agent.py) · [Sandbox executor](examples/sandbox_access_agent.py)
+
+</details>
+
+## Framework integration
+
+`LangGraphMemory` provides long-term context without duplicating framework-managed history. `MemWeftStore` implements `BaseStore` for scoped JSON documents. Store documents are separate from context-visible facts; store search supports filters, not vectors or TTL.
 
 ```bash
 python -m pip install -r python/requirements-test.txt
@@ -156,58 +233,60 @@ python examples/langgraph_memory.py
 node typescript/examples/langgraph.mjs
 ```
 
-The [local Agent example](examples/local_memory_agent.py) runs a real LangGraph recall → answer graph using the Python SDK and a chat-completions model. To replay memory lifecycle and learning tests against the local Qwen server, run on the machine hosting the endpoint:
+Use an existing LangGraph checkpointer for graph execution state. The deprecated `MemWeftCheckpointer` wraps working state and is not a checkpoint saver. [Python API](python/README.md) · [TypeScript API](typescript/README.md)
 
-```bash
-PYTHONPATH=python/src python evals/run_agent_lifecycle.py \
-  --output data/evals/agent-lifecycle-new-run \
-  --base-url http://127.0.0.1:8002/v1 --model qwen3-8b --repeats 2
+## Current boundaries
+
+- **Context budgets** estimate `ceil(UTF-8 bytes / 4)` for returned text, not a model tokenizer limit or the entire prompt.
+- **Forgetting** removes facts and dependent scoped records; messages or content already copied into external prompts require separate deletion.
+- **Durability** uses SQLite WAL with `synchronous=NORMAL`. Process-crash tests do not prove power-loss durability. The bundled engine is SQLite 3.51.3; [source and fix provenance](vendor/libsqlite3-sys/MEMWEFT-PATCH.md) are retained.
+- **Isolation needs trusted identity:** callers must bind tenant/user/agent scopes correctly. Memory pools are not a production IAM service.
+- **Platform validation:** local measurements cover Linux. The CI matrix defines Linux, macOS and Windows builds; other platforms require successful CI runs.
+
+## Roadmap
+
+| Stage | Focus |
+|---|---|
+| Implemented | Scoped pools, indexed lexical recall, evaluation gates, coordinated local maintenance |
+| Under validation | Real Agent behavior, input boundaries, tool authorization and legitimate-operation completion |
+| Next | Long business conversations, multi-agent tool concurrency, longer storage soak tests and WAL space control |
+| Planned | Bounded hot-data preloading, staged background jobs, sharding; RDMA only after measuring a relevant bottleneck |
+
+## Guides
+
+| Guide | Contents |
+|---|---|
+| [Memory pools](docs/memory_pools.md) | Private/shared configuration, precedence and concurrent revisions |
+| [Indexed retrieval](docs/indexed_retrieval.md) | Ranking, bounded loading, fallbacks and migration |
+| [Learning design](docs/rust_learning_and_integrations.md) | Evaluation gates, strategy lifecycle and integration |
+| [Reference boundaries](docs/reference_boundaries.md) | Python input projection, content pins and information loss |
+| [Confirmed commands](docs/confirmed_commands.md) | Application confirmation, input binding, cancellation and execution checks |
+| [Async maintenance](docs/async_pipeline.md) | Checkpoint configuration, diagnostics and pipeline plans |
+| [Preloading and scale](docs/preloading_and_scale.md) | Memory budgets, sharding and RDMA considerations |
+| [Evaluation guide](evals/README.md) | Reproduction commands, scenarios and report history |
+
+<details>
+<summary><b>Repository map</b></summary>
+
+```text
+crates/
+  memweft/           User/session API, context builder and CLI
+  memweft-store/     Storage, pools, indexed recall and maintenance
+  memweft-learning/  Evaluation gates and strategy versions
+python/              Python SDK and LangGraph adapters
+typescript/          Node SDK and LangGraph.js adapters
+examples/            Runnable memory and Agent integrations
+evals/               Fixtures, runners, benchmarks and reports
+docs/                Design notes, operational guides and figures
 ```
 
-The API key defaults to `EMPTY`. The runner requires the server's supported Qwen request options and strict JSON Schema output; see [evaluation setup](evals/README.md). Each run needs a new output directory and preserves requests, responses, recalled context, scores and adoption evidence. Raw artifacts stay under Git-ignored `data/evals/`; report summaries are versioned in `evals/reports/`.
+</details>
 
-## Evaluated learning
+## Contributing
 
-Learning changes the strategy included in an agent's prompt, not model weights. The workflow is explicit:
+Bug reports, reproducible workloads and focused pull requests are welcome. For retrieval or learning changes, include correctness checks alongside latency or score improvements; preserve failures and the dataset/build versions used.
 
-1. Record feedback and propose a task or reflection strategy with declared source keys.
-2. Start a job with pinned dataset/evaluator versions and evaluation case IDs.
-3. Measure baseline and candidate results, then submit scores, cost and latency.
-4. Adopt only if the policy passes; otherwise retain the baseline. Inspect, cancel or roll back through the SDK.
-
-The default policy requires at least three cases, mean score gain of at least 0.05, no per-case regression, total candidate cost at most 1.0 in the evaluator's cost unit, and latency at most 30,000 ms per case. Evaluators are trusted application components: MemWeft validates submissions and gates, but cannot establish whether externally supplied scores are truthful.
-
-Accepted strategies enter context for the matching `task_type` / `taskType`. Revision checks prevent competing candidates from overwriting a changed baseline. Source changes or deletion invalidate dependent strategies. Rust exposes `Proposer`, `Evaluator` and `Learning::improve` for one bounded round; automatic model-backed proposal generation and multi-round scheduling are not bundled.
-
-See the [Python learning API](python/README.md), [TypeScript learning API](typescript/README.md) and [learning design](docs/rust_learning_and_integrations.md). `cargo run --locked -p memweft --example learning` demonstrates the state machine with synthetic scores; model-backed evidence is listed below.
-
-## Measured results
-
-Local results from **2026-09-22**; these are workload-specific observations, not production SLOs.
-
-| Evaluation | Observed result | Evidence and limits |
-| --- | --- | --- |
-| LangGraph + local `qwen3-8b` | 44/44 lifecycle checks; learning test score 34/48 → 48/48, no regressions; 284 model calls | [Agent report](evals/reports/2026-09-22-wal-and-agent.md). Synthetic business inputs and a previously evaluated split; 24 learning test tasks repeated twice, not a new blind test |
-| Broader enterprise scenarios | 2,385 model calls across three tasks, including poisoned-label and injection controls | [Enterprise report](evals/reports/2026-09-22-enterprise-v1.md). Historical-message injection and tool-approval boundary failures remain unresolved |
-| Exact indexed retrieval | 1,273 differential ranking checks; million-fact queries retain expected context | [Retrieval follow-up](evals/reports/2026-09-22-wal-and-agent.md). Common fast paths around 1–3 ms p95; a difficult two-term query still around 338 ms p95 |
-| Coordinated WAL maintenance | Write p99 33.58 → 4.32 ms; 14,109 → 14,942 of 15,000 planned writes completed | [Latest maintenance report](evals/reports/2026-09-22-wal-coordination.md). Million facts, 8 readers + 1 writer, 5 minutes per run; both new runs had zero successful WAL truncations |
-
-The Agent replay covers updates, shared/private precedence, tenant/user/agent isolation, deletion, reopening, strategy adoption and source invalidation. Its no-memory lifecycle controls correctly return unknown values; their passing checks do not mean they answered business facts. It does not cover real tool execution, production conversations or automatic fact extraction.
-
-The maintenance comparison used sequential local runs, not an isolated performance lab. Lower write tail latency came with delayed space reclamation: the final WAL peak was 117.33 MiB against a 16 MiB soft threshold. Million-fact tests do not establish ten-million or hundred-million scale support.
-
-## Operational behavior and limits
-
-- **Context budget:** estimated as `ceil(UTF-8 bytes / 4)`, not by a model tokenizer. The budget applies to returned context text, not the entire structured response or complete model prompt. Explanations report selections and omissions.
-- **Retrieval:** indexed candidate bodies are bounded by `max_facts + 64`; omission and shadowed-key samples are capped at 64 with completeness flags. Frequent terms can still require substantial index work. Strict pool conflict mode (`error`) retains full-scan resolution. Read the [index migration notes](docs/indexed_retrieval.md) before upgrading an existing database.
-- **Forgetting:** deletes matching facts, scoped context snapshots and dependent learning records/strategies that declare those sources. Unrelated messages, application documents, feedback and content already copied into external prompts require separate deletion. High-level sessions do not automatically import older low-level event history.
-- **Retries and cancellation:** use stable message/job IDs. Cancelling an awaiting SDK call does not guarantee cancellation of an already-running database write.
-- **Background maintenance:** opt in with SQLite options; automatic checkpointing remains the default. Coordinated maintenance uses a persistent local sidecar lock, requires consistent configuration across participating instances, and reports per-instance status. Reclamation thresholds are soft; active readers can prevent truncation. See [configuration, takeover and diagnostics](docs/async_pipeline.md).
-- **Durability and platform scope:** SQLite uses WAL with `synchronous=NORMAL`; process-crash tests do not prove power-loss durability. The bundled SQLite 3.51.3 includes the official WAL-reset fix; [source provenance and licenses](vendor/libsqlite3-sys/MEMWEFT-PATCH.md) are preserved. Local validation covers Linux; macOS and Windows require successful CI runs.
-
-## Development and verification
-
-After building both native extensions, run from the repository root with the Python environment active:
+After building both native extensions, run from the repository root:
 
 ```bash
 cargo test --locked
@@ -220,30 +299,19 @@ npm test
 cd ..
 ```
 
-The latest recorded verification passed **105 tests**: Rust 45, Python 15, Node 7 and evaluation tests 38; two optional database-DSN tests skipped. This count is separate from model-call and load-test results. Rust, Python and TypeScript replay [the same contract fixture](tests/contract.json). Coverage includes persistence, isolation, retries, learning gates, indexed ranking, shared revisions, crash recovery and maintenance takeover.
+Rust, Python and TypeScript share a [contract fixture](tests/contract.json). Optional database tests skip without their DSNs. The [CI workflow](.github/workflows/verify.yml) builds native artifacts and runs offline Agent evaluation tests on Linux; model-call evaluations remain explicit local runs.
 
-The [CI workflow](.github/workflows/verify.yml) defines Linux, macOS and Windows builds and uploads Python wheels, Node packages and CLI artifacts. See [evaluation commands](evals/README.md) for model runs, storage benchmarks and report reproduction.
+[Report an issue](https://github.com/chongliujia/memweft/issues) · [Browse examples](examples/) · [Inspect evaluation reports](evals/reports/)
 
-## Guides and project layout
+<details>
+<summary><b>Migrating from Engram</b></summary>
 
-| Path | Purpose |
-| --- | --- |
-| [Memory pools](docs/memory_pools.md) | Independent/shared configuration, precedence and revision semantics |
-| [Indexed retrieval](docs/indexed_retrieval.md) | Ranking, bounded loading, fallbacks and migration |
-| [Async maintenance](docs/async_pipeline.md) | Current checkpoint implementation and future pipeline design |
-| [Preloading and scale](docs/preloading_and_scale.md) | Future memory budgets, sharding and conditional RDMA evaluation |
-| [Retrieval research](docs/retrieval_research.md) | Elasticsearch/Lucene algorithm research and applicability |
-| [Evaluation guide](evals/README.md) | Reproducible scenarios, benchmarks and report history |
-| [`crates/memweft`](crates/memweft/) | User/session API, context builder, shared request interface and CLI |
-| [`crates/memweft-learning`](crates/memweft-learning/) | Evaluation gates, strategy versions and rollback |
-| [`crates/memweft-store`](crates/memweft-store/) | Storage, indexed recall, pool transactions and maintenance |
-| [`python`](python/README.md) / [`typescript`](typescript/README.md) | SDKs and framework adapters |
-| [`examples`](examples/) | Memory, shared pools, LangGraph and model-provider examples |
+Rebuild native extensions; replace `engram` imports with `memweft`, `Engram*` names with `MemWeft*`, and Rust crate prefixes with `memweft-*`. Rename `ENGRAM_` environment variables to `MEMWEFT_` and benchmark configuration to `bench/memweft_bench.env`.
 
-## Migrating from Engram
+The default SQLite path is `data/memweft.db`; the default server database name is `memweft`. Explicitly supply the previous path/name to reuse data. Nothing is renamed automatically. Some older files under `docs/` and `images/` describe the earlier low-level implementation.
 
-- Rebuild native extensions; replace `engram` imports with `memweft`, `Engram*` classes with `MemWeft*`, and Rust crate prefixes with `memweft-*`.
-- Rename `ENGRAM_` environment variables to `MEMWEFT_` and the benchmark configuration to `bench/memweft_bench.env`.
-- The default SQLite path is `data/memweft.db`; the default server database name is `memweft`. Explicitly supply the previous path or database name to reuse existing data. No databases are renamed automatically.
+</details>
 
-Apache License 2.0. Some historical notes under [docs](docs/) and [images](images/) describe the earlier low-level implementation. Vendored dependencies retain their own licenses.
+## License
+
+[Apache License 2.0](LICENSE). Vendored dependencies retain their own licenses.

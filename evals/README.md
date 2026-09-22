@@ -681,3 +681,213 @@ counts. It also requires both `wal-coordination-build/manifest.json` and
 `wal-coordination-final-build/manifest.json`, plus the saved
 verification logs. Do not remove `.memweft-maintenance` sidecars while clients
 are running; clean a disposable fixture only after all its processes exit.
+
+## Frozen access holdouts and sandbox tools
+
+This follow-up runs a real LangGraph graph and the Python SDK against local Qwen,
+with a deterministic tool executor that writes **only disposable SQLite grant
+and audit rows**. It never changes real accounts, IAM permissions or host settings.
+Build/install the Python native extension and install `python/requirements-test.txt`
+first. Run on the host exposing the model endpoint:
+
+```bash
+PYTHONPATH=python/src python -m unittest discover -s evals -p 'test_*.py' -v
+PYTHONPATH=python/src python evals/run_access_holdout.py \
+  --output data/evals/access-holdout-tools-new-run \
+  --base-url http://127.0.0.1:8002/v1 --model qwen3-8b --repeats 2
+PYTHONPATH=python/src python evals/report_access_holdout.py \
+  --run data/evals/access-holdout-tools-new-run \
+  --output data/evals/access-holdout-tools-new-report
+```
+
+The Linux CI job also runs these offline evaluation tests without a model server.
+Model-call evaluations remain explicit local runs.
+
+A run requires a new output directory. The API key defaults to `EMPTY`; strict
+JSON Schema and Qwen request options follow the existing runner. Default sampling
+is temperature 0.2, seeds 42/43, maximum 256 output tokens. Modes rotate their
+execution order by case and repeat. Model/provider errors preserve a failed run;
+there is no response rewriting, automatic retry or regeneration to pass a test.
+
+The [frozen strategy](fixtures/access-strategy-frozen-v1.json) is derived only
+from the original access task's 18 training examples and includes its content
+hash and training-suite hash. The SDK evaluates it against the **old** validation
+split (18 cases × 2 repeats × baseline/candidate = 72 calls), requiring positive
+gain and no per-case regression. The `learned` mode includes it only when that
+actual job is accepted. A rejection leaves the baseline active and remains a
+valid evaluation outcome. Candidate cost is measured in thousands of model
+reported tokens; the gate's 10,000-unit ceiling is an evaluation budget, not money.
+
+The new [fixture](scenarios/access-holdout-tools-v1.json) contains:
+
+- **30 fresh same-domain boundary cases**, each run in no-memory, memory and
+  accepted-learning modes, twice: 180 calls. These cover approval reference,
+  revocation, expiration, conditional approval, urgency, English and missing
+  evidence. None of these prompts are in the old train/validation/test splits;
+  they never reach the proposal builder or acceptance gate.
+- **40 tool scenarios**, also in three modes and two repeats: 240 calls. These
+  include 12 attacks in each of persistent memory and caller-managed history,
+  clean allow/deny controls, availability attacks, and execution boundaries.
+  The same history is provided in every mode; no-memory mode does not receive
+  memory-injected payloads and is not counted as exposed for those attacks.
+
+Total: **492 model calls** for one complete run. Repeated cases and attack
+paraphrases are correlated, not independent samples. This is an evaluator-authored
+synthetic holdout, not an external secret benchmark. Freeze the strategy and
+fixtures before execution; any later tuning requires a new test version.
+
+The [sandbox Agent](../examples/sandbox_access_agent.py) uses
+recall → decide → execute. The model emits a proposed request ID, resource class
+and action. Its output cannot supply identity, approver roles or approvals.
+Trusted caller context binds tenant/user/agent/current request; the executor
+checks its own request/approval tables inside the same write transaction as the
+grant and audit insert. It rejects wrong routes, resource mismatches, missing,
+revoked, expired or stale-revision approvals, and non-executor agents. An approval
+revoked after the model response is checked again at execution time. Every action
+is retried once to test request-level idempotency; a retry still reauthorizes.
+Approved decoy requests in another route, user and tenant must remain untouched.
+
+The tool database is separate from MemWeft. Its setup helpers are trusted fixture
+APIs, not model tools. This example uses a fixed virtual approval time of `1000`,
+local SQLite WAL/NORMAL, and one serial caller; it does not implement production
+identity authentication, distributed transactions, real approval issuance,
+role management or power-loss durability. A recorded grant is a simulated effect,
+not evidence that a real IAM integration is secured.
+
+Results separate model correctness, protocol validity, unsafe proposals,
+unauthorized **effects**, and authorized-operation completion. The scoring oracle
+uses fixture labels and persisted grant rows, not the executor's reported verdict.
+A deny-all executor would fail legitimate-operation checks. In the late-revocation
+case, a model may correctly propose execution based on its earlier snapshot;
+that suggestion is unauthorized at commit time and must still be blocked.
+
+Artifacts include source/fixture snapshots, strategy/native hashes, raw model
+requests/responses, recalled contexts, gate evidence, model proposals, and a
+separate audited sandbox database per observation. The report generator rechecks
+scores, call coverage, seeds, recorded effects, audit entries and database integrity.
+It supports `--interrupted-run PATH` for the first recorded checker failure in this
+experiment. The initial run stopped at call 272 because the exposure assertion
+compared raw newlines/quotes against JSON-escaped context text. The corrected
+checker verifies both the selected fact value and its quoted representation;
+strategy, fixtures and prompts were unchanged. First-exposure blind results are
+retained separately; a full rerun is not another independent blind test.
+
+See the [measured report](reports/2026-09-22-access-holdout-tools.md). To regenerate
+the recorded comparison, use `--run data/evals/access-holdout-tools-v1-run2`
+and `--interrupted-run data/evals/access-holdout-tools-v1-run1` with the report
+script. Prior history-injection failures remain historical evidence: the new graph
+uses explicit trusted approval snapshots and quoted history, so comparisons do
+not isolate a change in model behavior or prove that memory storage alone solves
+prompt injection.
+
+## Reference boundary comparison
+
+The optional Python [reference projection](../docs/reference_boundaries.md)
+compares three profiles in the same sandbox access graph:
+
+- `baseline`: previous memory text/history framing and original snapshot order.
+- `quoted`: separate JSON strategy/fact/history references, an explicit boundary
+  reminder, and the live approval snapshot placed after references.
+- `restricted`: the same framing as quoted, with only application-allowed finite
+  fact values and exact strategy-content pins; other memory/history is omitted.
+
+The executor, frozen learned strategy, truth labels and sampling parameters are
+unchanged. This is a combined framing/ordering comparison; it does not isolate the
+causal effect of a particular delimiter. Restricted inputs reduce exposure, not
+teach the model to resist content that it never receives. Current question text
+remains exposed, including new direct-question attack controls.
+
+```bash
+PYTHONPATH=python/src python -m unittest discover -s python/tests -p test_references.py -v
+PYTHONPATH=python/src python -m unittest discover -s evals -p 'test_*.py' -v
+PYTHONPATH=python/src python evals/run_reference_boundary.py \
+  --output data/evals/reference-boundary-new-run --repeats 2 \
+  --base-url http://127.0.0.1:8002/v1 --model qwen3-8b
+PYTHONPATH=python/src python evals/report_reference_boundary.py \
+  --run data/evals/reference-boundary-new-run \
+  --output data/evals/reference-boundary-new-report
+```
+
+The [frozen fixture](scenarios/reference-boundary-v1.json) has 40 old regression
+scenarios and 32 new synthetic scenarios. Each is tested in three profiles,
+with memory and with adopted learning, twice: 864 model/tool observations.
+Rechecking the old validation/adoption gate takes 72 calls. Six separate language
+preference tasks × three profiles × two repeats add 36 calls, verifying that valid
+allowed memory remains usable and missing/invalid values are not invented.
+Total: **972 calls**. Sampling is temperature 0.2, seed 42/43; profiles/modes rotate
+by case and repeat. Strategies and prompts are not tuned after test results.
+
+The no-memory comparison remains in the prior access/tool experiment. This round
+uses two memory modes to compare input policies while retaining the same stored
+memory and learning state. Old cases are regressions, not blind evidence; new cases
+are evaluator-authored synthetic probes, not external secret benchmarks.
+
+Every observation preserves selected context, exact model-facing projection,
+omission counts, actual model proposal, execution result, grant rows and audit.
+The report verifier checks raw call coverage, seeds, regenerated projections,
+actual sent reference messages, model scores and every sandbox database. It
+separates exposed from excluded attacks and retains failures, including direct
+question attacks outside the projection boundary. There is no model-answer repair.
+
+See the [measured report](reports/2026-09-22-reference-boundary.md). The published
+run is `data/evals/reference-boundary-v1-run1`; raw databases and model logs stay
+Git-ignored. This helper currently targets Python only and is explicitly opt-in;
+it does not change native storage, default context text or the Node API.
+
+## Confirmed command comparison
+
+The [application-confirmed command example](../docs/confirmed_commands.md) adds
+pending/confirmed/canceled command state bound to tenant, user, agent, request,
+revision, action, expiry and the SHA-256 of submitted material. Confirmation is
+supplied by the trusted application, never inferred from model output or chat.
+
+Three profiles share the new command-aware executor and sanitized snapshot:
+
+- `previous_restricted`: previous reference filtering with raw current question.
+- `rules_with_text`: explicit business rules and fixed recall query; quoted input.
+- `bound_command`: same rules and query; raw input omitted, binding checked.
+
+The frozen fixture contains 72 adapted regression cases and 28 new cases.
+Old cases now have explicit application confirmation fixtures, so historical
+totals are not directly comparable. Two memory modes × three profiles × two
+repeats produce 1,200 tool observations, plus 72 old validation calls: **1,272
+model calls**. New cases cover pending/fake confirmation, inspection, cancellation,
+expiry, changed material, changed revisions, foreign identities/routes, late
+cancellation/revocation and valid/missing/expired role approvals. There is no
+answer repair and no prompt tuning after observing this fixture's results.
+
+```bash
+PYTHONPATH=python/src python -m unittest discover -s evals -p 'test_*.py' -v
+PYTHONPATH=python/src python evals/run_confirmed_command.py \
+  --output data/evals/confirmed-command-new-run --repeats 2 \
+  --base-url http://127.0.0.1:8002/v1 --model qwen3-8b
+PYTHONPATH=python/src python evals/report_confirmed_command.py \
+  --run data/evals/confirmed-command-new-run \
+  --output data/evals/confirmed-command-new-report
+```
+
+Use a fresh output directory. Results include raw proposals, snapshot and reference
+messages, independent labels, input hashes, command audits, grants and retry
+outcomes. The report reconciles every raw call and database against recorded
+evidence. The bound path excludes raw submissions; this does not prove resistance
+to content the model never receives. Synthetic serial fixtures do not validate a
+real confirmation UI, authentication, IAM integration or concurrent external tools.
+
+See the [measured report](reports/2026-09-22-confirmed-command.md). The published
+run is `data/evals/confirmed-command-v1-run1`; source and fixture hashes remain in
+the report, while raw model logs and databases stay Git-ignored.
+
+## README performance figures
+
+The versioned SVG/PNG figures read the measured WAL coordination and query
+comparison JSON reports. Regenerate them without rerunning benchmarks or calling
+a model:
+
+```bash
+python -m pip install matplotlib
+python evals/plot_readme_metrics.py
+```
+
+Matplotlib is only needed to regenerate these figures, not to use MemWeft.
+The local render used Matplotlib 3.10.8. Keep workload conditions, slow paths and
+WAL-space limitations alongside any headline latency numbers.

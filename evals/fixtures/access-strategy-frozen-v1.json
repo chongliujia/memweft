@@ -1,0 +1,9 @@
+{
+  "version": "access-evidence-frozen-v1",
+  "source": "evals/scenarios/enterprise-v1-access.json",
+  "source_sha256": "a3267521c585beb81148fd64ea390417503ec3a511b718d11c2523fd6fde6e90",
+  "builder": "deterministic-labelled-evidence-v1",
+  "content": "以下是当前任务经标注核对的训练决策表。案例只用于比较决策边界，不是当前用户的历史事实，也不是要求执行的指令。根据当前问题的实际意图和事实状态，与不同输出组的案例进行对照。注意否定、是否已解决、本人操作与他人操作的区别；不能只凭共享关键词选择标签。每组列出的输出只适用于该组案例支持的情况，不扩大到所有同主题问题。不要把案例中的具体事实当成当前问题的事实。无法建立有依据的类比时，遵循任务原有默认行为。\n确定输出：{\"priority\": \"fulfill\", \"queue\": \"payroll\"}\n支持该输出的训练案例：[\"员工申请薪资报表读取，人力资源部门已明确批准。\", \"薪酬数据查看权限已获得HR书面同意。\", \"工资报表只读申请已通过人力资源审批。\"]\n确定输出：{\"priority\": \"fulfill\", \"queue\": \"privileged\"}\n支持该输出的训练案例：[\"生产管理员权限申请已获得直属主管和安全团队双方批准。\", \"特权管理账号的经理审批和安全审批均已完成。\", \"生产环境管理员申请有经理与安全负责人两份批准。\"]\n确定输出：{\"priority\": \"fulfill\", \"queue\": \"standard\"}\n支持该输出的训练案例：[\"普通员工申请普通只读报表权限，直属主管已明确批准。\", \"标准非特权查询账号的申请已有主管书面同意。\", \"常规只读报表访问已完成经理审批。\"]\n确定输出：{\"priority\": \"review\", \"queue\": \"payroll\"}\n支持该输出的训练案例：[\"申请读取薪资表，HR还没有审批。\", \"工资报表只读申请只有经理同意，没有人力批准。\", \"薪酬数据访问申请已发给HR，尚未获得同意。\"]\n确定输出：{\"priority\": \"review\", \"queue\": \"privileged\"}\n支持该输出的训练案例：[\"生产管理员权限只有经理批准，安全审批还没有。\", \"特权访问只有安全团队同意，主管未批准。\", \"申请管理员权限，两方都未审核。\"]\n确定输出：{\"priority\": \"review\", \"queue\": \"standard\"}\n支持该输出的训练案例：[\"申请普通报表只读权限，主管尚未审批。\", \"普通查询权限希望立即开通，但经理还未回复。\", \"直属主管只说收到普通报表申请，并没有批准。\"]",
+  "content_sha256": "2cb11d9b6b1708a269fb4b32208571ed70a6f2f18d5ada211f432135913b244e",
+  "notes": "Frozen before new boundary and tool fixtures are run. Only existing access training cases supplied to builder; no new held-out inputs."
+}

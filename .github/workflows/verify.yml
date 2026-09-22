@@ -36,6 +36,10 @@ jobs:
           wheel = glob.glob('dist/*.whl')[0]
           subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel])
       - run: python -m unittest discover -s python/tests -v
+      - name: Offline Agent evaluation and authorization regression tests
+        # Evaluation benchmark helpers currently import the Unix resource module.
+        if: runner.os == 'Linux'
+        run: python -m unittest discover -s evals -p 'test_*.py' -v
       - run: npm ci
         working-directory: typescript
       - run: npm run build:native

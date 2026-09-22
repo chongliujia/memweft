@@ -46,6 +46,16 @@ terms and scores. `AsyncSession.context` and `LangGraphMemory.context` also acce
 provide semantic similarity. Indexed candidate selection and exact fallback paths
 are described in the [retrieval guide](../docs/indexed_retrieval.md).
 
+## Model reference boundaries
+
+For sensitive decisions, the optional `memweft.adapters.references` module exposes
+`ReferencePolicy` and `project_references`. Applications can allow finite fact
+values and exact strategy-content hashes, omit unlisted memory/history, and inspect
+exclusion counts. Quoted mode retains free-form data and is not an injection defense.
+This does not change stored memory, authenticate facts or authorize tools. See the
+[reference guide](../docs/reference_boundaries.md) and
+[LangGraph example](../examples/reference_access_agent.py).
+
 ## Agent memory pools
 
 `memory.user("alice", agent_id="planner", memory_config=config)` binds private, shared or mixed fact pools. `remember` and `forget` accept `pool_id` and `expected_revision`; `memories(pool_id=...)` inspects one pool. The same options work with `AsyncMemory`. See the [configuration and learning dependency guide](../docs/memory_pools.md) and [two-Agent example](../examples/shared_pools.py).
