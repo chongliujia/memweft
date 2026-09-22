@@ -29,6 +29,7 @@ python/src/memweft/_core.*
 *.db
 *.db-shm
 *.db-wal
+*.memweft-maintenance
 data/
 # 如果有特定的本地测试库目录
 python/data/

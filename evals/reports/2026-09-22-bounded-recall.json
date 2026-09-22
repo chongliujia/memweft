@@ -1,0 +1,1022 @@
+{
+  "100k": {
+    "raw_directory": "data/evals/bounded-recall-100k-run1",
+    "manifest": {
+      "before": "data/evals/indexed-v1-before-build/libmemweft_ffi.so",
+      "after": "target/release/libmemweft_ffi.so",
+      "before_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+      "after_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+      "script_sha256": "b9e596c4b80f25ad00f50cf4442eb785916a8db9ad50aed3c21e61f9897f758d",
+      "samples": 30,
+      "writes_per_trial": 1000,
+      "write_trials": 3,
+      "readers": 8,
+      "reader_rounds": 30,
+      "concurrent_queries": [
+        [
+          "rare",
+          "deployment port"
+        ],
+        [
+          "frequent",
+          "archive"
+        ],
+        [
+          "mixed_terms",
+          "archive deployment port"
+        ],
+        [
+          "value_common",
+          "common"
+        ]
+      ],
+      "source_sha256": {
+        "crates/memweft-store/src/indexed_recall.rs": "92b1b089700c3ac1a4337c1ac8a99e23ee964bb7974b7287bdbb90073a081395",
+        "crates/memweft-store/src/sqlite.rs": "06f658830df27067f3788b13944b7d7c0cd3e623b3fbd6ece2e03a124cd5f54b",
+        "crates/memweft-store/src/pools.rs": "ec3fe4ea2f7f5f6c2ca057be7ae4d4438947fb562233cc9f98cf7387eed5e02b",
+        "crates/memweft/src/lib.rs": "39bc7b0439e28ef51b518c9bae26344f3a8f62c0dbbb3037c85355481b37762d",
+        "crates/memweft/src/pools.rs": "87311c44ea1169fadb2fc197987b00c77da8c2620922a020fb0db9460d206dba"
+      },
+      "build_order": [
+        "before",
+        "after"
+      ],
+      "limitations": "Synthetic warm-cache data; chronological paired runs, not randomized; not a production SLO."
+    },
+    "comparison": [
+      {
+        "profile": "private",
+        "query": "rare",
+        "context_identical": true,
+        "before_p50_ms": 3.6161505013296846,
+        "after_p50_ms": 1.2386150010570418,
+        "before_p95_ms": 3.98318800580455,
+        "after_p95_ms": 1.3131259984220378,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "frequent",
+        "context_identical": true,
+        "before_p50_ms": 165.4790030006552,
+        "after_p50_ms": 1.766557001246838,
+        "before_p95_ms": 168.89925899886293,
+        "after_p95_ms": 1.9126879997202195,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "mixed_terms",
+        "context_identical": true,
+        "before_p50_ms": 164.9560764999478,
+        "after_p50_ms": 1.8254069982504006,
+        "before_p95_ms": 367.31862699525664,
+        "after_p95_ms": 2.050203001999762,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "absent",
+        "context_identical": true,
+        "before_p50_ms": 3.4878494989243336,
+        "after_p50_ms": 1.2151295013609342,
+        "before_p95_ms": 3.594608002458699,
+        "after_p95_ms": 1.2985190041945316,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "empty",
+        "context_identical": true,
+        "before_p50_ms": 3.3691944991005585,
+        "after_p50_ms": 1.1174504979862832,
+        "before_p95_ms": 3.4899320016847923,
+        "after_p95_ms": 1.1888289955095388,
+        "after_plan": "key_order"
+      },
+      {
+        "profile": "shared",
+        "query": "rare",
+        "context_identical": true,
+        "before_p50_ms": 3.596966500481358,
+        "after_p50_ms": 1.235288000316359,
+        "before_p95_ms": 3.64764600089984,
+        "after_p95_ms": 1.3624210041598417,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "shared",
+        "query": "frequent",
+        "context_identical": true,
+        "before_p50_ms": 156.99645249696914,
+        "after_p50_ms": 1.7294479985139333,
+        "before_p95_ms": 161.99481199873844,
+        "after_p95_ms": 2.2210559982340783,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "shared",
+        "query": "mixed_terms",
+        "context_identical": true,
+        "before_p50_ms": 158.51271700012148,
+        "after_p50_ms": 1.7731444968376309,
+        "before_p95_ms": 161.3434579994646,
+        "after_p95_ms": 1.8706449991441332,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "shared",
+        "query": "absent",
+        "context_identical": true,
+        "before_p50_ms": 3.515874999720836,
+        "after_p50_ms": 1.2267960046301596,
+        "before_p95_ms": 3.6391019966686144,
+        "after_p95_ms": 1.4377439947566018,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "shared",
+        "query": "empty",
+        "context_identical": true,
+        "before_p50_ms": 3.3097689993155655,
+        "after_p50_ms": 1.104375500290189,
+        "before_p95_ms": 3.4636910058907233,
+        "after_p95_ms": 1.1948120009037666,
+        "after_plan": "key_order"
+      },
+      {
+        "profile": "mixed",
+        "query": "rare",
+        "context_identical": true,
+        "before_p50_ms": 4.602037002769066,
+        "after_p50_ms": 1.9927294997614808,
+        "before_p95_ms": 4.739310999866575,
+        "after_p95_ms": 2.185091005230788,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "mixed",
+        "query": "frequent",
+        "context_identical": true,
+        "before_p50_ms": 438.715994998347,
+        "after_p50_ms": 2.8409149999788497,
+        "before_p95_ms": 953.0244929992477,
+        "after_p95_ms": 3.0998409929452464,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "mixed",
+        "query": "mixed_terms",
+        "context_identical": true,
+        "before_p50_ms": 431.99603199900594,
+        "after_p50_ms": 2.863676501874579,
+        "before_p95_ms": 439.3531189998612,
+        "after_p95_ms": 3.0553940014215186,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "mixed",
+        "query": "absent",
+        "context_identical": true,
+        "before_p50_ms": 4.50127650401555,
+        "after_p50_ms": 1.96875600158819,
+        "before_p95_ms": 4.662187995563727,
+        "after_p95_ms": 2.059689002635423,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "mixed",
+        "query": "empty",
+        "context_identical": true,
+        "before_p50_ms": 4.4398239988368005,
+        "after_p50_ms": 1.8710874974203762,
+        "before_p95_ms": 4.603517001669388,
+        "after_p95_ms": 1.968750002561137,
+        "after_plan": "key_order"
+      }
+    ],
+    "workers": {
+      "private-before": {
+        "metadata": {
+          "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 5.990154997562058,
+          "peak_rss_kib": 64480,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 142782464,
+            "index_version": 1,
+            "private_facts": 103000,
+            "shared_facts": 0
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.19385950145078823,
+            "p95_ms": 0.31225199927575886,
+            "mean_ms": 4.726198768745235,
+            "max_ms": 414.77230700547807,
+            "total_ms": 14178.596306235704
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.2253894999739714,
+            "p95_ms": 2.6830920032807626,
+            "mean_ms": 5.573860271729548,
+            "max_ms": 455.41996900283266,
+            "total_ms": 16721.580815188645
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 142782464,
+          "allocated_page_bytes": 142778368,
+          "reusable_page_bytes": 4096
+        }
+      },
+      "private-after": {
+        "metadata": {
+          "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 30964.981462995638,
+          "peak_rss_kib": 68240,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 181047296,
+            "index_version": 2,
+            "private_facts": 103000,
+            "shared_facts": 0
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.09096250141737983,
+            "p95_ms": 0.16581199452048168,
+            "mean_ms": 7.0539924527111,
+            "max_ms": 784.8157499975059,
+            "total_ms": 21161.9773581333
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.11867500143125653,
+            "p95_ms": 1.101068002753891,
+            "mean_ms": 5.759207833970625,
+            "max_ms": 973.6120689995005,
+            "total_ms": 17277.623501911876
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 181047296,
+          "allocated_page_bytes": 140275712,
+          "reusable_page_bytes": 40771584
+        }
+      },
+      "shared-before": {
+        "metadata": {
+          "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 6.1236019973875955,
+          "peak_rss_kib": 64620,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 138280960,
+            "index_version": 1,
+            "private_facts": 0,
+            "shared_facts": 103000
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.20548500106087886,
+            "p95_ms": 0.327678004396148,
+            "mean_ms": 3.68739269534611,
+            "max_ms": 386.44910500443075,
+            "total_ms": 11062.17808603833
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.30277849873527884,
+            "p95_ms": 1.1087410020991229,
+            "mean_ms": 4.113035270342759,
+            "max_ms": 517.8161959993304,
+            "total_ms": 12339.105811028276
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 138280960,
+          "allocated_page_bytes": 138268672,
+          "reusable_page_bytes": 12288
+        }
+      },
+      "shared-after": {
+        "metadata": {
+          "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 26088.97425399482,
+          "peak_rss_kib": 67856,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 167464960,
+            "index_version": 2,
+            "private_facts": 0,
+            "shared_facts": 103000
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.1196409975818824,
+            "p95_ms": 0.25149599969154224,
+            "mean_ms": 5.7955538323221845,
+            "max_ms": 758.552906998375,
+            "total_ms": 17386.661496966553
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.21199649927439168,
+            "p95_ms": 0.6404369996744208,
+            "mean_ms": 5.801146489960956,
+            "max_ms": 746.2866810019477,
+            "total_ms": 17403.43946988287
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 167464960,
+          "allocated_page_bytes": 136708096,
+          "reusable_page_bytes": 30756864
+        }
+      },
+      "mixed-before": {
+        "metadata": {
+          "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 5.488122995302547,
+          "peak_rss_kib": 82936,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 278294528,
+            "index_version": 1,
+            "private_facts": 103000,
+            "shared_facts": 100000
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.20672450045822188,
+            "p95_ms": 0.6970200047362596,
+            "mean_ms": 4.323523409664631,
+            "max_ms": 434.82006400154205,
+            "total_ms": 12970.570228993893
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.23122150014387444,
+            "p95_ms": 0.4168840023339726,
+            "mean_ms": 4.638725042672983,
+            "max_ms": 470.85279499879107,
+            "total_ms": 13916.17512801895
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 278294528,
+          "allocated_page_bytes": 278294528,
+          "reusable_page_bytes": 0
+        }
+      },
+      "mixed-after": {
+        "metadata": {
+          "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 71409.12370099977,
+          "peak_rss_kib": 67976,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 349847552,
+            "index_version": 2,
+            "private_facts": 103000,
+            "shared_facts": 100000
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.10025799929280765,
+            "p95_ms": 1.0765080005512573,
+            "mean_ms": 7.559734966297886,
+            "max_ms": 2398.833398001443,
+            "total_ms": 22679.20489889366
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.12190649795229547,
+            "p95_ms": 0.6988059976720251,
+            "mean_ms": 6.554964373918968,
+            "max_ms": 1555.7037519974983,
+            "total_ms": 19664.893121756904
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 349847552,
+          "allocated_page_bytes": 273752064,
+          "reusable_page_bytes": 76095488
+        }
+      }
+    }
+  },
+  "million": {
+    "raw_directory": "data/evals/bounded-recall-million-run1",
+    "manifest": {
+      "before": "data/evals/indexed-v1-before-build/libmemweft_ffi.so",
+      "after": "target/release/libmemweft_ffi.so",
+      "before_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+      "after_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+      "script_sha256": "b9e596c4b80f25ad00f50cf4442eb785916a8db9ad50aed3c21e61f9897f758d",
+      "samples": 30,
+      "writes_per_trial": 1000,
+      "write_trials": 3,
+      "readers": 8,
+      "reader_rounds": 30,
+      "concurrent_queries": [
+        [
+          "rare",
+          "deployment port"
+        ],
+        [
+          "frequent",
+          "archive"
+        ],
+        [
+          "mixed_terms",
+          "archive deployment port"
+        ],
+        [
+          "value_common",
+          "common"
+        ]
+      ],
+      "source_sha256": {
+        "crates/memweft-store/src/indexed_recall.rs": "92b1b089700c3ac1a4337c1ac8a99e23ee964bb7974b7287bdbb90073a081395",
+        "crates/memweft-store/src/sqlite.rs": "06f658830df27067f3788b13944b7d7c0cd3e623b3fbd6ece2e03a124cd5f54b",
+        "crates/memweft-store/src/pools.rs": "ec3fe4ea2f7f5f6c2ca057be7ae4d4438947fb562233cc9f98cf7387eed5e02b",
+        "crates/memweft/src/lib.rs": "39bc7b0439e28ef51b518c9bae26344f3a8f62c0dbbb3037c85355481b37762d",
+        "crates/memweft/src/pools.rs": "87311c44ea1169fadb2fc197987b00c77da8c2620922a020fb0db9460d206dba"
+      },
+      "build_order": [
+        "before",
+        "after"
+      ],
+      "limitations": "Synthetic warm-cache data; chronological paired runs, not randomized; not a production SLO."
+    },
+    "comparison": [
+      {
+        "profile": "private",
+        "query": "rare",
+        "context_identical": true,
+        "before_p50_ms": 3.64024249574868,
+        "after_p50_ms": 1.2848699989262968,
+        "before_p95_ms": 4.085993001353927,
+        "after_p95_ms": 1.8935199987026863,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "frequent",
+        "context_identical": true,
+        "before_p50_ms": 1742.8117339986784,
+        "after_p50_ms": 1.913266005431069,
+        "before_p95_ms": 2372.433252996416,
+        "after_p95_ms": 2.0852769957855344,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "mixed_terms",
+        "context_identical": true,
+        "before_p50_ms": 1740.132832495874,
+        "after_p50_ms": 1.9180064991815016,
+        "before_p95_ms": 2216.989836000721,
+        "after_p95_ms": 2.0492600015131757,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "absent",
+        "context_identical": true,
+        "before_p50_ms": 3.625108496635221,
+        "after_p50_ms": 1.2454484967747703,
+        "before_p95_ms": 4.416294003021903,
+        "after_p95_ms": 1.271796994842589,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "empty",
+        "context_identical": true,
+        "before_p50_ms": 3.3985815025516786,
+        "after_p50_ms": 1.1471434991108254,
+        "before_p95_ms": 4.095451004104689,
+        "after_p95_ms": 1.170998002635315,
+        "after_plan": "key_order"
+      },
+      {
+        "profile": "private",
+        "query": "value_common",
+        "context_identical": true,
+        "before_p50_ms": 1725.8759484975599,
+        "after_p50_ms": 1.8619710026541725,
+        "before_p95_ms": 2227.307026994822,
+        "after_p95_ms": 1.9380679950700141,
+        "after_plan": "bounded_prefix"
+      },
+      {
+        "profile": "private",
+        "query": "fallback",
+        "context_identical": true,
+        "before_p50_ms": 1730.5475270004536,
+        "after_p50_ms": 1725.7572050002636,
+        "before_p95_ms": 2258.0320299966843,
+        "after_p95_ms": 2340.979200002039,
+        "after_plan": "postings_aggregate"
+      }
+    ],
+    "workers": {
+      "private-before": {
+        "metadata": {
+          "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 6.24127500486793,
+          "peak_rss_kib": 87164,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 1608982528,
+            "index_version": 1,
+            "private_facts": 1003000,
+            "shared_facts": 0
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.19922150022466667,
+            "p95_ms": 0.3233919997001067,
+            "mean_ms": 4.5030989829901955,
+            "max_ms": 629.0653039977769,
+            "total_ms": 13509.296948970587
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.22783249369240366,
+            "p95_ms": 1.5363080019596964,
+            "mean_ms": 5.059278685980341,
+            "max_ms": 489.29503700492205,
+            "total_ms": 15177.836057941022
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 1608982528,
+          "allocated_page_bytes": 1608974336,
+          "reusable_page_bytes": 8192
+        },
+        "concurrency": {
+          "readers": 8,
+          "rounds": 30,
+          "query_latency": {
+            "n": 240,
+            "p50_ms": 1829.2206975020235,
+            "p95_ms": 2559.3263629998546,
+            "max_ms": 2856.9474260002607
+          },
+          "reader_wall_seconds": 45.45269236500462,
+          "query_throughput_per_second_including_validation": 5.280215263656926,
+          "query_context_checks": 240,
+          "live_snapshot_checks": 240,
+          "writer": {
+            "role": "writer",
+            "updates": 3712,
+            "latency": {
+              "n": 3712,
+              "p50_ms": 0.5795619981654454,
+              "p95_ms": 2.3688099972787313,
+              "max_ms": 138.21061899943743
+            },
+            "start_monotonic": 52100.918381917,
+            "finish_monotonic": 52146.379281792
+          },
+          "integrity_after_concurrency": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 1608982528,
+            "index_version": 1,
+            "private_facts": 1003000,
+            "shared_facts": 1
+          },
+          "method": "Spawned processes with a start barrier; separate SDK clients. Query timing excludes live-pool validation."
+        }
+      },
+      "private-after": {
+        "metadata": {
+          "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+          "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+          "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+          "open_and_migration_ms": 481305.02321800304,
+          "peak_rss_kib": 84744,
+          "file_after_writes": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 2130976768,
+            "index_version": 2,
+            "private_facts": 1003000,
+            "shared_facts": 0
+          }
+        },
+        "write_summary": {
+          "insert": {
+            "n": 3000,
+            "p50_ms": 0.09385450175614096,
+            "p95_ms": 0.8347850016434677,
+            "mean_ms": 4.319560227932622,
+            "max_ms": 364.3166390029364,
+            "total_ms": 12958.680683797866
+          },
+          "update": {
+            "n": 3000,
+            "p50_ms": 0.11871349852299318,
+            "p95_ms": 0.942719001614023,
+            "mean_ms": 4.194868777752466,
+            "max_ms": 479.00588899938157,
+            "total_ms": 12584.606333257398
+          }
+        },
+        "pages_after_run": {
+          "file_bytes": 2130976768,
+          "allocated_page_bytes": 1576554496,
+          "reusable_page_bytes": 554422272
+        },
+        "concurrency": {
+          "readers": 8,
+          "rounds": 30,
+          "query_latency": {
+            "n": 240,
+            "p50_ms": 2.435983005852904,
+            "p95_ms": 3.684023999085184,
+            "max_ms": 4.5930349951959215
+          },
+          "reader_wall_seconds": 0.11082071800046833,
+          "query_throughput_per_second_including_validation": 2165.6600347868684,
+          "query_context_checks": 240,
+          "live_snapshot_checks": 240,
+          "writer": {
+            "role": "writer",
+            "updates": 6,
+            "latency": {
+              "n": 6,
+              "p50_ms": 0.28119250055169687,
+              "p95_ms": 54.616313995211385,
+              "max_ms": 54.616313995211385
+            },
+            "start_monotonic": 52757.617049539,
+            "finish_monotonic": 52757.73410834
+          },
+          "integrity_after_concurrency": {
+            "integrity_check": "ok",
+            "foreign_key_check": "ok",
+            "database_bytes": 2130976768,
+            "index_version": 2,
+            "private_facts": 1003000,
+            "shared_facts": 1
+          },
+          "method": "Spawned processes with a start barrier; separate SDK clients. Query timing excludes live-pool validation."
+        }
+      }
+    }
+  },
+  "storage": {
+    "metadata": {
+      "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+      "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+      "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+      "source_sha256": "3e31de90f4fd13b34ebf11f3e65e76efab911bc5c7f3f36b3605986b10bae6e8",
+      "sqlite_durability": "WAL, synchronous=NORMAL as configured by the Rust store",
+      "profile": "release (caller must install the release native extension)"
+    },
+    "results": {
+      "concurrency": {
+        "workers": 8,
+        "rounds": 100,
+        "attempts": 800,
+        "successful_updates": 100,
+        "expected_conflicts": 700,
+        "final_value": 100,
+        "final_revision": 101,
+        "write_latency": {
+          "n": 800,
+          "p50_ms": 1.1061410004913341,
+          "p95_ms": 3.245675005018711,
+          "max_ms": 33.34976100450149
+        },
+        "idempotent_message_attempts": 160,
+        "persisted_messages": 1
+      },
+      "isolation": {
+        "tenant_user_scopes": 100,
+        "agents_per_scope": 2,
+        "private_and_session_leaks": 0,
+        "readonly_mutations_blocked": 200,
+        "boundary": "Application scope/config binding, not authentication against an untrusted database client."
+      },
+      "process_crash": {
+        "acknowledged": 50,
+        "recovered": 50,
+        "integrity_check": "ok",
+        "scope": "SIGKILL recovery; no simulated power loss"
+      },
+      "scale": [
+        {
+          "facts": 100,
+          "added_facts_ms": 234.23193299822742,
+          "query": {
+            "n": 30,
+            "p50_ms": 8.066145001066616,
+            "p95_ms": 14.222740996046923,
+            "max_ms": 14.337631000671536
+          },
+          "inspected_facts": 74,
+          "retrieval": "sqlite_inverted_v1",
+          "report_json_bytes": 9785,
+          "selected_facts": 10,
+          "peak_process_rss_kib": 68260,
+          "database_bytes": 339968,
+          "wal_bytes": 4165352
+        },
+        {
+          "facts": 1000,
+          "added_facts_ms": 4833.04703199974,
+          "query": {
+            "n": 30,
+            "p50_ms": 1.1287150045973249,
+            "p95_ms": 1.3104210011078976,
+            "max_ms": 1.4658069994766265
+          },
+          "inspected_facts": 74,
+          "retrieval": "sqlite_inverted_v1",
+          "report_json_bytes": 9785,
+          "selected_facts": 10,
+          "peak_process_rss_kib": 69284,
+          "database_bytes": 1597440,
+          "wal_bytes": 4227152
+        },
+        {
+          "facts": 10000,
+          "added_facts_ms": 52292.40537999431,
+          "query": {
+            "n": 30,
+            "p50_ms": 1.1767789983423427,
+            "p95_ms": 1.2891099977423437,
+            "max_ms": 1.3595019991043955
+          },
+          "inspected_facts": 74,
+          "retrieval": "sqlite_inverted_v1",
+          "report_json_bytes": 9785,
+          "selected_facts": 10,
+          "peak_process_rss_kib": 69924,
+          "database_bytes": 14102528,
+          "wal_bytes": 4235392
+        },
+        {
+          "facts": 100000,
+          "added_facts_ms": 645962.5652399991,
+          "query": {
+            "n": 30,
+            "p50_ms": 1.2732010000036098,
+            "p95_ms": 1.9289959964226,
+            "max_ms": 2.237661996332463
+          },
+          "inspected_facts": 74,
+          "retrieval": "sqlite_inverted_v1",
+          "report_json_bytes": 9785,
+          "selected_facts": 10,
+          "peak_process_rss_kib": 70948,
+          "database_bytes": 140247040,
+          "wal_bytes": 4251872
+        }
+      ]
+    },
+    "raw_directory": "data/evals/bounded-storage-run1"
+  },
+  "sustained": {
+    "manifest": {
+      "before": "data/evals/indexed-v1-before-build/libmemweft_ffi.so",
+      "after": "target/release/libmemweft_ffi.so",
+      "before_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+      "after_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+      "script_sha256": "b9e596c4b80f25ad00f50cf4442eb785916a8db9ad50aed3c21e61f9897f758d",
+      "samples": 30,
+      "writes_per_trial": 1000,
+      "write_trials": 3,
+      "readers": 8,
+      "reader_rounds": 30,
+      "concurrent_queries": [
+        [
+          "rare",
+          "deployment port"
+        ],
+        [
+          "frequent",
+          "archive"
+        ],
+        [
+          "mixed_terms",
+          "archive deployment port"
+        ],
+        [
+          "value_common",
+          "common"
+        ]
+      ],
+      "source_sha256": {
+        "crates/memweft-store/src/indexed_recall.rs": "92b1b089700c3ac1a4337c1ac8a99e23ee964bb7974b7287bdbb90073a081395",
+        "crates/memweft-store/src/sqlite.rs": "06f658830df27067f3788b13944b7d7c0cd3e623b3fbd6ece2e03a124cd5f54b",
+        "crates/memweft-store/src/pools.rs": "ec3fe4ea2f7f5f6c2ca057be7ae4d4438947fb562233cc9f98cf7387eed5e02b",
+        "crates/memweft/src/lib.rs": "39bc7b0439e28ef51b518c9bae26344f3a8f62c0dbbb3037c85355481b37762d",
+        "crates/memweft/src/pools.rs": "87311c44ea1169fadb2fc197987b00c77da8c2620922a020fb0db9460d206dba"
+      },
+      "build_order": [
+        "before",
+        "after"
+      ],
+      "limitations": "Synthetic warm-cache data; chronological paired runs, not randomized; not a production SLO.",
+      "soak_script_sha256": "380bb2c1d319b96d5df95c46174c9b0b8c219728c78d8f001a333bb9f037beb0",
+      "helper_script_sha256": "b9e596c4b80f25ad00f50cf4442eb785916a8db9ad50aed3c21e61f9897f758d",
+      "seconds": 60,
+      "input_directory": "data/evals/bounded-recall-million-run1"
+    },
+    "workers": {
+      "before": {
+        "readers": 8,
+        "minimum_reader_seconds": 60.0,
+        "reader_wall_seconds": 61.603358788997866,
+        "query_latency": {
+          "n": 323,
+          "p50_ms": 1853.94235199783,
+          "p95_ms": 2440.19172800472,
+          "max_ms": 4398.613752004167
+        },
+        "by_query": {
+          "rare": {
+            "n": 80,
+            "p50_ms": 3.936551001970656,
+            "p95_ms": 6.880855995405,
+            "max_ms": 68.12024900136748
+          },
+          "frequent": {
+            "n": 82,
+            "p50_ms": 1868.0555320024723,
+            "p95_ms": 2617.9738359933253,
+            "max_ms": 4398.613752004167
+          },
+          "mixed_terms": {
+            "n": 81,
+            "p50_ms": 1873.6392880018684,
+            "p95_ms": 2246.700570998655,
+            "max_ms": 4283.807788997365
+          },
+          "value_common": {
+            "n": 80,
+            "p50_ms": 1862.3983095021686,
+            "p95_ms": 2865.507955000794,
+            "max_ms": 4207.812123997428
+          }
+        },
+        "queries_per_second_including_validation": 5.243220602732568,
+        "context_checks": 323,
+        "live_snapshot_checks": 323,
+        "writer": {
+          "role": "writer",
+          "updates": 4962,
+          "latency": {
+            "n": 4962,
+            "p50_ms": 0.5946964993199799,
+            "p95_ms": 2.6533669952186756,
+            "max_ms": 202.47606199700385
+          },
+          "start_monotonic": 53502.795075921,
+          "finish_monotonic": 53564.428077131,
+          "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15"
+        },
+        "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+        "integrity": {
+          "integrity_check": "ok",
+          "foreign_key_check": "ok",
+          "database_bytes": 1608982528,
+          "index_version": 1,
+          "private_facts": 1003000,
+          "shared_facts": 2
+        },
+        "method": "Closed-loop processes, same query mix, >=60 seconds per reader; primary query timing excludes extra live-pool validation."
+      },
+      "after": {
+        "readers": 8,
+        "minimum_reader_seconds": 60.0,
+        "reader_wall_seconds": 60.00306323199766,
+        "query_latency": {
+          "n": 209550,
+          "p50_ms": 1.9513645020197146,
+          "p95_ms": 2.953347000584472,
+          "max_ms": 42.9346489981981
+        },
+        "by_query": {
+          "rare": {
+            "n": 52386,
+            "p50_ms": 1.3377115028561093,
+            "p95_ms": 2.21809399954509,
+            "max_ms": 27.407390996813774
+          },
+          "frequent": {
+            "n": 52387,
+            "p50_ms": 1.9596540005295537,
+            "p95_ms": 3.2607359971734695,
+            "max_ms": 42.9346489981981
+          },
+          "mixed_terms": {
+            "n": 52388,
+            "p50_ms": 2.0065310018253513,
+            "p95_ms": 3.3513320013298653,
+            "max_ms": 32.128382998052984
+          },
+          "value_common": {
+            "n": 52389,
+            "p50_ms": 1.9592780008679256,
+            "p95_ms": 3.2651980000082403,
+            "max_ms": 34.41392700187862
+          }
+        },
+        "queries_per_second_including_validation": 3492.3217034735303,
+        "context_checks": 209550,
+        "live_snapshot_checks": 209550,
+        "writer": {
+          "role": "writer",
+          "updates": 1103,
+          "latency": {
+            "n": 1103,
+            "p50_ms": 45.497667997551616,
+            "p95_ms": 76.73172000068007,
+            "max_ms": 223.30770899861818
+          },
+          "start_monotonic": 53600.603163666,
+          "finish_monotonic": 53660.85825219,
+          "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979"
+        },
+        "native_sha256": "4c34c6ae3095f75ea61566c56b2e9cc390023567ec4eace655ff3437a0a4b979",
+        "integrity": {
+          "integrity_check": "ok",
+          "foreign_key_check": "ok",
+          "database_bytes": 2130976768,
+          "index_version": 2,
+          "private_facts": 1003000,
+          "shared_facts": 2
+        },
+        "method": "Closed-loop processes, same query mix, >=60 seconds per reader; primary query timing excludes extra live-pool validation."
+      }
+    },
+    "raw_directory": "data/evals/bounded-concurrency-sustained-run1"
+  },
+  "verification": {
+    "rust_tests_passed": 37,
+    "differential_context_checks": 1176,
+    "python_passed": 12,
+    "python_optional_dsn_skipped": 2,
+    "node_passed": 6,
+    "offline_eval_passed": 37,
+    "paired_contexts_identical": 22,
+    "model_calls": 0,
+    "native_and_runner_source_hashes_verified": true
+  },
+  "limitations": [
+    "Warm-cache synthetic single-reader queries, 30 samples each; chronological, nonrandomized build order.",
+    "A proven fast path; loose upper bounds deliberately retain the full aggregation fallback.",
+    "Eight reader processes and one throttled shared-pool writer; no multiwriter saturation or cross-machine SLO claim.",
+    "Concurrent primary queries read private facts; separate same-tenant/user shared-pool reads validate live revisions.",
+    "The 60-second closed-loop follow-up sends much more read traffic with v2; writer latency regresses under that load. It is not a matched-arrival-rate comparison.",
+    "Million-record fixture created by bulk SQL and indexed outside query timing, not a public SDK bulk-write throughput claim.",
+    "Single-record write trials insert then update new user scopes on the copied populated files.",
+    "Version migration copies postings, locks writes, and can leave reusable free pages in the file.",
+    "Strict conflict policy and large history retrieval retain their previous behavior; model prompt-injection failures are unchanged."
+  ]
+}

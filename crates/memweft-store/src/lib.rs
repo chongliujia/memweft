@@ -9,15 +9,22 @@ use std::sync::RwLock;
 
 mod composer;
 mod documents;
+mod pools;
+mod indexed_recall;
+mod lexical;
+pub use indexed_recall::RecallCandidates;
+pub use lexical::terms as lexical_terms;
 pub use documents::{Document, Mutation};
+pub use pools::{PoolFact, PoolRef, PoolRevision};
 mod sqlite;
+mod checkpoint;
 #[cfg(feature = "mysql")]
 mod mysql;
 #[cfg(feature = "postgres")]
 mod postgres;
 
 pub use composer::{build_memory_packet, BuildRequest, RecallCues, RecallPolicy};
-pub use sqlite::SqliteStore;
+pub use sqlite::{SqliteStore, SqliteOptions};
 #[cfg(feature = "mysql")]
 pub use mysql::MySqlStore;
 #[cfg(feature = "postgres")]
@@ -125,6 +132,31 @@ pub struct WorkingStatePatch {
 }
 
 pub trait Store: Send + Sync {
+    /// Instance-level operational diagnostics; never returns memory contents.
+    fn storage_status(&self) -> StoreResult<Value> {
+        Ok(serde_json::json!({"supported": false}))
+    }
+    /// Ordered pools already authorized by the caller. None preserves the legacy
+    /// fallback on backends without an indexed implementation. Limit includes
+    /// any caller-requested diagnostic sample; it is not a global hit count.
+    fn recall_candidates(&self, _scope: &Scope, _pools: &[String], _query: Option<&str>, _limit: usize) -> StoreResult<Option<RecallCandidates>> {
+        Ok(None)
+    }
+    fn pool_facts(&self, _scope: &Scope, _pool: &str) -> StoreResult<Vec<PoolFact>> {
+        Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
+    }
+    fn put_pool_fact(&self, _scope: &Scope, _pool: &str, _fact: Fact, _expected_revision: Option<u64>) -> StoreResult<PoolFact> {
+        Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
+    }
+    fn forget_pool_fact(&self, _scope: &Scope, _pool: &str, _key: &str, _expected_revision: Option<u64>) -> StoreResult<bool> {
+        Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
+    }
+    fn mutate_documents_checked(&self, scope: &Scope, mutations: &[Mutation], guards: &[PoolRevision]) -> StoreResult<()> {
+        if !guards.is_empty() {
+            return Err(StoreError::InvalidInput("pool revision checks require the sqlite backend".into()));
+        }
+        self.mutate_documents(scope, mutations)
+    }
     /// Versioned JSON documents. The initial implementation supports SQLite.
     fn documents(&self, _scope: &Scope, _prefix: &[String]) -> StoreResult<Vec<Document>> {
         Err(StoreError::InvalidInput("document API requires the sqlite backend".into()))

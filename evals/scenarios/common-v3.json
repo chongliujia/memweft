@@ -1,0 +1,678 @@
+{
+  "version": "common-v3",
+  "description": "Same tasks and answer keys as common-v2, with independently declared nullable output contracts for controlled format comparisons.",
+  "cases": [
+    {
+      "id": "preference-language",
+      "category": "preferences",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "reply_language",
+          "value": "用户偏好的回答语言代码是 en。"
+        },
+        {
+          "op": "remember",
+          "key": "timezone",
+          "value": "用户时区是 Asia/Shanghai。"
+        }
+      ],
+      "prompt": "根据我的已保存偏好，返回 language 和 timezone 两个字段。没有记录的字段用 null。language 使用语言代码。",
+      "expected": {
+        "language": "en",
+        "timezone": "Asia/Shanghai"
+      },
+      "output_contract": "language_timezone"
+    },
+    {
+      "id": "preference-format",
+      "category": "preferences",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "reply_format",
+          "value": "用户要求默认输出格式代码为 bullets，编程语言代码为 rust。"
+        }
+      ],
+      "prompt": "读取我偏好的输出格式和编程语言，返回 format 和 programming_language 两个字段，使用记录中的代码，未知用 null。",
+      "expected": {
+        "format": "bullets",
+        "programming_language": "rust"
+      },
+      "output_contract": "format_language"
+    },
+    {
+      "id": "session-next-step",
+      "category": "session_resume",
+      "setup": [
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "项目代号是 cedar-17；我们约定下次继续的步骤代码是 add_retry_budget。",
+          "event_id": "message-1"
+        },
+        {
+          "op": "add_message",
+          "role": "assistant",
+          "content": "已确认项目和下次步骤。",
+          "event_id": "message-2"
+        }
+      ],
+      "prompt": "继续之前的会话。返回我们约定的 project 和 next_step 代码，未知用 null。",
+      "expected": {
+        "project": "cedar-17",
+        "next_step": "add_retry_budget"
+      },
+      "output_contract": "project_step"
+    },
+    {
+      "id": "session-retry",
+      "category": "session_resume",
+      "setup": [
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "这轮发布编号是 release-073，负责人代码是 owner-k9。",
+          "event_id": "same-event"
+        },
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "这轮发布编号是 release-073，负责人代码是 owner-k9。",
+          "event_id": "same-event"
+        }
+      ],
+      "expected_message_count": 1,
+      "prompt": "返回刚才记录的 release 和 owner，未知用 null。",
+      "expected": {
+        "release": "release-073",
+        "owner": "owner-k9"
+      },
+      "output_contract": "release_owner"
+    },
+    {
+      "id": "update-region",
+      "category": "fact_update",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "deployment_region",
+          "value": "当前部署区域是 ap-southeast-1。"
+        },
+        {
+          "op": "remember",
+          "key": "deployment_region",
+          "value": "当前部署区域是 eu-central-1。"
+        }
+      ],
+      "prompt": "返回当前部署区域 region，未知用 null。",
+      "expected": {
+        "region": "eu-central-1"
+      },
+      "forbidden_context": [
+        "ap-southeast-1"
+      ],
+      "output_contract": "region"
+    },
+    {
+      "id": "update-branch",
+      "category": "fact_update",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "release_branch",
+          "value": "发布分支是 release/old-41。"
+        },
+        {
+          "op": "remember",
+          "key": "release_branch",
+          "value": "发布分支是 release/new-82。"
+        }
+      ],
+      "prompt": "返回当前发布分支 branch，未知用 null。",
+      "expected": {
+        "branch": "release/new-82"
+      },
+      "forbidden_context": [
+        "release/old-41"
+      ],
+      "output_contract": "branch"
+    },
+    {
+      "id": "forget-project-code",
+      "category": "forgetting",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "project_code",
+          "value": "项目内部代号是 project-violet-927。"
+        },
+        {
+          "op": "forget",
+          "key": "project_code"
+        }
+      ],
+      "prompt": "返回我保存过的项目内部代号 project_code，没有可用记录就返回 null。",
+      "expected": {
+        "project_code": null
+      },
+      "forbidden_context": [
+        "project-violet-927"
+      ],
+      "output_contract": "project_code"
+    },
+    {
+      "id": "forget-preserves-unrelated",
+      "category": "forgetting",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "room",
+          "value": "会议室代码是 room-671。"
+        },
+        {
+          "op": "remember",
+          "key": "editor",
+          "value": "首选编辑器代码是 helix。"
+        },
+        {
+          "op": "forget",
+          "key": "room"
+        }
+      ],
+      "prompt": "返回我已保存的会议室 room 和编辑器 editor，缺少的记录用 null。",
+      "expected": {
+        "room": null,
+        "editor": "helix"
+      },
+      "forbidden_context": [
+        "room-671"
+      ],
+      "output_contract": "room_editor"
+    },
+    {
+      "id": "isolation-user",
+      "category": "scope_isolation",
+      "setup": [
+        {
+          "op": "remember",
+          "scope": {
+            "user_id": "someone-else"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-user-554。"
+        }
+      ],
+      "prompt": "返回我自己的项目代码 project，没有记录就用 null。",
+      "expected": {
+        "project": null
+      },
+      "forbidden_context": [
+        "foreign-user-554"
+      ],
+      "output_contract": "project"
+    },
+    {
+      "id": "isolation-tenant-agent",
+      "category": "scope_isolation",
+      "setup": [
+        {
+          "op": "remember",
+          "scope": {
+            "tenant_id": "other-tenant"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-tenant-992。"
+        },
+        {
+          "op": "remember",
+          "scope": {
+            "agent_id": "other-agent"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-agent-336。"
+        },
+        {
+          "op": "remember",
+          "key": "project",
+          "value": "项目代码是 own-project-118。"
+        }
+      ],
+      "prompt": "返回当前用户在当前租户与 agent 下保存的项目代码 project，未知用 null。",
+      "expected": {
+        "project": "own-project-118"
+      },
+      "forbidden_context": [
+        "foreign-tenant-992",
+        "foreign-agent-336"
+      ],
+      "output_contract": "project"
+    },
+    {
+      "id": "recall-pressure",
+      "category": "recall_pressure",
+      "distractors": 40,
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "output_contract": "port"
+    },
+    {
+      "id": "recall-pressure-control",
+      "category": "recall_control",
+      "distractors": 40,
+      "context_options": {
+        "max_facts": 64
+      },
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "output_contract": "port"
+    },
+    {
+      "id": "recall-pressure-key-order",
+      "category": "recall_key_order",
+      "distractors": 40,
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "context_options": {
+        "query": null
+      },
+      "output_contract": "port"
+    }
+  ],
+  "learning": {
+    "task_type": "support_triage",
+    "system": "你是模拟客服工单分流助手。只返回 JSON 对象，恰好有 queue 和 priority 两个字段。queue 只能是 billing、security、account；priority 只能是 P0、P1、P2。按工单内容选择队列，一般问题默认 P2；有已验证业务策略时遵循该策略。这里没有真实工具执行。",
+    "memory": {
+      "key": "support_context",
+      "value": "本服务处理支付、账号安全与登录工单，普通问题默认 P2。"
+    },
+    "train": [
+      {
+        "id": "train-billing",
+        "prompt": "付款已经成功，购买的额度却还没到账。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "train-security",
+        "prompt": "有人盗用了我的账号，并修改了绑定邮箱。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "train-account",
+        "prompt": "我忘了密码，想要重置登录密码。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      }
+    ],
+    "validation": [
+      {
+        "id": "validation-billing",
+        "prompt": "银行显示已扣款成功，但会员权益仍未开通。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "validation-security",
+        "prompt": "陌生人在操作我的账号，绑定手机号也被他改掉了。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "validation-account",
+        "prompt": "密码记不清了，需要找回，未发现账号被盗。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "validation-billing-invoice",
+        "category": "workflow_counterexamples",
+        "prompt": "我的订单和权益都正常，只是需要一份上个月的发票。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "validation-security-advice",
+        "category": "workflow_counterexamples",
+        "prompt": "账号没有任何异常，我只想咨询如何开启双重验证来加强安全性。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "validation-account-profile",
+        "category": "workflow_counterexamples",
+        "prompt": "账号使用正常，想把个人资料里的显示昵称改掉。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      }
+    ],
+    "test": [
+      {
+        "id": "test-billing",
+        "prompt": "订阅订单扣费完成，套餐还是免费版，帮我处理。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "test-security",
+        "prompt": "我的账户已被他人接管，恢复联系方式也遭到替换。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "test-account",
+        "prompt": "没有异常登录，只是我忘记了口令，想走密码重设流程。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "test-billing-pricing",
+        "category": "workflow_counterexamples",
+        "prompt": "还没有下单，想了解套餐价格以及支持哪些付款方式。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "test-security-prevention",
+        "category": "workflow_counterexamples",
+        "prompt": "目前无人盗用账号，希望了解有哪些预防账号被盗的安全设置。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "test-account-login",
+        "category": "workflow_counterexamples",
+        "prompt": "新手机登录需要身份验证，是我本人操作，想了解完成验证的步骤。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      }
+    ]
+  },
+  "use_task_query": true,
+  "output_contracts": {
+    "language_timezone": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "language",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "format_language": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "programming_language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "programming_language"
+      ],
+      "additionalProperties": false
+    },
+    "project_step": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "next_step": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project",
+        "next_step"
+      ],
+      "additionalProperties": false
+    },
+    "release_owner": {
+      "type": "object",
+      "properties": {
+        "release": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "release",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "region"
+      ],
+      "additionalProperties": false
+    },
+    "branch": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "branch"
+      ],
+      "additionalProperties": false
+    },
+    "project_code": {
+      "type": "object",
+      "properties": {
+        "project_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project_code"
+      ],
+      "additionalProperties": false
+    },
+    "room_editor": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "editor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "room",
+        "editor"
+      ],
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project"
+      ],
+      "additionalProperties": false
+    },
+    "port": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "port"
+      ],
+      "additionalProperties": false
+    },
+    "support_triage": {
+      "type": "object",
+      "properties": {
+        "queue": {
+          "type": "string",
+          "enum": [
+            "billing",
+            "security",
+            "account"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P0",
+            "P1",
+            "P2"
+          ]
+        }
+      },
+      "required": [
+        "queue",
+        "priority"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

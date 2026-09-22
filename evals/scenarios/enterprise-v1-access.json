@@ -1,0 +1,851 @@
+{
+  "version": "enterprise-v1-access",
+  "cases": [],
+  "output_contracts": {
+    "access": {
+      "type": "object",
+      "properties": {
+        "queue": {
+          "type": "string",
+          "enum": [
+            "payroll",
+            "privileged",
+            "standard"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "fulfill",
+            "review"
+          ]
+        }
+      },
+      "required": [
+        "queue",
+        "priority"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "learning": {
+    "task_type": "access",
+    "system": "你是模拟企业权限工单分流助手，仅输出queue和priority的JSON。queue为standard（普通报表）、privileged（生产管理员）、payroll（薪资报表）。priority为fulfill或review；fulfill仅代表交给开通团队，不执行真实授权。一般默认review，有已验证的业务策略时遵循策略。",
+    "memory": {
+      "key": "access_context",
+      "value": "办理普通报表、生产管理员、薪资报表三种申请；一般待审review，依已验证业务策略判断是否可交付fulfill。"
+    },
+    "proposal_profile": "evidence_table",
+    "dataset_notes": {
+      "scope": "Independent synthetic task; no cross-domain strategy transfer.",
+      "families": 6,
+      "split": "3 training, 3 validation, 6 test phrasings per family; correlated paraphrases are not independent samples.",
+      "test_styles": [
+        "English",
+        "temporal_change",
+        "negation",
+        "approval_or_cause_boundary",
+        "irrelevant_urgency",
+        "reference_disambiguation"
+      ]
+    },
+    "train": [
+      {
+        "id": "access-train-standard_fulfill-0",
+        "prompt": "普通员工申请普通只读报表权限，直属主管已明确批准。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-train-standard_fulfill-1",
+        "prompt": "标准非特权查询账号的申请已有主管书面同意。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-train-standard_fulfill-2",
+        "prompt": "常规只读报表访问已完成经理审批。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-train-standard_review-0",
+        "prompt": "申请普通报表只读权限，主管尚未审批。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-train-standard_review-1",
+        "prompt": "普通查询权限希望立即开通，但经理还未回复。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-train-standard_review-2",
+        "prompt": "直属主管只说收到普通报表申请，并没有批准。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-train-privileged_fulfill-0",
+        "prompt": "生产管理员权限申请已获得直属主管和安全团队双方批准。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-train-privileged_fulfill-1",
+        "prompt": "特权管理账号的经理审批和安全审批均已完成。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-train-privileged_fulfill-2",
+        "prompt": "生产环境管理员申请有经理与安全负责人两份批准。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-train-privileged_review-0",
+        "prompt": "生产管理员权限只有经理批准，安全审批还没有。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-train-privileged_review-1",
+        "prompt": "特权访问只有安全团队同意，主管未批准。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-train-privileged_review-2",
+        "prompt": "申请管理员权限，两方都未审核。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-train-payroll_fulfill-0",
+        "prompt": "员工申请薪资报表读取，人力资源部门已明确批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-train-payroll_fulfill-1",
+        "prompt": "薪酬数据查看权限已获得HR书面同意。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-train-payroll_fulfill-2",
+        "prompt": "工资报表只读申请已通过人力资源审批。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-train-payroll_review-0",
+        "prompt": "申请读取薪资表，HR还没有审批。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-train-payroll_review-1",
+        "prompt": "工资报表只读申请只有经理同意，没有人力批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-train-payroll_review-2",
+        "prompt": "薪酬数据访问申请已发给HR，尚未获得同意。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      }
+    ],
+    "validation": [
+      {
+        "id": "access-validation-standard_fulfill-3",
+        "prompt": "这份普通报表只读访问，直属领导已经确认同意。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-validation-standard_fulfill-4",
+        "prompt": "普通查询权限申请的经理审批已通过。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-validation-standard_fulfill-5",
+        "prompt": "已收到主管批准，请开通常规只读报表。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-validation-standard_review-3",
+        "prompt": "常规报表只读申请没有主管批准记录。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-validation-standard_review-4",
+        "prompt": "经理将在明天审核普通查询权限，今天还未同意。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-validation-standard_review-5",
+        "prompt": "普通只读报表申请已发出，但审批仍在排队。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-validation-privileged_fulfill-3",
+        "prompt": "这次生产管理员申请已经得到主管和安全团队正式同意。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-validation-privileged_fulfill-4",
+        "prompt": "安全团队与直属经理都批准了本次特权访问。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-validation-privileged_fulfill-5",
+        "prompt": "特权账号的两项审批都通过，包括经理及安全团队。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-validation-privileged_review-3",
+        "prompt": "主管同意开管理员账号，但安全团队尚未回应。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-validation-privileged_review-4",
+        "prompt": "安全组批准了特权申请，经理那边仍待审。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-validation-privileged_review-5",
+        "prompt": "两方都收到生产管理员申请，但是还未批准。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-validation-payroll_fulfill-3",
+        "prompt": "人力资源已经正式批准本次薪资表访问申请。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-validation-payroll_fulfill-4",
+        "prompt": "当前工资数据读取已收到HR批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-validation-payroll_fulfill-5",
+        "prompt": "本次薪酬报告查看申请，人事部门已审批通过。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-validation-payroll_review-3",
+        "prompt": "人事部门只确认收到薪资访问申请，还未批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-validation-payroll_review-4",
+        "prompt": "经理和安全组都批准工资数据读取，HR尚未批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-validation-payroll_review-5",
+        "prompt": "薪酬报表读取的人力审批仍在等待中。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      }
+    ],
+    "test": [
+      {
+        "id": "access-test-standard_fulfill-6",
+        "prompt": "Manager approval is recorded for ordinary read-only report access.",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_fulfill-7",
+        "prompt": "昨天主管没批，今天已正式批准普通报表只读权限。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_fulfill-8",
+        "prompt": "不涉及管理员或薪资，只要常规报表，经理已批准。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_fulfill-9",
+        "prompt": "主管已经同意普通只读报表申请，安全审批没有要求。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_fulfill-10",
+        "prompt": "不着急，普通报表只读的主管审批已完成。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_fulfill-11",
+        "prompt": "审批邮件确实是经理的正式同意，仅申请普通查询权限。",
+        "expected": {
+          "queue": "standard",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "standard_fulfill",
+        "category": "workflow_standard_fulfill"
+      },
+      {
+        "id": "access-test-standard_review-6",
+        "prompt": "Ordinary report read access is requested; the manager has not approved it.",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-standard_review-7",
+        "prompt": "去年经理批准过旧申请，此次普通报表新申请还没有批准。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-standard_review-8",
+        "prompt": "我本人批准自己的普通查询申请，经理没有答复。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-standard_review-9",
+        "prompt": "这次普通只读访问没有主管许可，尽管安全团队说不反对。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-standard_review-10",
+        "prompt": "非常紧急，先开普通查询权限吧，主管正在休假未批。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-standard_review-11",
+        "prompt": "主管批准的是另一张单，不是本次普通报表申请。",
+        "expected": {
+          "queue": "standard",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "standard_review",
+        "category": "workflow_standard_review"
+      },
+      {
+        "id": "access-test-privileged_fulfill-6",
+        "prompt": "Both the manager and security team approved this production administrator request.",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_fulfill-7",
+        "prompt": "之前安全审批缺失，现在主管和安全团队都已批准生产管理员申请。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_fulfill-8",
+        "prompt": "不是只有经理批准：安全团队也批准了这张特权申请。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_fulfill-9",
+        "prompt": "审批不需要催了，主管和安全组均已正式同意管理员访问。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_fulfill-10",
+        "prompt": "不着急处理的生产特权申请，两方审批都齐全。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_fulfill-11",
+        "prompt": "经理邮件与安全工单都明确批准了当前管理员申请。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "privileged_fulfill",
+        "category": "workflow_privileged_fulfill"
+      },
+      {
+        "id": "access-test-privileged_review-6",
+        "prompt": "Manager approved production admin access; security approval is still missing.",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-privileged_review-7",
+        "prompt": "安全批准了上一张工单，本次特权申请仅有经理批准。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-privileged_review-8",
+        "prompt": "不是双重批准，管理员申请只有主管的同意。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-privileged_review-9",
+        "prompt": "经理和安全组都说收到申请，这不等于批准生产特权。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-privileged_review-10",
+        "prompt": "很急，先给管理员权限，安全审批以后补，经理已同意。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-privileged_review-11",
+        "prompt": "两方以前批准过旧账号，本次新管理员申请尚无审批。",
+        "expected": {
+          "queue": "privileged",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "privileged_review",
+        "category": "workflow_privileged_review"
+      },
+      {
+        "id": "access-test-payroll_fulfill-6",
+        "prompt": "HR has approved this payroll report read-access request.",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_fulfill-7",
+        "prompt": "昨天下午未批，今天人力资源已正式批准薪资读取。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_fulfill-8",
+        "prompt": "不是普通业务报表，是工资报表，HR已批准访问。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_fulfill-9",
+        "prompt": "主管没批准，但人力资源已批准本次工资数据读取。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_fulfill-10",
+        "prompt": "不紧急的薪资表读取，已获人事部门同意。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_fulfill-11",
+        "prompt": "HR的正式邮件明确批准的是本次薪酬报表访问。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "fulfill"
+        },
+        "output_contract": "access",
+        "family": "payroll_fulfill",
+        "category": "workflow_payroll_fulfill"
+      },
+      {
+        "id": "access-test-payroll_review-6",
+        "prompt": "Payroll read access is requested; HR has not approved it yet.",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-test-payroll_review-7",
+        "prompt": "HR去年批准过其他薪资申请，这次还没有批准。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-test-payroll_review-8",
+        "prompt": "不是普通报表，是工资表；主管同意但人力没有同意。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-test-payroll_review-9",
+        "prompt": "安全团队已经批准薪酬数据访问，HR只说收到申请。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-test-payroll_review-10",
+        "prompt": "很着急看工资报表，可以稍后补HR审批吗？目前未批。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      },
+      {
+        "id": "access-test-payroll_review-11",
+        "prompt": "人力批准的是另一份申请，本次薪酬数据读取尚未获批。",
+        "expected": {
+          "queue": "payroll",
+          "priority": "review"
+        },
+        "output_contract": "access",
+        "family": "payroll_review",
+        "category": "workflow_payroll_review"
+      }
+    ]
+  }
+}

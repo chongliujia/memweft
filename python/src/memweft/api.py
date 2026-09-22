@@ -1,6 +1,7 @@
 """User/session API. Validation, defaults and learning decisions live in Rust."""
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
@@ -18,22 +19,24 @@ class Context:
 
 
 class UserMemory:
-    def __init__(self, memory, user_id: str, *, tenant_id: str = "default", agent_id: str = "default"):
+    def __init__(self, memory, user_id: str, *, tenant_id: str = "default", agent_id: str = "default", memory_config: dict | None = None):
         self._memory = memory
         self.scope = {"user_id": user_id, "tenant_id": tenant_id, "agent_id": agent_id}
+        if memory_config is not None:
+            self.scope["memory_config"] = deepcopy(memory_config)
         self.learning = Learning(self)
 
     def _request(self, op: str, **kwargs):
         return self._memory._request({"op": op, "scope": self.scope, **kwargs})
 
-    def remember(self, value: Any, *, key: str) -> dict:
-        return self._request("remember", key=key, value=value)
+    def remember(self, value: Any, *, key: str, pool_id: str | None = None, expected_revision: int | None = None) -> dict:
+        return self._request("remember", key=key, value=value, pool_id=pool_id, expected_revision=expected_revision)
 
-    def memories(self) -> list[dict]:
-        return self._request("memories")
+    def memories(self, *, pool_id: str | None = None) -> list[dict]:
+        return self._request("memories", pool_id=pool_id)
 
-    def forget(self, key: str) -> bool:
-        return self._request("forget", key=key)
+    def forget(self, key: str, *, pool_id: str | None = None, expected_revision: int | None = None) -> bool:
+        return self._request("forget", key=key, pool_id=pool_id, expected_revision=expected_revision)
 
     def session(self, session_id: str) -> Session:
         return Session(self, session_id)
@@ -56,10 +59,11 @@ class Session:
         return self.user._request("clear_session", session_id=self.session_id)
 
     def context(self, *, max_tokens: int = 2048, conversation_window: int = 10,
-                max_facts: int = 30, include_messages: bool = True, task_type: str | None = None) -> Context:
+                max_facts: int = 30, include_messages: bool = True, task_type: str | None = None,
+                query: str | None = None) -> Context:
         return Context(**self.user._request("context", session_id=self.session_id, options={
             "max_tokens": max_tokens, "conversation_window": conversation_window,
-            "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type,
+            "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type, "query": query,
         }))
 
 
@@ -110,14 +114,14 @@ class AsyncUserMemory(UserMemory):
     async def _request(self, op: str, **kwargs):
         return await self._memory._request({"op": op, "scope": self.scope, **kwargs})
 
-    async def remember(self, value: Any, *, key: str) -> dict:
-        return await self._request("remember", key=key, value=value)
+    async def remember(self, value: Any, *, key: str, pool_id: str | None = None, expected_revision: int | None = None) -> dict:
+        return await self._request("remember", key=key, value=value, pool_id=pool_id, expected_revision=expected_revision)
 
-    async def memories(self) -> list[dict]:
-        return await self._request("memories")
+    async def memories(self, *, pool_id: str | None = None) -> list[dict]:
+        return await self._request("memories", pool_id=pool_id)
 
-    async def forget(self, key: str) -> bool:
-        return await self._request("forget", key=key)
+    async def forget(self, key: str, *, pool_id: str | None = None, expected_revision: int | None = None) -> bool:
+        return await self._request("forget", key=key, pool_id=pool_id, expected_revision=expected_revision)
 
     def session(self, session_id: str) -> AsyncSession:
         return AsyncSession(self, session_id)
@@ -134,10 +138,10 @@ class AsyncSession(Session):
         return await super().clear()
 
     async def context(self, *, max_tokens=2048, conversation_window=10, max_facts=30,
-                      include_messages=True, task_type=None):
+                      include_messages=True, task_type=None, query=None):
         data = await self.user._request("context", session_id=self.session_id, options={
             "max_tokens": max_tokens, "conversation_window": conversation_window,
-            "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type,
+            "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type, "query": query,
         })
         return Context(**data)
 

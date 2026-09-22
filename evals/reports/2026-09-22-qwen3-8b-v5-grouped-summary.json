@@ -1,0 +1,966 @@
+{
+  "matched_fields": [
+    "suite_sha256",
+    "binary_sha256",
+    "runner_sha256",
+    "contract_module_sha256",
+    "repeats",
+    "seed",
+    "temperature",
+    "max_tokens",
+    "enable_thinking",
+    "evaluator",
+    "model",
+    "base_url",
+    "output_contract"
+  ],
+  "runs": [
+    {
+      "directory": "data/evals/qwen3-8b-common-v5-grouped-run1",
+      "metadata": {
+        "created_at": "2026-09-22T03:54:45.083044+00:00",
+        "model": "qwen3-8b",
+        "base_url": "http://127.0.0.1:8002/v1",
+        "suite_version": "common-v5",
+        "suite_sha256": "ea228565e5a1e817996991162802f03d3a11931e7b49edcd10faf2930730e2e2",
+        "runner_sha256": "ed3b77d6f28fb14bfd981168b583411fcc1bb72dfa9f40b37165c71b501070e7",
+        "contract_module_sha256": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+        "binary_sha256": "4abd3f6a3d59906199f21ef7ed046656f0d78664abc0f06a2217072ee40b2b5e",
+        "repeats": 2,
+        "seed": 42,
+        "temperature": 0,
+        "max_tokens": 256,
+        "enable_thinking": false,
+        "evaluator": "exact-json-fields-v2",
+        "output_contract": "schema",
+        "learning_profile": "grouped_rules",
+        "use_task_query": true
+      },
+      "profile": "grouped_rules",
+      "status": "accepted",
+      "reason": "mean_gain=0.166667; total_cost=14.830000; policy passed",
+      "policy": {
+        "max_candidate_cost": 100.0,
+        "max_candidate_latency_ms": 90000.0,
+        "max_case_regression": 0.0,
+        "min_cases": 3,
+        "min_gain": 0.05
+      },
+      "candidate": "仅用于当前客服工单分流。逐条核对触发条件和排除条件；排除条件成立时不得采用该条。依据当前真实状态，不把已否定或已结束的事件视为正在发生。未匹配时遵循任务原有默认行为。\n触发：账号存在异常登录或被盗用行为；排除：账号正常使用或已处理完毕的异常情况；输出：{\"priority\": \"P0\", \"queue\": \"security\"}\n触发：付款已成功但相关权益未到账；排除：涉及账号安全、密码重置、发票补发或未付款咨询；输出：{\"priority\": \"P1\", \"queue\": \"billing\"}\n触发：用户请求与账户安全相关，如身份核验、防止盗号、二次验证、安全设置检查、账号异常登录或安全防护咨询；排除：涉及付款问题、费用结算、权益到账、发票补发、支付渠道咨询或存储空间未到账；输出：{\"priority\": \"P2\", \"queue\": \"account\"}\n触发：用户询问与发票、支付渠道或订阅价格相关的问题，且未提及异常登录或账号安全问题；排除：用户提及账号被盗、异常登录、身份核验、安全防护或涉及已处理的账号入侵事件；输出：{\"priority\": \"P2\", \"queue\": \"billing\"}\n触发：用户咨询与账号安全相关的问题，且未涉及当前账号被盗或已处理完毕的入侵事件；排除：涉及付款问题、密码重置、账户身份核验或与账号被盗直接相关的事件；输出：{\"priority\": \"P2\", \"queue\": \"security\"}",
+      "training_case_ids": [
+        "train-billing",
+        "train-security",
+        "train-account",
+        "v4-train-01",
+        "v4-train-02",
+        "v4-train-03",
+        "v4-train-04",
+        "v4-train-05",
+        "v4-train-06",
+        "v4-train-07",
+        "v4-train-08",
+        "v4-train-09"
+      ],
+      "validation": {
+        "n": 24,
+        "baseline_passed": 18,
+        "candidate_passed": 22,
+        "regressed": 0
+      },
+      "heldout": {
+        "n": 36,
+        "baseline_passed": 30,
+        "adopted_passed": 32,
+        "improved": 4,
+        "regressed": 2,
+        "pairs": [
+          {
+            "case_id": "v5-test-01",
+            "repeat": 0,
+            "baseline": 0.0,
+            "adopted": 1.0,
+            "change": "improved"
+          },
+          {
+            "case_id": "v5-test-01",
+            "repeat": 1,
+            "baseline": 0.0,
+            "adopted": 1.0,
+            "change": "improved"
+          },
+          {
+            "case_id": "v5-test-02",
+            "repeat": 0,
+            "baseline": 0.0,
+            "adopted": 1.0,
+            "change": "improved"
+          },
+          {
+            "case_id": "v5-test-02",
+            "repeat": 1,
+            "baseline": 0.0,
+            "adopted": 1.0,
+            "change": "improved"
+          },
+          {
+            "case_id": "v5-test-03",
+            "repeat": 0,
+            "baseline": 0.0,
+            "adopted": 0.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-03",
+            "repeat": 1,
+            "baseline": 0.0,
+            "adopted": 0.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-04",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-04",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-05",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-05",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-06",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-06",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-07",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-07",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-08",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-08",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-09",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-09",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-10",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-10",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-11",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-11",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-12",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-12",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-13",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 0.0,
+            "change": "regressed"
+          },
+          {
+            "case_id": "v5-test-13",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 0.0,
+            "change": "regressed"
+          },
+          {
+            "case_id": "v5-test-14",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-14",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-15",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-15",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-16",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-16",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-17",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-17",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-18",
+            "repeat": 0,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          },
+          {
+            "case_id": "v5-test-18",
+            "repeat": 1,
+            "baseline": 1.0,
+            "adopted": 1.0,
+            "change": "unchanged"
+          }
+        ]
+      },
+      "groups": [
+        {
+          "category": "fact_update",
+          "mode": "memory",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 238.99838700162945,
+          "sample_p95_latency_ms": 247.84744800126646,
+          "mean_total_tokens": 195.5
+        },
+        {
+          "category": "fact_update",
+          "mode": "memory_learning",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 238.82548150140792,
+          "sample_p95_latency_ms": 250.29973200435052,
+          "mean_total_tokens": 195.5
+        },
+        {
+          "category": "fact_update",
+          "mode": "no_memory",
+          "n": 4,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 0,
+          "median_latency_ms": 164.55714849871583,
+          "sample_p95_latency_ms": 168.04494000098202,
+          "mean_total_tokens": 158
+        },
+        {
+          "category": "forgetting",
+          "mode": "memory",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 235.03938599969842,
+          "sample_p95_latency_ms": 275.648615002865,
+          "mean_total_tokens": 191.5
+        },
+        {
+          "category": "forgetting",
+          "mode": "memory_learning",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 224.54209249917767,
+          "sample_p95_latency_ms": 274.15228999598185,
+          "mean_total_tokens": 191.5
+        },
+        {
+          "category": "forgetting",
+          "mode": "no_memory",
+          "n": 4,
+          "passed": 2,
+          "pass_rate": 0.5,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 2,
+          "median_latency_ms": 220.92451600110508,
+          "sample_p95_latency_ms": 255.54599500173936,
+          "mean_total_tokens": 175
+        },
+        {
+          "category": "preferences",
+          "mode": "memory",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 293.22671300178627,
+          "sample_p95_latency_ms": 306.11218299600296,
+          "mean_total_tokens": 237
+        },
+        {
+          "category": "preferences",
+          "mode": "memory_learning",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 296.97805900286767,
+          "sample_p95_latency_ms": 307.57859800360166,
+          "mean_total_tokens": 237
+        },
+        {
+          "category": "preferences",
+          "mode": "no_memory",
+          "n": 4,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 0,
+          "median_latency_ms": 267.20330699754413,
+          "sample_p95_latency_ms": 282.7925859965035,
+          "mean_total_tokens": 192
+        },
+        {
+          "category": "recall_control",
+          "mode": "memory",
+          "n": 2,
+          "passed": 2,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 2,
+          "median_latency_ms": 250.47594099669368,
+          "sample_p95_latency_ms": 250.7121249946067,
+          "mean_total_tokens": 1127
+        },
+        {
+          "category": "recall_control",
+          "mode": "memory_learning",
+          "n": 2,
+          "passed": 2,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 2,
+          "median_latency_ms": 256.7230530003144,
+          "sample_p95_latency_ms": 258.49131099676015,
+          "mean_total_tokens": 1127
+        },
+        {
+          "category": "recall_control",
+          "mode": "no_memory",
+          "n": 2,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 0,
+          "median_latency_ms": 169.75162949529476,
+          "sample_p95_latency_ms": 172.3623969955952,
+          "mean_total_tokens": 164
+        },
+        {
+          "category": "recall_key_order",
+          "mode": "memory",
+          "n": 2,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 0,
+          "median_latency_ms": 162.79116250007064,
+          "sample_p95_latency_ms": 165.18532900227,
+          "mean_total_tokens": 873
+        },
+        {
+          "category": "recall_key_order",
+          "mode": "memory_learning",
+          "n": 2,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 0,
+          "median_latency_ms": 160.90887400059728,
+          "sample_p95_latency_ms": 161.98104999784846,
+          "mean_total_tokens": 873
+        },
+        {
+          "category": "recall_key_order",
+          "mode": "no_memory",
+          "n": 2,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 0,
+          "median_latency_ms": 161.32753349666018,
+          "sample_p95_latency_ms": 162.40204399946379,
+          "mean_total_tokens": 164
+        },
+        {
+          "category": "recall_pressure",
+          "mode": "memory",
+          "n": 2,
+          "passed": 2,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 2,
+          "median_latency_ms": 253.0097474991635,
+          "sample_p95_latency_ms": 258.6670939999749,
+          "mean_total_tokens": 874
+        },
+        {
+          "category": "recall_pressure",
+          "mode": "memory_learning",
+          "n": 2,
+          "passed": 2,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 2,
+          "median_latency_ms": 244.9812809973082,
+          "sample_p95_latency_ms": 247.1119740002905,
+          "mean_total_tokens": 874
+        },
+        {
+          "category": "recall_pressure",
+          "mode": "no_memory",
+          "n": 2,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 2,
+          "protocol_passed": 2,
+          "content_evaluated": 2,
+          "content_passed": 0,
+          "median_latency_ms": 170.07349049890763,
+          "sample_p95_latency_ms": 175.9760839995579,
+          "mean_total_tokens": 164
+        },
+        {
+          "category": "scope_isolation",
+          "mode": "memory",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 216.66966200064053,
+          "sample_p95_latency_ms": 284.5347819966264,
+          "mean_total_tokens": 184
+        },
+        {
+          "category": "scope_isolation",
+          "mode": "memory_learning",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 212.09364799869945,
+          "sample_p95_latency_ms": 276.32758500112686,
+          "mean_total_tokens": 184
+        },
+        {
+          "category": "scope_isolation",
+          "mode": "no_memory",
+          "n": 4,
+          "passed": 2,
+          "pass_rate": 0.5,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 2,
+          "median_latency_ms": 162.68411700366414,
+          "sample_p95_latency_ms": 166.75054500228725,
+          "mean_total_tokens": 164.5
+        },
+        {
+          "category": "session_resume",
+          "mode": "memory",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 396.1509660039155,
+          "sample_p95_latency_ms": 408.3198859952972,
+          "mean_total_tokens": 235
+        },
+        {
+          "category": "session_resume",
+          "mode": "memory_learning",
+          "n": 4,
+          "passed": 4,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 4,
+          "median_latency_ms": 399.86129850149155,
+          "sample_p95_latency_ms": 1169.3250829994213,
+          "mean_total_tokens": 235
+        },
+        {
+          "category": "session_resume",
+          "mode": "no_memory",
+          "n": 4,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 4,
+          "protocol_passed": 4,
+          "content_evaluated": 4,
+          "content_passed": 0,
+          "median_latency_ms": 263.9806739971391,
+          "sample_p95_latency_ms": 1045.5150410052738,
+          "mean_total_tokens": 180.5
+        },
+        {
+          "category": "workflow_account_self_service",
+          "mode": "memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 277.40594900024007,
+          "sample_p95_latency_ms": 936.0818739951355,
+          "mean_total_tokens": 269
+        },
+        {
+          "category": "workflow_account_self_service",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 4,
+          "pass_rate": 0.6666666666666666,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 4,
+          "median_latency_ms": 343.03954699862516,
+          "sample_p95_latency_ms": 419.05986899655545,
+          "mean_total_tokens": 630
+        },
+        {
+          "category": "workflow_account_self_service",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 277.88603699809755,
+          "sample_p95_latency_ms": 286.4937740014284,
+          "mean_total_tokens": 226
+        },
+        {
+          "category": "workflow_active_compromise",
+          "mode": "memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 273.4051624975109,
+          "sample_p95_latency_ms": 299.7184380001272,
+          "mean_total_tokens": 269
+        },
+        {
+          "category": "workflow_active_compromise",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 339.6994225004164,
+          "sample_p95_latency_ms": 348.25377500237664,
+          "mean_total_tokens": 630
+        },
+        {
+          "category": "workflow_active_compromise",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 277.7817434980534,
+          "sample_p95_latency_ms": 285.53154499968514,
+          "mean_total_tokens": 226
+        },
+        {
+          "category": "workflow_billing_normal",
+          "mode": "memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 276.5075120005349,
+          "sample_p95_latency_ms": 277.74537700315705,
+          "mean_total_tokens": 267
+        },
+        {
+          "category": "workflow_billing_normal",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 343.19459649850614,
+          "sample_p95_latency_ms": 347.4244019962498,
+          "mean_total_tokens": 627.5
+        },
+        {
+          "category": "workflow_billing_normal",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 4,
+          "pass_rate": 0.6666666666666666,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 4,
+          "median_latency_ms": 275.1510385023721,
+          "sample_p95_latency_ms": 280.50231400266057,
+          "mean_total_tokens": 224
+        },
+        {
+          "category": "workflow_payment_gap",
+          "mode": "memory",
+          "n": 6,
+          "passed": 0,
+          "pass_rate": 0.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 0,
+          "median_latency_ms": 276.1166009986482,
+          "sample_p95_latency_ms": 435.47762899834197,
+          "mean_total_tokens": 270.3333333333333
+        },
+        {
+          "category": "workflow_payment_gap",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 4,
+          "pass_rate": 0.6666666666666666,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 4,
+          "median_latency_ms": 341.40759899673867,
+          "sample_p95_latency_ms": 448.32654600031674,
+          "mean_total_tokens": 629
+        },
+        {
+          "category": "workflow_payment_gap",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 2,
+          "pass_rate": 0.3333333333333333,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 2,
+          "median_latency_ms": 275.0302954991639,
+          "sample_p95_latency_ms": 277.74839099583915,
+          "mean_total_tokens": 225
+        },
+        {
+          "category": "workflow_resolved_compromise",
+          "mode": "memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 276.2440390033589,
+          "sample_p95_latency_ms": 281.2281399965286,
+          "mean_total_tokens": 270.6666666666667
+        },
+        {
+          "category": "workflow_resolved_compromise",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 343.4428045002278,
+          "sample_p95_latency_ms": 347.4100849998649,
+          "mean_total_tokens": 631.6666666666666
+        },
+        {
+          "category": "workflow_resolved_compromise",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 275.66665249469224,
+          "sample_p95_latency_ms": 281.3669499955722,
+          "mean_total_tokens": 227.66666666666666
+        },
+        {
+          "category": "workflow_security_advice",
+          "mode": "memory",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 275.75300299940864,
+          "sample_p95_latency_ms": 281.0299400007352,
+          "mean_total_tokens": 266
+        },
+        {
+          "category": "workflow_security_advice",
+          "mode": "memory_learning",
+          "n": 6,
+          "passed": 6,
+          "pass_rate": 1.0,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 6,
+          "median_latency_ms": 348.93533399736043,
+          "sample_p95_latency_ms": 351.98649000085425,
+          "mean_total_tokens": 627
+        },
+        {
+          "category": "workflow_security_advice",
+          "mode": "no_memory",
+          "n": 6,
+          "passed": 4,
+          "pass_rate": 0.6666666666666666,
+          "protocol_evaluated": 6,
+          "protocol_passed": 6,
+          "content_evaluated": 6,
+          "content_passed": 4,
+          "median_latency_ms": 271.8093809999118,
+          "sample_p95_latency_ms": 284.47281399712665,
+          "mean_total_tokens": 223
+        }
+      ],
+      "protocol": {
+        "passed": 186,
+        "n": 186
+      },
+      "adoption_check": {
+        "verified": true,
+        "status": "accepted",
+        "active_versions": [
+          "support-candidate-v1"
+        ]
+      },
+      "task_scope_check": {
+        "verified": true,
+        "task_type": "unrelated_task"
+      },
+      "rollback_verified": true,
+      "model_calls": 316,
+      "total_tokens": 143724,
+      "generalization_check": {
+        "passed": false,
+        "mean_gain": 0.05555555555555555,
+        "regressed_observations": 2,
+        "scope": "held-out task transfer only; not production readiness or cross-domain generalization"
+      },
+      "training": {
+        "selected_round": 1,
+        "max_rounds": 2,
+        "rounds": [
+          {
+            "round": 1,
+            "passed": 22,
+            "n": 24,
+            "proposer_call_id": 29
+          },
+          {
+            "round": 2,
+            "passed": 20,
+            "n": 24,
+            "proposer_call_id": 58
+          }
+        ]
+      }
+    }
+  ],
+  "interpretation": "The primary comparison is each run's held-out pre-learning baseline versus its actually adopted strategy. Cross-profile comparisons can change training coverage, proposal instructions and token limits; their individual contributions are not isolated. Repeats at temperature zero are not independent samples."
+}

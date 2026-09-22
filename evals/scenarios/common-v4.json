@@ -1,0 +1,1010 @@
+{
+  "version": "common-v4",
+  "description": "Bounded support-rule transfer: balanced training examples and fresh validation/test prompts; unchanged memory controls.",
+  "cases": [
+    {
+      "id": "preference-language",
+      "category": "preferences",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "reply_language",
+          "value": "用户偏好的回答语言代码是 en。"
+        },
+        {
+          "op": "remember",
+          "key": "timezone",
+          "value": "用户时区是 Asia/Shanghai。"
+        }
+      ],
+      "prompt": "根据我的已保存偏好，返回 language 和 timezone 两个字段。没有记录的字段用 null。language 使用语言代码。",
+      "expected": {
+        "language": "en",
+        "timezone": "Asia/Shanghai"
+      },
+      "output_contract": "language_timezone"
+    },
+    {
+      "id": "preference-format",
+      "category": "preferences",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "reply_format",
+          "value": "用户要求默认输出格式代码为 bullets，编程语言代码为 rust。"
+        }
+      ],
+      "prompt": "读取我偏好的输出格式和编程语言，返回 format 和 programming_language 两个字段，使用记录中的代码，未知用 null。",
+      "expected": {
+        "format": "bullets",
+        "programming_language": "rust"
+      },
+      "output_contract": "format_language"
+    },
+    {
+      "id": "session-next-step",
+      "category": "session_resume",
+      "setup": [
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "项目代号是 cedar-17；我们约定下次继续的步骤代码是 add_retry_budget。",
+          "event_id": "message-1"
+        },
+        {
+          "op": "add_message",
+          "role": "assistant",
+          "content": "已确认项目和下次步骤。",
+          "event_id": "message-2"
+        }
+      ],
+      "prompt": "继续之前的会话。返回我们约定的 project 和 next_step 代码，未知用 null。",
+      "expected": {
+        "project": "cedar-17",
+        "next_step": "add_retry_budget"
+      },
+      "output_contract": "project_step"
+    },
+    {
+      "id": "session-retry",
+      "category": "session_resume",
+      "setup": [
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "这轮发布编号是 release-073，负责人代码是 owner-k9。",
+          "event_id": "same-event"
+        },
+        {
+          "op": "add_message",
+          "role": "user",
+          "content": "这轮发布编号是 release-073，负责人代码是 owner-k9。",
+          "event_id": "same-event"
+        }
+      ],
+      "expected_message_count": 1,
+      "prompt": "返回刚才记录的 release 和 owner，未知用 null。",
+      "expected": {
+        "release": "release-073",
+        "owner": "owner-k9"
+      },
+      "output_contract": "release_owner"
+    },
+    {
+      "id": "update-region",
+      "category": "fact_update",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "deployment_region",
+          "value": "当前部署区域是 ap-southeast-1。"
+        },
+        {
+          "op": "remember",
+          "key": "deployment_region",
+          "value": "当前部署区域是 eu-central-1。"
+        }
+      ],
+      "prompt": "返回当前部署区域 region，未知用 null。",
+      "expected": {
+        "region": "eu-central-1"
+      },
+      "forbidden_context": [
+        "ap-southeast-1"
+      ],
+      "output_contract": "region"
+    },
+    {
+      "id": "update-branch",
+      "category": "fact_update",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "release_branch",
+          "value": "发布分支是 release/old-41。"
+        },
+        {
+          "op": "remember",
+          "key": "release_branch",
+          "value": "发布分支是 release/new-82。"
+        }
+      ],
+      "prompt": "返回当前发布分支 branch，未知用 null。",
+      "expected": {
+        "branch": "release/new-82"
+      },
+      "forbidden_context": [
+        "release/old-41"
+      ],
+      "output_contract": "branch"
+    },
+    {
+      "id": "forget-project-code",
+      "category": "forgetting",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "project_code",
+          "value": "项目内部代号是 project-violet-927。"
+        },
+        {
+          "op": "forget",
+          "key": "project_code"
+        }
+      ],
+      "prompt": "返回我保存过的项目内部代号 project_code，没有可用记录就返回 null。",
+      "expected": {
+        "project_code": null
+      },
+      "forbidden_context": [
+        "project-violet-927"
+      ],
+      "output_contract": "project_code"
+    },
+    {
+      "id": "forget-preserves-unrelated",
+      "category": "forgetting",
+      "setup": [
+        {
+          "op": "remember",
+          "key": "room",
+          "value": "会议室代码是 room-671。"
+        },
+        {
+          "op": "remember",
+          "key": "editor",
+          "value": "首选编辑器代码是 helix。"
+        },
+        {
+          "op": "forget",
+          "key": "room"
+        }
+      ],
+      "prompt": "返回我已保存的会议室 room 和编辑器 editor，缺少的记录用 null。",
+      "expected": {
+        "room": null,
+        "editor": "helix"
+      },
+      "forbidden_context": [
+        "room-671"
+      ],
+      "output_contract": "room_editor"
+    },
+    {
+      "id": "isolation-user",
+      "category": "scope_isolation",
+      "setup": [
+        {
+          "op": "remember",
+          "scope": {
+            "user_id": "someone-else"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-user-554。"
+        }
+      ],
+      "prompt": "返回我自己的项目代码 project，没有记录就用 null。",
+      "expected": {
+        "project": null
+      },
+      "forbidden_context": [
+        "foreign-user-554"
+      ],
+      "output_contract": "project"
+    },
+    {
+      "id": "isolation-tenant-agent",
+      "category": "scope_isolation",
+      "setup": [
+        {
+          "op": "remember",
+          "scope": {
+            "tenant_id": "other-tenant"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-tenant-992。"
+        },
+        {
+          "op": "remember",
+          "scope": {
+            "agent_id": "other-agent"
+          },
+          "key": "project",
+          "value": "项目代码是 foreign-agent-336。"
+        },
+        {
+          "op": "remember",
+          "key": "project",
+          "value": "项目代码是 own-project-118。"
+        }
+      ],
+      "prompt": "返回当前用户在当前租户与 agent 下保存的项目代码 project，未知用 null。",
+      "expected": {
+        "project": "own-project-118"
+      },
+      "forbidden_context": [
+        "foreign-tenant-992",
+        "foreign-agent-336"
+      ],
+      "output_contract": "project"
+    },
+    {
+      "id": "recall-pressure",
+      "category": "recall_pressure",
+      "distractors": 40,
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "output_contract": "port"
+    },
+    {
+      "id": "recall-pressure-control",
+      "category": "recall_control",
+      "distractors": 40,
+      "context_options": {
+        "max_facts": 64
+      },
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "output_contract": "port"
+    },
+    {
+      "id": "recall-pressure-key-order",
+      "category": "recall_key_order",
+      "distractors": 40,
+      "setup": [
+        {
+          "op": "remember",
+          "key": "z_deployment_port",
+          "value": "当前部署端口是 17443。"
+        }
+      ],
+      "prompt": "返回当前部署端口 port，使用整数；没有记录用 null。",
+      "expected": {
+        "port": 17443
+      },
+      "context_options": {
+        "query": null
+      },
+      "output_contract": "port"
+    }
+  ],
+  "learning": {
+    "task_type": "support_triage",
+    "system": "你是模拟客服工单分流助手。只返回 JSON 对象，恰好有 queue 和 priority 两个字段。queue 只能是 billing、security、account；priority 只能是 P0、P1、P2。按工单内容选择队列，一般问题默认 P2；有已验证业务策略时遵循该策略。这里没有真实工具执行。",
+    "memory": {
+      "key": "support_context",
+      "value": "本服务处理支付、账号安全与登录工单，普通问题默认 P2。"
+    },
+    "train": [
+      {
+        "id": "train-billing",
+        "prompt": "付款已经成功，购买的额度却还没到账。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap"
+      },
+      {
+        "id": "train-security",
+        "prompt": "有人盗用了我的账号，并修改了绑定邮箱。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise"
+      },
+      {
+        "id": "train-account",
+        "prompt": "我忘了密码，想要重置登录密码。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service"
+      },
+      {
+        "id": "v4-train-01",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "费用已经结算，权益也到账了，现在只想补开发票。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-02",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "我还在比较订阅价格，尚未付款，想了解可用的支付渠道。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-03",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "没有异常登录或账号损失，我想学习如何配置二次验证以防盗号。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-04",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "账号一直由我本人使用，咨询如何检查安全设置是否足够。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-05",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "刚换手机，是我本人登录，需要完成身份核验，没有陌生人操作。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-06",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "过去账号被盗，现已收回并撤销陌生人的全部会话，确认没有继续入侵，想咨询后续安全防护。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-07",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "上月账号遭到入侵，已完全处理且恢复正常，现在只问如何避免再次发生。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-08",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "付款已经扣款成功，但已购买的存储空间仍未增加。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-train-09",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "不认识的人仍在登录我的账号并更换恢复资料，我无法阻止。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      }
+    ],
+    "validation": [
+      {
+        "id": "v4-validation-01",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "支付平台的订单已完成，购买的团队席位到现在仍然不可使用。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-02",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "扩容款项已经成功结算，系统却一直没给我增加容量。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-03",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "付费服务运行正常，财务需要下载此次交易的收据。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-04",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "尚未产生订单，准备买年付套餐，咨询能否使用公司银行卡。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-05",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "未知设备当前正在我的账户中发消息，恢复邮件地址已被对方更换。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-06",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "发现他人已经拿到账号控制权，正在擅自更改绑定资料。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-07",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "尚未遇到盗用，我想提前学习怎样开启登录保护。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-08",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "所有会话都是我的，想请教定期审查账号安全的做法。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-09",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "自己的平板首次登录要验证身份，设备是我的，没有被盗迹象，应该怎样继续？请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-10",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "我想修改公开头像，账号登录和使用都正常。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-11",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "之前的冒用已经处理完，控制权恢复且恶意会话全部清除，确认没有持续攻击，只咨询预防措施。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-validation-12",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "两周前有过未经授权的访问，现在已完全解决且未再发生，我来了解安全加固选项。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      }
+    ],
+    "test": [
+      {
+        "id": "v4-test-01",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "已收到交易成功凭证，但购买的 API 配额一直显示为零。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-02",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "付款结算已完成，收费功能仍然被锁着，权益还没生效。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-03",
+        "family": "payment_gap",
+        "category": "workflow_payment_gap",
+        "prompt": "同事帮忙核实过这笔订单确实成功扣款，可新增用户席位至今未交付。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P1"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-04",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "我的套餐生效和扣费均正常，只想查询下次账单日期。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-05",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "支付未成功，也没有扣款，我要问支持哪种付款方式。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-06",
+        "family": "billing_normal",
+        "category": "workflow_billing_normal",
+        "prompt": "这次购买的权益全部到账了，现在需要把账单上的公司名称改正确。请分流。",
+        "expected": {
+          "queue": "billing",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-07",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "绑定的号码正被陌生人替换，我还看到他继续使用我的账号。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-08",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "邮箱被别的人换走了，现在对方掌控着账号，这不是我授权的。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-09",
+        "family": "active_compromise",
+        "category": "workflow_active_compromise",
+        "prompt": "昨天以为盗号事件已经结束，今天又出现他人的操作，恢复信息也再次被改。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P0"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-10",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "所有登录记录均已确认是本人，希望知道如何让今后登录更安全。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-11",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "担心将来被盗但目前没有任何事件，咨询是否应该设置验证器。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-12",
+        "family": "security_advice",
+        "category": "workflow_security_advice",
+        "prompt": "我能正常使用账户，没有入侵，想了解安全告警该怎样配置。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-13",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "本人重装电脑后登录，要走一遍验证流程，没有他人访问，想知道接下来的步骤。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-14",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "忘记自己设置的登录密码，确认无异常设备，需要恢复登录。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-15",
+        "family": "account_self_service",
+        "category": "workflow_account_self_service",
+        "prompt": "没有账号风险，我想把自己的显示名称换成新的名字。请分流。",
+        "expected": {
+          "queue": "account",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-16",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "去年被盗的账号早已修复，陌生设备均已移除，此后始终正常；现在咨询定期安全检查。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-17",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "未经许可的访问已终止，密码已重置且确认对方完全退出，当前只需要防护建议。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      },
+      {
+        "id": "v4-test-18",
+        "family": "resolved_compromise",
+        "category": "workflow_resolved_compromise",
+        "prompt": "支持团队已帮我彻底收回账号，确认入侵结束，今天询问日后如何防范相同问题。请分流。",
+        "expected": {
+          "queue": "security",
+          "priority": "P2"
+        },
+        "output_contract": "support_triage"
+      }
+    ],
+    "legacy_train_ids": [
+      "train-billing",
+      "train-security",
+      "train-account"
+    ],
+    "proposal_profile": "boundaries",
+    "dataset_notes": {
+      "scope": "Same-domain rule transfer, not cross-domain generalization.",
+      "training": "Includes previous training positives and new boundary examples informed by v2/v3 failures. Previous held-out benchmarks are retired for development.",
+      "heldout": "Validation/test authored before v4 model runs. No prompt reused from v1-v3. No retuning against this run."
+    }
+  },
+  "use_task_query": true,
+  "output_contracts": {
+    "language_timezone": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "language",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "format_language": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "programming_language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "programming_language"
+      ],
+      "additionalProperties": false
+    },
+    "project_step": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "next_step": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project",
+        "next_step"
+      ],
+      "additionalProperties": false
+    },
+    "release_owner": {
+      "type": "object",
+      "properties": {
+        "release": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "release",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "region"
+      ],
+      "additionalProperties": false
+    },
+    "branch": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "branch"
+      ],
+      "additionalProperties": false
+    },
+    "project_code": {
+      "type": "object",
+      "properties": {
+        "project_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project_code"
+      ],
+      "additionalProperties": false
+    },
+    "room_editor": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "editor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "room",
+        "editor"
+      ],
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "project"
+      ],
+      "additionalProperties": false
+    },
+    "port": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "port"
+      ],
+      "additionalProperties": false
+    },
+    "support_triage": {
+      "type": "object",
+      "properties": {
+        "queue": {
+          "type": "string",
+          "enum": [
+            "billing",
+            "security",
+            "account"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P0",
+            "P1",
+            "P2"
+          ]
+        }
+      },
+      "required": [
+        "queue",
+        "priority"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

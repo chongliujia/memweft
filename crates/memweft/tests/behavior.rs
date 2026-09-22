@@ -10,6 +10,7 @@ fn proposal(content: &str) -> Proposal {
         target: Target::Task,
         content: content.into(),
         proposer_version: "p1".into(),
+        source_pools: vec![],
         source_keys: vec![],
     }
 }
@@ -45,6 +46,7 @@ fn persistence_isolation_upsert_and_forget() {
         assert!(memory.user("bob").unwrap().memories().unwrap().is_empty());
         let other = memory
             .scoped(UserScope {
+                memory_config: Default::default(),
                 user_id: "alice".into(),
                 tenant_id: "other".into(),
                 agent_id: "default".into(),
@@ -54,6 +56,7 @@ fn persistence_isolation_upsert_and_forget() {
         assert!(
             memory
                 .scoped(UserScope {
+                    memory_config: Default::default(),
                     user_id: "alice".into(),
                     tenant_id: "default".into(),
                     agent_id: "other".into()
@@ -134,6 +137,178 @@ fn unicode_budget_and_framework_history_exclusion() {
         .unwrap();
     assert!(context.messages.is_empty());
     assert!(!context.text.contains("hello"));
+}
+
+#[test]
+fn task_query_recalls_chinese_facts_before_candidate_truncation() {
+    let memory = Memory::in_memory().unwrap();
+    let user = memory.user("alice").unwrap();
+    for i in 0..40 {
+        user.remember(&format!("a_{i:03}"), json!("历史项目已归档"))
+            .unwrap();
+    }
+    user.remember("z_deployment_port", json!("当前部署端口是 17443。"))
+        .unwrap();
+    memory
+        .user("bob")
+        .unwrap()
+        .remember("port", json!("部署端口 secret"))
+        .unwrap();
+    let chat = user.session("s").unwrap();
+    let old = chat.context(ContextOptions::default()).unwrap();
+    assert!(!old.text.contains("17443"));
+    let context = chat
+        .context(ContextOptions {
+            query: Some("当前部署端口是多少？".into()),
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(context.memories.len(), 30);
+    assert_eq!(context.memories[0].fact_key, "z_deployment_port");
+    assert!(!context.text.contains("secret"));
+    assert_eq!(context.report["recall"]["inspected_facts"], 41);
+    assert_eq!(context.report["recall"]["matched_facts"], 1);
+    assert_eq!(context.report["recall"]["method"], "lexical_overlap_v1");
+    assert!(
+        context.report["recall"]["selected"][0]["value_terms"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("端口"))
+    );
+    assert_eq!(context.report["omissions"].as_array().unwrap().len(), 11);
+}
+
+#[test]
+fn query_ranking_is_stable_and_retains_best_facts_under_budget() {
+    let memory = Memory::in_memory().unwrap();
+    let user = memory.user("alice").unwrap();
+    user.remember("a_airport", json!("airport")).unwrap();
+    user.remember("z_service_port", json!(17443)).unwrap();
+    let chat = user.session("s").unwrap();
+    let options = ContextOptions {
+        query: Some("PORT".into()),
+        max_facts: 1,
+        ..Default::default()
+    };
+    let context = chat.context(options.clone()).unwrap();
+    assert_eq!(context.memories[0].fact_key, "z_service_port");
+    assert_eq!(
+        context.report["recall"]["selected"][0]["key_terms"],
+        json!(["port"])
+    );
+    assert_eq!(context.report["recall"]["matched_facts"], 1);
+    let fitted = chat
+        .context(ContextOptions {
+            max_facts: 30,
+            max_tokens: context.report["estimated_tokens"].as_u64().unwrap() as u32,
+            ..options
+        })
+        .unwrap();
+    assert_eq!(fitted.text, context.text);
+    assert_eq!(fitted.report["omissions"][0]["reason"], "budget");
+    assert_eq!(fitted.report["omissions"][0]["relevance_score"], 0);
+    assert_eq!(
+        fitted.report["recall"]["selected"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    for query in [None, Some(" \n！？".into()), Some("unmatched".into())] {
+        let fallback = chat
+            .context(ContextOptions {
+                query,
+                max_facts: 1,
+                ..Default::default()
+            })
+            .unwrap();
+        assert_eq!(fallback.memories[0].fact_key, "a_airport");
+    }
+}
+
+#[test]
+fn recall_obeys_fact_updates_forgetting_and_query_limits() {
+    let memory = Memory::in_memory().unwrap();
+    let user = memory.user("alice").unwrap();
+    user.remember("a", json!("oldregion")).unwrap();
+    user.remember("z", json!({"region":"newregion"})).unwrap();
+    let chat = user.session("s").unwrap();
+    let options = ContextOptions {
+        query: Some("NEWREGION".into()),
+        max_facts: 1,
+        ..Default::default()
+    };
+    assert_eq!(
+        chat.context(options.clone()).unwrap().memories[0].fact_key,
+        "z"
+    );
+    user.remember("z", json!("retired")).unwrap();
+    assert_eq!(
+        chat.context(options.clone()).unwrap().memories[0].fact_key,
+        "a"
+    );
+    user.remember("z", json!("newregion")).unwrap();
+    user.forget("z").unwrap();
+    assert_eq!(
+        chat.context(options.clone()).unwrap().report["recall"]["matched_facts"],
+        0
+    );
+    assert!(
+        chat.context(ContextOptions {
+            query: Some("界".repeat(1366)),
+            ..options
+        })
+        .is_err()
+    );
+}
+
+#[test]
+fn repeated_terms_do_not_outweigh_distinct_task_matches() {
+    let memory = Memory::in_memory().unwrap();
+    let user = memory.user("alice").unwrap();
+    user.remember("a", json!("rust ".repeat(100))).unwrap();
+    user.remember("z", json!("rust sqlite")).unwrap();
+    let context = user
+        .session("s")
+        .unwrap()
+        .context(ContextOptions {
+            query: Some("rust sqlite rust rust".into()),
+            max_facts: 1,
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(context.memories[0].fact_key, "z");
+    assert_eq!(
+        context.report["recall"]["selected"][0]["value_terms"],
+        json!(["rust", "sqlite"])
+    );
+}
+
+#[test]
+fn learning_rejects_a_net_gain_when_a_counterexample_regresses() {
+    let memory = Memory::in_memory().unwrap();
+    let user = memory.user("alice").unwrap();
+    let learning = user.learning();
+    learning
+        .start(
+            "broad-rule",
+            proposal("All billing issues are urgent"),
+            AcceptancePolicy::default(),
+            "heldout-v1",
+            "e1",
+            cases(),
+        )
+        .unwrap();
+    let mut result = evaluation(1.0);
+    result.cases[0].baseline_score = 0.0;
+    result.cases[1].baseline_score = 0.0;
+    result.cases[2].baseline_score = 1.0;
+    result.cases[2].candidate_score = 0.0;
+    assert_eq!(
+        learning.submit("broad-rule", result).unwrap().status,
+        Status::Rejected
+    );
+    assert!(learning.active("answer", &Target::Task).unwrap().is_none());
 }
 
 #[test]

@@ -1,0 +1,272 @@
+{
+  "metadata": {
+    "created_at": "2026-09-21T17:42:47.526331+00:00",
+    "model": "qwen3-8b",
+    "base_url": "http://127.0.0.1:8002/v1",
+    "suite_version": "common-v1",
+    "suite_sha256": "85daec9a7fc825192aa760aa80345962b9f047f2cb9e5d2909036708feb0a079",
+    "runner_sha256": "5352ed8fbdfae5578890e17e4ca70072c354d9de234b225563784cf9b80abac9",
+    "binary_sha256": "507076ac8742f0da2b2ab063772cf38fd89ec962251000a0eb4085f406eaaf12",
+    "repeats": 2,
+    "seed": 42,
+    "temperature": 0,
+    "max_tokens": 256,
+    "enable_thinking": false,
+    "evaluator": "exact-json-fields-v1"
+  },
+  "learning_status": "accepted",
+  "groups": [
+    {
+      "category": "fact_update",
+      "mode": "memory",
+      "n": 4,
+      "passed": 2,
+      "pass_rate": 0.5,
+      "median_latency_ms": 255.91473650047192,
+      "sample_p95_latency_ms": 261.18824600052903,
+      "mean_total_tokens": 125
+    },
+    {
+      "category": "fact_update",
+      "mode": "memory_learning",
+      "n": 4,
+      "passed": 2,
+      "pass_rate": 0.5,
+      "median_latency_ms": 258.95610299994587,
+      "sample_p95_latency_ms": 263.07667799937917,
+      "mean_total_tokens": 125
+    },
+    {
+      "category": "fact_update",
+      "mode": "no_memory",
+      "n": 4,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 151.09835549992567,
+      "sample_p95_latency_ms": 152.44150199941942,
+      "mean_total_tokens": 86
+    },
+    {
+      "category": "forgetting",
+      "mode": "memory",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 241.0067885002718,
+      "sample_p95_latency_ms": 316.35014500079706,
+      "mean_total_tokens": 114
+    },
+    {
+      "category": "forgetting",
+      "mode": "memory_learning",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 237.91372850018888,
+      "sample_p95_latency_ms": 301.88958899998397,
+      "mean_total_tokens": 114
+    },
+    {
+      "category": "forgetting",
+      "mode": "no_memory",
+      "n": 4,
+      "passed": 2,
+      "pass_rate": 0.5,
+      "median_latency_ms": 205.93885200014483,
+      "sample_p95_latency_ms": 240.00518400043802,
+      "mean_total_tokens": 96.5
+    },
+    {
+      "category": "learned_workflow",
+      "mode": "memory",
+      "n": 6,
+      "passed": 4,
+      "pass_rate": 0.6666666666666666,
+      "median_latency_ms": 369.3532249999407,
+      "sample_p95_latency_ms": 409.8362830000042,
+      "mean_total_tokens": 168.33333333333334
+    },
+    {
+      "category": "learned_workflow",
+      "mode": "memory_learning",
+      "n": 6,
+      "passed": 6,
+      "pass_rate": 1.0,
+      "median_latency_ms": 326.4796550001847,
+      "sample_p95_latency_ms": 330.0982370001293,
+      "mean_total_tokens": 233.33333333333334
+    },
+    {
+      "category": "learned_workflow",
+      "mode": "no_memory",
+      "n": 6,
+      "passed": 4,
+      "pass_rate": 0.6666666666666666,
+      "median_latency_ms": 404.44209750012305,
+      "sample_p95_latency_ms": 409.8564380001335,
+      "mean_total_tokens": 127.33333333333333
+    },
+    {
+      "category": "preferences",
+      "mode": "memory",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 345.73721100014154,
+      "sample_p95_latency_ms": 395.80261199989764,
+      "mean_total_tokens": 156
+    },
+    {
+      "category": "preferences",
+      "mode": "memory_learning",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 345.44878800033985,
+      "sample_p95_latency_ms": 367.9047760006142,
+      "mean_total_tokens": 156
+    },
+    {
+      "category": "preferences",
+      "mode": "no_memory",
+      "n": 4,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 310.11693050004396,
+      "sample_p95_latency_ms": 336.9420999997601,
+      "mean_total_tokens": 111
+    },
+    {
+      "category": "recall_control",
+      "mode": "memory",
+      "n": 2,
+      "passed": 2,
+      "pass_rate": 1.0,
+      "median_latency_ms": 262.1663205004552,
+      "sample_p95_latency_ms": 262.83968100051425,
+      "mean_total_tokens": 1056
+    },
+    {
+      "category": "recall_control",
+      "mode": "memory_learning",
+      "n": 2,
+      "passed": 2,
+      "pass_rate": 1.0,
+      "median_latency_ms": 293.639232500027,
+      "sample_p95_latency_ms": 321.4694700000109,
+      "mean_total_tokens": 1056
+    },
+    {
+      "category": "recall_control",
+      "mode": "no_memory",
+      "n": 2,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 155.2764100006243,
+      "sample_p95_latency_ms": 161.25007700065908,
+      "mean_total_tokens": 92
+    },
+    {
+      "category": "recall_pressure",
+      "mode": "memory",
+      "n": 2,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 491.23363349963256,
+      "sample_p95_latency_ms": 826.9785789998423,
+      "mean_total_tokens": 801
+    },
+    {
+      "category": "recall_pressure",
+      "mode": "memory_learning",
+      "n": 2,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 192.19525949984018,
+      "sample_p95_latency_ms": 229.0259290002723,
+      "mean_total_tokens": 801
+    },
+    {
+      "category": "recall_pressure",
+      "mode": "no_memory",
+      "n": 2,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 152.22119450027094,
+      "sample_p95_latency_ms": 155.33957200022996,
+      "mean_total_tokens": 92
+    },
+    {
+      "category": "scope_isolation",
+      "mode": "memory",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 213.4759424998265,
+      "sample_p95_latency_ms": 280.0285999992411,
+      "mean_total_tokens": 112.5
+    },
+    {
+      "category": "scope_isolation",
+      "mode": "memory_learning",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 215.67880199972933,
+      "sample_p95_latency_ms": 552.9208470006779,
+      "mean_total_tokens": 112.5
+    },
+    {
+      "category": "scope_isolation",
+      "mode": "no_memory",
+      "n": 4,
+      "passed": 2,
+      "pass_rate": 0.5,
+      "median_latency_ms": 156.21787100008078,
+      "sample_p95_latency_ms": 535.7543999998597,
+      "mean_total_tokens": 92.5
+    },
+    {
+      "category": "session_resume",
+      "mode": "memory",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 450.9965385000214,
+      "sample_p95_latency_ms": 463.6281820003205,
+      "mean_total_tokens": 154
+    },
+    {
+      "category": "session_resume",
+      "mode": "memory_learning",
+      "n": 4,
+      "passed": 4,
+      "pass_rate": 1.0,
+      "median_latency_ms": 442.7755564997824,
+      "sample_p95_latency_ms": 470.915165000406,
+      "mean_total_tokens": 154
+    },
+    {
+      "category": "session_resume",
+      "mode": "no_memory",
+      "n": 4,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "median_latency_ms": 346.4653519999956,
+      "sample_p95_latency_ms": 438.56407400016906,
+      "mean_total_tokens": 101
+    }
+  ],
+  "whole_run": {
+    "model_calls": 109,
+    "total_tokens": 22494,
+    "model_http_wall_ms": 36027.43817300143
+  },
+  "status": {
+    "status": "completed",
+    "model_calls": 109,
+    "final_test_calls": 90,
+    "learning_status": "accepted"
+  },
+  "rollback_verified": true
+}

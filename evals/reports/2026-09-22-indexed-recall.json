@@ -1,0 +1,447 @@
+{
+  "date": "2026-09-22",
+  "implementation": "sqlite_inverted_v1",
+  "scoring": "lexical_overlap_v1 (unchanged)",
+  "paired_raw_directory": "data/evals/indexed-recall-comparison-run2",
+  "storage_raw_directory": "data/evals/indexed-storage-run1",
+  "manifest": {
+    "before": "data/evals/retrieval-before-build/libmemweft_ffi.so",
+    "after": "target/release/libmemweft_ffi.so",
+    "before_sha256": "729e0bb43d16cc90beb5e6e564e6369497da52e26c67c635cc85c177e3ac7908",
+    "after_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+    "samples": 30,
+    "source_database": "data/evals/enterprise-storage-run1/scale.db",
+    "script_sha256": "04d1e040380ee18ad8d18cbea83df7dbae0365a4294aad6ed5ea5f318076bf0c",
+    "profile_order": [
+      "private",
+      "shared",
+      "mixed"
+    ],
+    "build_order": [
+      "before",
+      "after"
+    ],
+    "limitations": "Single-process warm-cache synthetic fixture. No model calls. One timed run per profile/build; chronological order is not randomized."
+  },
+  "comparison": [
+    {
+      "profile": "private",
+      "query": "rare",
+      "context_identical": true,
+      "before_p50_ms": 656.0094679989561,
+      "after_p50_ms": 3.614129003835842,
+      "before_p95_ms": 669.4391040000482,
+      "after_p95_ms": 3.7170109935686924,
+      "p95_ratio": 180.10145925269958,
+      "before_report_bytes": 11001332,
+      "after_report_bytes": 9751,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "private",
+      "query": "frequent",
+      "context_identical": true,
+      "before_p50_ms": 647.3011330017471,
+      "after_p50_ms": 165.3784305017325,
+      "before_p95_ms": 1238.094751999597,
+      "after_p95_ms": 171.2044519954361,
+      "p95_ratio": 7.231673812037328,
+      "before_report_bytes": 11001466,
+      "after_report_bytes": 9883,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "private",
+      "query": "mixed_terms",
+      "context_identical": true,
+      "before_p50_ms": 671.4924649968452,
+      "after_p50_ms": 166.28565899736714,
+      "before_p95_ms": 688.3451390021946,
+      "after_p95_ms": 173.69530200085137,
+      "p95_ratio": 3.9629462113996654,
+      "before_report_bytes": 11001510,
+      "after_report_bytes": 9925,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "private",
+      "query": "absent",
+      "context_identical": true,
+      "before_p50_ms": 619.8965744988527,
+      "after_p50_ms": 3.533729999617208,
+      "before_p95_ms": 1461.3130479992833,
+      "after_p95_ms": 3.689775003294926,
+      "p95_ratio": 396.0439448731556,
+      "before_report_bytes": 11001288,
+      "after_report_bytes": 9708,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "private",
+      "query": "empty",
+      "context_identical": true,
+      "before_p50_ms": 529.6296720007376,
+      "after_p50_ms": 3.4313774995098356,
+      "before_p95_ms": 553.3928139993805,
+      "after_p95_ms": 3.6336409975774586,
+      "p95_ratio": 152.29705256196922,
+      "before_report_bytes": 11001241,
+      "after_report_bytes": 9661,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "shared",
+      "query": "rare",
+      "context_identical": true,
+      "before_p50_ms": 671.6767314974277,
+      "after_p50_ms": 3.5285265003039967,
+      "before_p95_ms": 1115.8716439967975,
+      "after_p95_ms": 3.6811609970754944,
+      "p95_ratio": 303.1303561249573,
+      "before_report_bytes": 11001272,
+      "after_report_bytes": 9691,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "shared",
+      "query": "absent",
+      "context_identical": true,
+      "before_p50_ms": 647.2883239985094,
+      "after_p50_ms": 3.4870814997702837,
+      "before_p95_ms": 1368.1655399996089,
+      "after_p95_ms": 5.294549002428539,
+      "p95_ratio": 258.4102138580736,
+      "before_report_bytes": 11001228,
+      "after_report_bytes": 9648,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "mixed",
+      "query": "rare",
+      "context_identical": true,
+      "before_p50_ms": 1211.459932001162,
+      "after_p50_ms": 4.74210250104079,
+      "before_p95_ms": 2464.509247998649,
+      "after_p95_ms": 5.016253002395388,
+      "p95_ratio": 491.3048139361757,
+      "before_report_bytes": 22001329,
+      "after_report_bytes": 16788,
+      "loaded_candidates": 74
+    },
+    {
+      "profile": "mixed",
+      "query": "absent",
+      "context_identical": true,
+      "before_p50_ms": 1189.3129289965145,
+      "after_p50_ms": 4.676997999922605,
+      "before_p95_ms": 2014.0016860023024,
+      "after_p95_ms": 4.775253000843804,
+      "p95_ratio": 421.75811117158,
+      "before_report_bytes": 22001285,
+      "after_report_bytes": 16746,
+      "loaded_candidates": 74
+    }
+  ],
+  "profiles": {
+    "private": {
+      "before": {
+        "native_sha256": "729e0bb43d16cc90beb5e6e564e6369497da52e26c67c635cc85c177e3ac7908",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 3.052141000807751,
+        "database_bytes": 27103232,
+        "integrity_check": "ok",
+        "profile": "private",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      },
+      "after": {
+        "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 5552.362324997375,
+        "database_bytes": 139010048,
+        "integrity_check": "ok",
+        "profile": "private",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      }
+    },
+    "shared": {
+      "before": {
+        "native_sha256": "729e0bb43d16cc90beb5e6e564e6369497da52e26c67c635cc85c177e3ac7908",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 3.7641669987351634,
+        "database_bytes": 73449472,
+        "integrity_check": "ok",
+        "profile": "shared",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      },
+      "after": {
+        "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 5096.04504500021,
+        "database_bytes": 134516736,
+        "integrity_check": "ok",
+        "profile": "shared",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      }
+    },
+    "mixed": {
+      "before": {
+        "native_sha256": "729e0bb43d16cc90beb5e6e564e6369497da52e26c67c635cc85c177e3ac7908",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 3.006309001648333,
+        "database_bytes": 73449472,
+        "integrity_check": "ok",
+        "profile": "mixed",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      },
+      "after": {
+        "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+        "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+        "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+        "open_and_migration_ms": 9348.315195995383,
+        "database_bytes": 274522112,
+        "integrity_check": "ok",
+        "profile": "mixed",
+        "samples": 30,
+        "timing": "Complete synchronous Python SDK context including Rust query, rendering and JSON transport; warm cache, single reader"
+      }
+    }
+  },
+  "storage_metadata": {
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "python": "3.11.14 (main, Oct 21 2025, 18:31:21) [GCC 11.2.0]",
+    "native_sha256": "99e6d4fb2b80130df20eda6f0f703387bfb9931904a70e6d49a58b5ecaa37e15",
+    "source_sha256": "3e31de90f4fd13b34ebf11f3e65e76efab911bc5c7f3f36b3605986b10bae6e8",
+    "sqlite_durability": "WAL, synchronous=NORMAL as configured by the Rust store",
+    "profile": "release (caller must install the release native extension)"
+  },
+  "storage_results": {
+    "concurrency": {
+      "workers": 8,
+      "rounds": 100,
+      "attempts": 800,
+      "successful_updates": 100,
+      "expected_conflicts": 700,
+      "final_value": 100,
+      "final_revision": 101,
+      "write_latency": {
+        "n": 800,
+        "p50_ms": 1.1148015000799205,
+        "p95_ms": 3.2151920022442937,
+        "max_ms": 33.45922799780965
+      },
+      "idempotent_message_attempts": 160,
+      "persisted_messages": 1
+    },
+    "isolation": {
+      "tenant_user_scopes": 100,
+      "agents_per_scope": 2,
+      "private_and_session_leaks": 0,
+      "readonly_mutations_blocked": 200,
+      "boundary": "Application scope/config binding, not authentication against an untrusted database client."
+    },
+    "process_crash": {
+      "acknowledged": 50,
+      "recovered": 50,
+      "integrity_check": "ok",
+      "scope": "SIGKILL recovery; no simulated power loss"
+    },
+    "scale": [
+      {
+        "facts": 100,
+        "added_facts_ms": 301.1109569997643,
+        "query": {
+          "n": 30,
+          "p50_ms": 3.4314430013182573,
+          "p95_ms": 3.7219949954305775,
+          "max_ms": 3.7266879953676835
+        },
+        "inspected_facts": 74,
+        "retrieval": "sqlite_inverted_v1",
+        "report_json_bytes": 9751,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 68260,
+        "database_bytes": 339968,
+        "wal_bytes": 4136512
+      },
+      {
+        "facts": 1000,
+        "added_facts_ms": 4119.381415002863,
+        "query": {
+          "n": 30,
+          "p50_ms": 3.6162295000394806,
+          "p95_ms": 3.9091439975891262,
+          "max_ms": 3.9112669983296655
+        },
+        "inspected_facts": 74,
+        "retrieval": "sqlite_inverted_v1",
+        "report_json_bytes": 9751,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 69284,
+        "database_bytes": 1585152,
+        "wal_bytes": 4202432
+      },
+      {
+        "facts": 10000,
+        "added_facts_ms": 51838.76605599653,
+        "query": {
+          "n": 30,
+          "p50_ms": 3.6375874988152646,
+          "p95_ms": 5.9795299966936,
+          "max_ms": 6.429232002119534
+        },
+        "inspected_facts": 74,
+        "retrieval": "sqlite_inverted_v1",
+        "report_json_bytes": 9751,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 70052,
+        "database_bytes": 13893632,
+        "wal_bytes": 4235392
+      },
+      {
+        "facts": 100000,
+        "added_facts_ms": 588950.1867170038,
+        "query": {
+          "n": 30,
+          "p50_ms": 3.6689565022243187,
+          "p95_ms": 3.8652889998047613,
+          "max_ms": 4.581756998959463
+        },
+        "inspected_facts": 74,
+        "retrieval": "sqlite_inverted_v1",
+        "report_json_bytes": 9751,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 70436,
+        "database_bytes": 138981376,
+        "wal_bytes": 4260112
+      }
+    ]
+  },
+  "previous_storage_reference": {
+    "concurrency": {
+      "workers": 8,
+      "rounds": 100,
+      "attempts": 800,
+      "successful_updates": 100,
+      "expected_conflicts": 700,
+      "final_value": 100,
+      "final_revision": 101,
+      "write_latency": {
+        "n": 800,
+        "p50_ms": 0.16328099809470586,
+        "p95_ms": 3.159742998832371,
+        "max_ms": 8.279357003630139
+      },
+      "idempotent_message_attempts": 160,
+      "persisted_messages": 1
+    },
+    "isolation": {
+      "tenant_user_scopes": 100,
+      "agents_per_scope": 2,
+      "private_and_session_leaks": 0,
+      "readonly_mutations_blocked": 200,
+      "boundary": "Application scope/config binding, not authentication against an untrusted database client."
+    },
+    "process_crash": {
+      "acknowledged": 50,
+      "recovered": 50,
+      "integrity_check": "ok",
+      "scope": "SIGKILL recovery; no simulated power loss"
+    },
+    "scale": [
+      {
+        "facts": 100,
+        "added_facts_ms": 5.134022001584526,
+        "query": {
+          "n": 30,
+          "p50_ms": 0.6203704979270697,
+          "p95_ms": 0.6985229993006214,
+          "max_ms": 0.845803995616734
+        },
+        "inspected_facts": 100,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 62004,
+        "database_bytes": 192512,
+        "wal_bytes": 1277232
+      },
+      {
+        "facts": 1000,
+        "added_facts_ms": 986.3356690038927,
+        "query": {
+          "n": 30,
+          "p50_ms": 4.9168669975188095,
+          "p95_ms": 6.836355998530053,
+          "max_ms": 12.204555001517292
+        },
+        "inspected_facts": 1000,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 64820,
+        "database_bytes": 425984,
+        "wal_bytes": 4128272
+      },
+      {
+        "facts": 10000,
+        "added_facts_ms": 9855.613644002005,
+        "query": {
+          "n": 30,
+          "p50_ms": 54.48522250298993,
+          "p95_ms": 59.72805499914102,
+          "max_ms": 61.2360869999975
+        },
+        "inspected_facts": 10000,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 96992,
+        "database_bytes": 2834432,
+        "wal_bytes": 4140632
+      },
+      {
+        "facts": 100000,
+        "added_facts_ms": 102969.7651259994,
+        "query": {
+          "n": 30,
+          "p50_ms": 657.5962575006997,
+          "p95_ms": 689.5320129988249,
+          "max_ms": 1480.3929159970721
+        },
+        "inspected_facts": 100000,
+        "selected_facts": 10,
+        "peak_process_rss_kib": 373436,
+        "database_bytes": 27086848,
+        "wal_bytes": 4152992
+      }
+    ]
+  },
+  "previous_storage_comparison_limitation": "Historical separate run, not randomized paired write measurement.",
+  "verification": {
+    "rust_tests_passed": 34,
+    "rust_differential_contexts": 900,
+    "python_tests_passed": 12,
+    "python_tests_skipped_optional_external_dsns": 2,
+    "node_tests_passed": 6,
+    "offline_eval_tests_passed": 37,
+    "previous_model_fixture_context_texts_unchanged": 36,
+    "paired_contexts_identical": 9,
+    "paired_database_integrity_checks_ok": 6,
+    "native_and_runner_hashes_verified": true,
+    "model_calls_this_query_optimization": 0
+  },
+  "limitations": [
+    "Synthetic warm-cache single-reader measurements; 30 samples per query; chronological build order.",
+    "Private/shared: 100000 source records. Mixed: 100000 private plus 100000 fully shadowed shared records.",
+    "Loaded candidates are not physical postings visited; common-term work remains corpus dependent.",
+    "Strict error policy retains full-scan global conflict detection.",
+    "Diagnostic arrays are bounded samples with truncation flags; counts describe loaded candidates.",
+    "Persistent index increases database size and write cost; all writers must upgrade together.",
+    "Crash check is SIGKILL under WAL synchronous=NORMAL, not a power-loss durability test.",
+    "No million-record, high-concurrency query SLO or model-quality improvement claim."
+  ]
+}

@@ -7,6 +7,41 @@ import { Memory } from '../dist/index.js';
 import { MemWeftStore, LangGraphMemory } from '../dist/langgraph.js';
 import { Annotation, StateGraph, START, END, MemorySaver } from '@langchain/langgraph';
 
+test('optional background checkpoint preserves shared CAS and forgetting', async () => {
+  await assert.rejects(Memory.open({inMemory:true,sqliteOptions:{backgroundCheckpointMs:100}}));
+  const dir = await mkdtemp(join(tmpdir(), 'memweft-checkpoint-'));
+  const options = {path:join(dir,'memory.db'),sqliteOptions:{backgroundCheckpointMs:100,walReclaimThresholdBytes:65536}};
+  const writer = await Memory.open(options);
+  const reader = await Memory.open(options);
+  const memoryConfig = {readPools:[{poolId:'team',access:'read_write'}],defaultWritePool:'team'};
+  try {
+    const status = await writer.storageStatus();
+    assert.equal(status.sqlite_version,'3.51.3');
+    assert.equal(status.checkpoint.wal_reclaim_threshold_bytes,65536);
+    const a = writer.user('u',{memoryConfig});
+    const b = reader.user('u',{agentId:'reader',memoryConfig});
+    await a.remember('old',{key:'key',expectedRevision:0});
+    await a.remember('new',{key:'key',expectedRevision:1});
+    assert.equal((await b.session('s').context()).memories[0].value,'new');
+    await assert.rejects(a.remember('stale',{key:'key',expectedRevision:1}));
+    await a.forget('key',{expectedRevision:2});
+    assert.deepEqual((await b.session('s').context()).memories,[]);
+    assert.equal((await a.remember('recreated',{key:'key',expectedRevision:0})).revision,4);
+  } finally { reader.close(); writer.close(); await rm(dir,{recursive:true,force:true}); }
+});
+
+test('task query reaches shared Rust ranking', async () => {
+  const memory = await Memory.open({inMemory:true});
+  try {
+    const user = memory.user('recall');
+    await user.remember('archived', {key:'a_archive'});
+    await user.remember('部署端口 17443', {key:'z_port'});
+    const context = await user.session('s').context({query:'部署端口',maxFacts:1});
+    assert.equal(context.memories[0].fact_key,'z_port');
+    assert.equal(context.explain().recall.method,'lexical_overlap_v1');
+  } finally { memory.close(); }
+});
+
 test('native persistence, scopes, retries and deletion', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'memweft-'));
   const path = join(dir, 'memory.db');
@@ -90,4 +125,30 @@ test('shared Rust/Python/TypeScript contract', async () => {
       assert.deepEqual(actual,expected,JSON.stringify(entry.request));
     }
   }
+});
+
+test('mixed pools, read-only bindings, provenance and revision conflicts', async () => {
+  const memory = await Memory.open({inMemory:true});
+  try {
+    const a = memory.user('alice', {agentId:'planner',memoryConfig:{
+      readPools:[{poolId:'team',access:'read_write'},{poolId:'private',access:'read_write'}],defaultWritePool:'private'
+    }});
+    const b = memory.user('alice', {agentId:'executor',memoryConfig:{readPools:[{poolId:'team'}]}});
+    const record = await a.remember(8002,{key:'port',poolId:'team',expectedRevision:0});
+    assert.equal(record.revision,1);
+    assert.equal((await b.memories())[0].writer_agent_id,'planner');
+    await a.remember(9000,{key:'port'});
+    const context = await a.session('s').context({query:'port'});
+    assert.equal(context.memories[0].value,9000);
+    assert.equal(context.explain().pools.selected[0].pool_id,'private');
+    assert.equal((await a.memories({poolId:'team'}))[0].value,8002);
+    await assert.rejects(b.remember(1,{key:'port',poolId:'team'}),/writing/);
+    await assert.rejects(b.forget('port',{poolId:'team'}),/writing/);
+    await assert.rejects(b.memories({poolId:'private'}),/reading/);
+    await assert.rejects(a.remember(1,{key:'port',poolId:'team',expectedRevision:7}),/changed/);
+    assert.equal(await a.forget('port'),true);
+    assert.equal((await a.memories())[0].value,8002);
+    assert.equal(await a.forget('port',{poolId:'team',expectedRevision:1}),true);
+    assert.deepEqual(await b.memories(),[]);
+  } finally { memory.close(); }
 });

@@ -66,8 +66,15 @@ pub(crate) fn mutate(
     scope: &Scope,
     mutations: &[Mutation],
 ) -> StoreResult<()> {
+    mutate_checked(store, scope, mutations, &[])
+}
+
+pub(crate) fn mutate_checked(
+    store: &SqliteStore, scope: &Scope, mutations: &[Mutation], guards: &[crate::PoolRevision],
+) -> StoreResult<()> {
     store.with_connection(|conn| {
         let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        crate::pools::check_revisions(&tx, scope, guards)?;
         let mut seen = std::collections::HashSet::new();
         for change in mutations {
             if change.namespace.is_empty() || change.key.is_empty() || change.namespace.iter().any(String::is_empty) {

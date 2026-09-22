@@ -16,8 +16,39 @@ with Memory("data/memweft.db") as memory:
 ```
 
 The high-level API supports SQLite and an optional evaluated-learning workflow.
+File stores can opt into periodic background WAL maintenance with
+`Memory(path, sqlite_options={"background_checkpoint_ms": 1000})`; `AsyncMemory`
+accepts the same option. The valid interval is 100–60,000 ms. Defaults remain
+unchanged, and in-memory databases reject this option. Writes still commit before
+returning; this is not a queue of deferred writes. See [pipeline and checkpoint
+semantics](../docs/async_pipeline.md) for shutdown, failure fallback, WAL growth
+and durability limits.
+
+Add `"wal_reclaim_threshold_bytes": 16 * 1024 * 1024` to those options to
+attempt WAL truncation above a soft size threshold (64 KiB–1 TiB). Active readers
+can delay reclamation and let the file exceed it. `memory.storage_status()`
+(or `await async_memory.storage_status()`) reports the actual SQLite version and
+per-instance checkpoint progress, busy attempts, sampled bytes and errors.
+Enabled instances coordinate maintenance through a persistent
+`<database>.memweft-maintenance` file lock. Busy reclamation backs off up to
+30 seconds; successful reclamation has a 30-second cooldown. Use consistent
+options for all instances; inspect `checkpoint.progress.coordinator_role` across
+all of them, since a reader can lead maintenance. Do not delete the sidecar while
+any instance is open. Native builds require Rust 1.89+.
+
 See the [repository guide](../README.md) for `AsyncMemory`, LangGraph `BaseStore`,
 learning jobs, budget semantics and the existing low-level interface.
+
+`chat.context(query="当前部署端口", max_facts=30)` ranks facts by lexical relevance
+before applying context limits. Inspect `context.explain()["recall"]` for matched
+terms and scores. `AsyncSession.context` and `LangGraphMemory.context` also accept
+`query`; omitting it preserves key order. This does not perform vector search or
+provide semantic similarity. Indexed candidate selection and exact fallback paths
+are described in the [retrieval guide](../docs/indexed_retrieval.md).
+
+## Agent memory pools
+
+`memory.user("alice", agent_id="planner", memory_config=config)` binds private, shared or mixed fact pools. `remember` and `forget` accept `pool_id` and `expected_revision`; `memories(pool_id=...)` inspects one pool. The same options work with `AsyncMemory`. See the [configuration and learning dependency guide](../docs/memory_pools.md) and [two-Agent example](../examples/shared_pools.py).
 
 ## Install (with database backends)
 
@@ -124,3 +155,9 @@ python python/scripts/soak_test.py --duration 600 --interval 60
 Outputs:
 - `target/python_soak.json`
 - `target/python_soak_prev.json` (auto-saved previous run)
+
+SQLite context queries now use a transactional inverted index with the existing
+lexical scoring. Diagnostic arrays are capped at 64; check `omissions_truncated`,
+`recall.candidates_truncated` and `pools.shadowed_truncated` before interpreting
+counts. Existing databases require an index backfill and coordinated writer
+upgrade; see [indexed retrieval and migration](../docs/indexed_retrieval.md).

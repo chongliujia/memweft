@@ -14,6 +14,7 @@ impl Proposer for ConciseProposer {
             target: Target::Task,
             content: "Answer directly in one sentence when the question is simple.".into(),
             proposer_version: "demo-v1".into(),
+            source_pools: vec![],
             source_keys: vec![],
         })
     }

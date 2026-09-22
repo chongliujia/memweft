@@ -1,5 +1,5 @@
 //! Persistent, externally evaluated strategy improvement. No implicit model calls.
-use memweft_store::{Document, Mutation, Store, StoreError, StoreResult};
+use memweft_store::{Document, Mutation, PoolRef, PoolRevision, Store, StoreError, StoreResult};
 use memweft_types::Scope;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -87,6 +87,9 @@ pub struct Proposal {
     /// User memory keys used to derive the candidate (for invalidation on forget).
     #[serde(default)]
     pub source_keys: Vec<String>,
+    /// Explicit shared-pool dependencies; source_keys always denotes private facts.
+    #[serde(default)]
+    pub source_pools: Vec<PoolRef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -94,6 +97,8 @@ pub struct Strategy {
     pub version: String,
     pub parent: Option<String>,
     pub proposal: Proposal,
+    #[serde(default)]
+    pub pool_revisions: Vec<PoolRevision>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -134,6 +139,8 @@ pub struct Job {
     pub baseline: Option<Strategy>,
     pub baseline_revision: u64,
     pub epoch_revision: u64,
+    #[serde(default)]
+    pub pool_revisions: Vec<PoolRevision>,
     pub status: Status,
     pub reason: String,
     pub evaluation: Option<Evaluation>,
@@ -156,10 +163,53 @@ pub trait Evaluator {
 pub struct Learning {
     store: Arc<dyn Store>,
     scope: Scope,
+    read_pools: Vec<String>,
 }
 impl Learning {
     pub fn new(store: Arc<dyn Store>, scope: Scope) -> Self {
-        Self { store, scope }
+        Self {
+            store,
+            scope,
+            read_pools: vec!["private".into()],
+        }
+    }
+    /// Application-selected fact visibility; learning records still belong to the actor.
+    pub fn with_memory_pools(mut self, read_pools: Vec<String>) -> Self {
+        self.read_pools = read_pools;
+        self
+    }
+    fn check_access(&self, proposal: &Proposal) -> StoreResult<()> {
+        if (!proposal.source_keys.is_empty() && !self.read_pools.iter().any(|p| p == "private"))
+            || proposal
+                .source_pools
+                .iter()
+                .any(|r| r.pool_id == "private" || !self.read_pools.contains(&r.pool_id))
+        {
+            return Err(invalid(
+                "strategy source pool is not readable; use source_keys for private facts",
+            ));
+        }
+        Ok(())
+    }
+    fn source_revisions(&self, proposal: &Proposal) -> StoreResult<Vec<PoolRevision>> {
+        self.check_access(proposal)?;
+        let mut guards = vec![];
+        for source in &proposal.source_pools {
+            let record = self
+                .store
+                .pool_facts(&self.scope, &source.pool_id)?
+                .into_iter()
+                .find(|r| r.fact.fact_key == source.key)
+                .ok_or_else(|| invalid("proposal references a missing pool memory"))?;
+            guards.push(PoolRevision {
+                pool_id: source.pool_id.clone(),
+                key: source.key.clone(),
+                revision: record
+                    .revision
+                    .ok_or_else(|| invalid("shared fact has no revision"))?,
+            });
+        }
+        Ok(guards)
     }
     fn find(&self, section: &str, key: &str) -> StoreResult<Option<Document>> {
         Ok(self
@@ -212,17 +262,12 @@ impl Learning {
             .collect()
     }
     pub fn active(&self, task: &str, target: &Target) -> StoreResult<Option<Strategy>> {
-        self.find("active", &slot(task, target))?
-            .and_then(|d| {
-                if d.value.is_null() {
-                    None
-                } else {
-                    Some(d.value)
-                }
-            })
-            .map(serde_json::from_value)
-            .transpose()
-            .map_err(StoreError::from)
+        let strategy: Option<Strategy> = self
+            .find("active", &slot(task, target))?
+            .filter(|d| !d.value.is_null())
+            .map(|d| serde_json::from_value(d.value))
+            .transpose()?;
+        Ok(strategy.filter(|s| self.check_access(&s.proposal).is_ok()))
     }
     pub fn jobs(&self) -> StoreResult<Vec<Job>> {
         self.store
@@ -245,6 +290,7 @@ impl Learning {
         case_ids: Vec<String>,
     ) -> StoreResult<Job> {
         policy.validate()?;
+        self.check_access(&proposal)?;
         if [
             id,
             &proposal.task_type,
@@ -307,10 +353,19 @@ impl Learning {
         }
         let active = self.find("active", &slot(&proposal.task_type, &proposal.target))?;
         let baseline_revision = active.as_ref().map(|d| d.revision).unwrap_or(0);
-        let baseline = active
+        let baseline: Option<Strategy> = active
             .filter(|d| !d.value.is_null())
             .map(|d| serde_json::from_value(d.value))
             .transpose()?;
+        let mut pool_revisions = self.source_revisions(&proposal)?;
+        if let Some(baseline) = &baseline {
+            self.check_access(&baseline.proposal)?;
+            pool_revisions.extend(baseline.pool_revisions.iter().cloned());
+        }
+        pool_revisions.sort_by(|a, b| {
+            (&a.pool_id, &a.key, a.revision).cmp(&(&b.pool_id, &b.key, b.revision))
+        });
+        pool_revisions.dedup();
         let job = Job {
             id: id.into(),
             proposal,
@@ -321,11 +376,12 @@ impl Learning {
             baseline,
             baseline_revision,
             epoch_revision,
+            pool_revisions,
             status: Status::Evaluating,
             reason: String::new(),
             evaluation: None,
         };
-        self.store.mutate_documents(
+        self.store.mutate_documents_checked(
             &self.scope,
             &[Mutation {
                 namespace: ns("jobs"),
@@ -333,12 +389,17 @@ impl Learning {
                 value: Some(serde_json::to_value(&job)?),
                 expected_revision: Some(0),
             }],
+            &job.pool_revisions,
         )?;
         Ok(job)
     }
     pub fn submit(&self, id: &str, evaluation: Evaluation) -> StoreResult<Job> {
         let doc = self.find("jobs", id)?.ok_or(StoreError::NotFound)?;
         let mut job: Job = serde_json::from_value(doc.value)?;
+        self.check_access(&job.proposal)?;
+        if let Some(baseline) = &job.baseline {
+            self.check_access(&baseline.proposal)?;
+        }
         if job.status != Status::Evaluating {
             if job.evaluation.as_ref() == Some(&evaluation) {
                 return Ok(job);
@@ -412,11 +473,17 @@ impl Learning {
                     .extend(baseline.proposal.source_keys.iter().cloned());
                 derived.source_keys.sort();
                 derived.source_keys.dedup();
+                derived
+                    .source_pools
+                    .extend(baseline.proposal.source_pools.iter().cloned());
+                derived.source_pools.sort();
+                derived.source_pools.dedup();
             }
             let strategy = Strategy {
                 version: id.into(),
                 parent: job.baseline.as_ref().map(|b| b.version.clone()),
                 proposal: derived,
+                pool_revisions: job.pool_revisions.clone(),
             };
             changes.push(Mutation {
                 namespace: ns("active"),
@@ -437,7 +504,8 @@ impl Learning {
                 expected_revision: Some(job.epoch_revision),
             });
         }
-        self.store.mutate_documents(&self.scope, &changes)?;
+        self.store
+            .mutate_documents_checked(&self.scope, &changes, &job.pool_revisions)?;
         Ok(job)
     }
     pub fn finish(&self, id: &str, status: Status, reason: &str) -> StoreResult<Job> {
@@ -488,6 +556,7 @@ impl Learning {
                 if s.proposal.task_type != task || s.proposal.target != target {
                     return Err(invalid("version belongs to a different task/target"));
                 }
+                self.check_access(&s.proposal)?;
                 Ok(s)
             })
             .transpose()?;
@@ -495,7 +564,7 @@ impl Learning {
             .find("epoch", "current")?
             .map(|d| d.revision)
             .unwrap_or(0);
-        self.store.mutate_documents(
+        self.store.mutate_documents_checked(
             &self.scope,
             &[
                 Mutation {
@@ -517,6 +586,10 @@ impl Learning {
                     expected_revision: Some(0),
                 },
             ],
+            restored
+                .as_ref()
+                .map(|s| s.pool_revisions.as_slice())
+                .unwrap_or(&[]),
         )?;
         Ok(restored)
     }

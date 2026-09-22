@@ -46,15 +46,17 @@ impl MemWeftStore {
         })
     }
     #[new]
-    #[pyo3(signature = (path=None, backend=None, dsn=None, database=None, in_memory=false))]
+    #[pyo3(signature = (path=None, backend=None, dsn=None, database=None, in_memory=false, sqlite_options=None))]
     fn new(
         path: Option<String>,
         backend: Option<String>,
         dsn: Option<String>,
         database: Option<String>,
         in_memory: bool,
+        sqlite_options: Option<String>,
     ) -> PyResult<Self> {
-        let store = open_store(path, backend, dsn, database, in_memory).map_err(store_error)?;
+        let options = sqlite_options.as_deref().map(parse_json::<memweft_store::SqliteOptions>).transpose()?;
+        let store = open_store(path, backend, dsn, database, in_memory, options).map_err(store_error)?;
         Ok(Self { inner: Arc::from(store) })
     }
 
@@ -989,18 +991,20 @@ fn open_store(
     dsn: Option<String>,
     database: Option<String>,
     in_memory: bool,
+    sqlite_options: Option<memweft_store::SqliteOptions>,
 ) -> StoreResult<Box<dyn Store>> {
     let backend = backend
         .unwrap_or_else(|| "sqlite".to_string())
         .to_lowercase();
+    if backend != "sqlite" && sqlite_options.is_some() {
+        return Err(StoreError::InvalidInput("sqlite_options requires sqlite backend".into()));
+    }
     match backend.as_str() {
         "sqlite" => {
-            if in_memory {
-                Ok(Box::new(SqliteStore::new_in_memory()?))
-            } else {
-                let path = path.unwrap_or_else(|| "data/memweft.db".to_string());
-                Ok(Box::new(SqliteStore::new(path)?))
-            }
+            let path = if in_memory { ":memory:".into() } else {
+                path.unwrap_or_else(|| "data/memweft.db".to_string())
+            };
+            Ok(Box::new(SqliteStore::new_with_options(path, sqlite_options.unwrap_or_default())?))
         }
         "postgres" => {
             if in_memory {

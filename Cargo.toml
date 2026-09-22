@@ -9,3 +9,4 @@ license = "Apache-2.0"
 
 [patch.crates-io]
 subprocess = { path = "vendor/subprocess" }
+libsqlite3-sys = { path = "vendor/libsqlite3-sys" }

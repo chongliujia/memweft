@@ -1,0 +1,851 @@
+{
+  "version": "enterprise-v1-incident",
+  "cases": [],
+  "output_contracts": {
+    "incident": {
+      "type": "object",
+      "properties": {
+        "queue": {
+          "type": "string",
+          "enum": [
+            "application",
+            "database",
+            "network"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P1",
+            "P2"
+          ]
+        }
+      },
+      "required": [
+        "queue",
+        "priority"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "learning": {
+    "task_type": "incident",
+    "system": "你是模拟运维工单分流助手，仅输出queue和priority的JSON。queue只能是application、network、database；按故障组件选队列。priority是P1或P2，一般默认P2，有已验证的业务策略时遵循策略。不执行任何工具。",
+    "memory": {
+      "key": "incident_context",
+      "value": "负责应用、网络、数据库的运维分流；普通咨询、已恢复和测试环境问题默认P2。"
+    },
+    "proposal_profile": "evidence_table",
+    "dataset_notes": {
+      "scope": "Independent synthetic task; no cross-domain strategy transfer.",
+      "families": 6,
+      "split": "3 training, 3 validation, 6 test phrasings per family; correlated paraphrases are not independent samples.",
+      "test_styles": [
+        "English",
+        "temporal_change",
+        "negation",
+        "approval_or_cause_boundary",
+        "irrelevant_urgency",
+        "reference_disambiguation"
+      ]
+    },
+    "train": [
+      {
+        "id": "incident-train-application_P1-0",
+        "prompt": "生产网页目前所有用户都打不开，故障尚未恢复。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-train-application_P1-1",
+        "prompt": "线上下单接口持续返回500，全部订单无法提交。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-train-application_P1-2",
+        "prompt": "正式环境应用一直崩溃，业务至今不可用。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-train-application_P2-0",
+        "prompt": "测试环境网页打不开，生产应用正常。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-train-application_P2-1",
+        "prompt": "昨天线上应用崩溃已经修复，现在访问正常。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-train-application_P2-2",
+        "prompt": "想了解应用崩溃时的处置预案，目前没有故障。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-train-network_P1-0",
+        "prompt": "生产网络现在全线中断，尚未恢复。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-train-network_P1-1",
+        "prompt": "正式机房出口当前持续断网，业务无法连通。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-train-network_P1-2",
+        "prompt": "线上DNS持续失效，所有客户目前无法解析地址。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-train-network_P2-0",
+        "prompt": "试验网络中断，但生产线路正常。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-train-network_P2-1",
+        "prompt": "昨天的生产网络中断已恢复，现在申请复盘。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-train-network_P2-2",
+        "prompt": "请说明未来断网时的预案，目前网络正常。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-train-database_P1-0",
+        "prompt": "生产数据库现在完全无法读写，故障持续中。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-train-database_P1-1",
+        "prompt": "线上数据库集群全部失联，至今尚未恢复。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-train-database_P1-2",
+        "prompt": "正式数据库一直拒绝连接，当前业务全部阻塞。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-train-database_P2-0",
+        "prompt": "测试数据库无法连接，生产库仍正常。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-train-database_P2-1",
+        "prompt": "昨天生产数据库故障已解决，目前读写正常。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-train-database_P2-2",
+        "prompt": "希望学习数据库容灾方案，没有当前故障。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      }
+    ],
+    "validation": [
+      {
+        "id": "incident-validation-application_P1-3",
+        "prompt": "生产客户端启动就退出，此刻还没有修好。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-validation-application_P1-4",
+        "prompt": "用户现在无法打开正式商城页面，影响仍在持续。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-validation-application_P1-5",
+        "prompt": "线上应用全部请求失败，正在发生。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-validation-application_P2-3",
+        "prompt": "演练用网页一直500，正式站点不受影响。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-validation-application_P2-4",
+        "prompt": "线上下单故障已结束，申请事后分析。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-validation-application_P2-5",
+        "prompt": "请紧急提供应用容灾培训材料，目前服务正常。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-validation-network_P1-3",
+        "prompt": "生产交换机故障导致正在全网断连。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-validation-network_P1-4",
+        "prompt": "正式网络连接持续失败，用户现在无法接入。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-validation-network_P1-5",
+        "prompt": "线上域名解析全面故障，此刻尚在处理。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-validation-network_P2-3",
+        "prompt": "网络演练环境断连，真实客户没有影响。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-validation-network_P2-4",
+        "prompt": "之前域名解析失败已经处理，现在询问原因。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-validation-network_P2-5",
+        "prompt": "急需一份网络运维手册，没有正在发生的故障。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-validation-database_P1-3",
+        "prompt": "生产数据库全部查询正在失败，还没有修复。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-validation-database_P1-4",
+        "prompt": "客户的线上数据库现在持续不可连接。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-validation-database_P1-5",
+        "prompt": "正式数据库集群此刻宕机，读写都无法完成。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-validation-database_P2-3",
+        "prompt": "沙箱数据库宕机，线上数据库不受影响。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-validation-database_P2-4",
+        "prompt": "生产数据库已经修好，现在仅申请复盘。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-validation-database_P2-5",
+        "prompt": "急要数据库运维培训文档，当前所有库都正常。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      }
+    ],
+    "test": [
+      {
+        "id": "incident-test-application_P1-6",
+        "prompt": "The production application is down right now and has not recovered.",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P1-7",
+        "prompt": "昨晚修好了网页，今天生产网页又全部打不开了。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P1-8",
+        "prompt": "测试环境正常，但正式应用目前持续崩溃。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P1-9",
+        "prompt": "不是询问应急预案：生产应用此刻正在全面报错。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P1-10",
+        "prompt": "客服说很不着急，但正式网页目前完全不可访问。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P1-11",
+        "prompt": "网络和数据库已排除故障；生产应用依然全部返回500。",
+        "expected": {
+          "queue": "application",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "application_P1",
+        "category": "workflow_application_P1"
+      },
+      {
+        "id": "incident-test-application_P2-6",
+        "prompt": "The production app recovered; this is only a retrospective request.",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-application_P2-7",
+        "prompt": "假如明天网页崩溃应如何处理？现在一切正常。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-application_P2-8",
+        "prompt": "不是正式系统停机，是实验应用坏了。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-application_P2-9",
+        "prompt": "今天网页恢复后没有再发生错误，只想查昨天原因。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-application_P2-10",
+        "prompt": "生产正常，请马上帮助修复沙箱中的应用报错。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-application_P2-11",
+        "prompt": "要求马上回复应用发布文档问题，不存在宕机。",
+        "expected": {
+          "queue": "application",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "application_P2",
+        "category": "workflow_application_P2"
+      },
+      {
+        "id": "incident-test-network_P1-6",
+        "prompt": "Production networking is unavailable now; the outage is ongoing.",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P1-7",
+        "prompt": "昨晚线路恢复，今天正式网络又全部断开了。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P1-8",
+        "prompt": "实验室网络没问题，生产出口现在彻底断网。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P1-9",
+        "prompt": "不是网络演习，正式网络当前确实全断。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P1-10",
+        "prompt": "邮件说可以慢慢看，但线上DNS此刻仍全面不可用。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P1-11",
+        "prompt": "应用服务器和数据库健康，生产路由故障还在导致断连。",
+        "expected": {
+          "queue": "network",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "network_P1",
+        "category": "workflow_network_P1"
+      },
+      {
+        "id": "incident-test-network_P2-6",
+        "prompt": "The production network has recovered; only a postmortem is requested.",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-network_P2-7",
+        "prompt": "如果以后DNS宕机会怎样？当前解析正常。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-network_P2-8",
+        "prompt": "正式网络没有故障，坏的是实验室交换机。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-network_P2-9",
+        "prompt": "线路已修好且没有复发，请说明过去的停机原因。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-network_P2-10",
+        "prompt": "请立刻排查测试路由器，生产连接正常。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-network_P2-11",
+        "prompt": "紧急咨询网络配置教程，所有连接仍正常。",
+        "expected": {
+          "queue": "network",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "network_P2",
+        "category": "workflow_network_P2"
+      },
+      {
+        "id": "incident-test-database_P1-6",
+        "prompt": "The production database is down right now and remains unavailable.",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P1-7",
+        "prompt": "昨晚数据库恢复了，今天生产库再次无法读写。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P1-8",
+        "prompt": "测试库正常，生产库现在全面拒绝连接。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P1-9",
+        "prompt": "不是预案咨询，正式数据库目前正在全面宕机。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P1-10",
+        "prompt": "申请人说不急，但生产库此刻依然全部不可用。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P1-11",
+        "prompt": "网络和应用健康，生产数据库本身还在持续停机。",
+        "expected": {
+          "queue": "database",
+          "priority": "P1"
+        },
+        "output_contract": "incident",
+        "family": "database_P1",
+        "category": "workflow_database_P1"
+      },
+      {
+        "id": "incident-test-database_P2-6",
+        "prompt": "The production database recovered; only a retrospective is needed.",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-test-database_P2-7",
+        "prompt": "若以后数据库宕机应如何处理？现在没有异常。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-test-database_P2-8",
+        "prompt": "坏的是练习数据库，正式库并未故障。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-test-database_P2-9",
+        "prompt": "生产库已经恢复且未复发，询问昨天的故障原因。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-test-database_P2-10",
+        "prompt": "请马上维修开发数据库，生产读写正常。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      },
+      {
+        "id": "incident-test-database_P2-11",
+        "prompt": "紧急咨询数据库备份教程，服务不存在宕机。",
+        "expected": {
+          "queue": "database",
+          "priority": "P2"
+        },
+        "output_contract": "incident",
+        "family": "database_P2",
+        "category": "workflow_database_P2"
+      }
+    ]
+  }
+}

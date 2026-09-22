@@ -12,6 +12,15 @@ from langgraph.store.base import GetOp, PutOp
 from typing import TypedDict
 
 class HighLevelTests(unittest.TestCase):
+    def test_task_query_reaches_rust_ranking(self):
+        with Memory(in_memory=True) as m:
+            user = m.user("recall")
+            user.remember("archived", key="a_archive")
+            user.remember("部署端口 17443", key="z_port")
+            context = user.session("s").context(query="部署端口", max_facts=1)
+            self.assertEqual(context.memories[0]["fact_key"], "z_port")
+            self.assertEqual(context.explain()["recall"]["method"], "lexical_overlap_v1")
+
     def test_shared_language_contract(self):
         import json
         from pathlib import Path
@@ -108,6 +117,14 @@ class HighLevelTests(unittest.TestCase):
         self.assertIsNone(store.get(("preferences",), "style"))
 
 class AsyncHighLevelTests(unittest.IsolatedAsyncioTestCase):
+    async def test_async_task_query_reaches_rust_ranking(self):
+        async with AsyncMemory(in_memory=True) as m:
+            user = m.user("recall")
+            await user.remember("archived", key="a_archive")
+            await user.remember("部署端口 17443", key="z_port")
+            context = await user.session("s").context(query="部署端口", max_facts=1)
+            self.assertEqual(context.memories[0]["fact_key"], "z_port")
+
     async def test_native_async_and_graph(self):
         m = AsyncMemory(in_memory=True)
         user = m.user("alice")

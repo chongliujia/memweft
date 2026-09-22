@@ -2,6 +2,7 @@
 name = "memweft-store"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.89"
 license.workspace = true
 
 [dependencies]
@@ -9,7 +10,7 @@ chrono = { version = "0.4", features = ["serde"] }
 serde = "1"
 serde_json = "1"
 memweft-types = { path = "../memweft-types" }
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.31", features = ["bundled", "functions"] }
 r2d2_sqlite = "0.24"
 postgres = { version = "0.19", optional = true }
 r2d2 = "0.8"

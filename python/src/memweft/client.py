@@ -4,6 +4,10 @@ from ._core import MemWeftStore
 
 
 class Memory:
+    def storage_status(self):
+        """Instance-local maintenance diagnostics; does not run a checkpoint."""
+        return self._request({"op": "storage_status"})
+
     def close(self):
         self._store = None
 
@@ -13,9 +17,9 @@ class Memory:
     def __exit__(self, *_):
         self.close()
 
-    def user(self, user_id: str, *, tenant_id: str = "default", agent_id: str = "default"):
+    def user(self, user_id: str, *, tenant_id: str = "default", agent_id: str = "default", memory_config: dict | None = None):
         from .api import UserMemory
-        return UserMemory(self, user_id, tenant_id=tenant_id, agent_id=agent_id)
+        return UserMemory(self, user_id, tenant_id=tenant_id, agent_id=agent_id, memory_config=memory_config)
 
     def _request(self, request):
         if self._store is None:
@@ -29,13 +33,16 @@ class Memory:
         backend="sqlite",
         dsn=None,
         database=None,
+        sqlite_options=None,
     ):
+        options = {} if sqlite_options is None else {"sqlite_options": json.dumps(sqlite_options, allow_nan=False)}
         self._store = MemWeftStore(
             path=path,
             backend=backend,
             dsn=dsn,
             database=database,
             in_memory=in_memory,
+            **options,
         )
 
     def append_event(self, event):
@@ -101,6 +108,10 @@ class Memory:
 
 
 class AsyncMemory:
+    async def storage_status(self):
+        """Instance-local maintenance diagnostics; does not run a checkpoint."""
+        return await self._request({"op": "storage_status"})
+
     def close(self):
         self._store = None
 
@@ -110,9 +121,9 @@ class AsyncMemory:
     async def __aexit__(self, *_):
         self.close()
 
-    def user(self, user_id: str, *, tenant_id: str = "default", agent_id: str = "default"):
+    def user(self, user_id: str, *, tenant_id: str = "default", agent_id: str = "default", memory_config: dict | None = None):
         from .api import AsyncUserMemory
-        return AsyncUserMemory(self, user_id, tenant_id=tenant_id, agent_id=agent_id)
+        return AsyncUserMemory(self, user_id, tenant_id=tenant_id, agent_id=agent_id, memory_config=memory_config)
 
     async def _request(self, request):
         if self._store is None:
@@ -126,13 +137,16 @@ class AsyncMemory:
         backend="sqlite",
         dsn=None,
         database=None,
+        sqlite_options=None,
     ):
+        options = {} if sqlite_options is None else {"sqlite_options": json.dumps(sqlite_options, allow_nan=False)}
         self._store = MemWeftStore(
             path=path,
             backend=backend,
             dsn=dsn,
             database=database,
             in_memory=in_memory,
+            **options,
         )
 
     async def append_event(self, event):

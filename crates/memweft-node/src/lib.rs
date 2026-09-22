@@ -9,9 +9,11 @@ pub struct NativeMemory {
 #[napi]
 impl NativeMemory {
     #[napi(factory)]
-    pub async fn open(path: String) -> napi::Result<Self> {
+    pub async fn open(path: String, sqlite_options: Option<String>) -> napi::Result<Self> {
         tokio::task::spawn_blocking(move || {
-            memweft::Memory::open(path)
+            let options = sqlite_options.as_deref().map(serde_json::from_str::<memweft::SqliteOptions>)
+                .transpose().map_err(|e| napi::Error::from_reason(e.to_string()))?.unwrap_or_default();
+            memweft::Memory::open_with_options(path, options)
                 .map(|memory| Self {
                     inner: Mutex::new(Some(memory)),
                 })

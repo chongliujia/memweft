@@ -19,8 +19,39 @@ use crate::{
 
 const SCHEMA_VERSION: i64 = 1;
 
+/// Storage-level options, independent of Agent memory-pool bindings.
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct SqliteOptions {
+    /// None retains SQLite's automatic checkpoints. Some(100..=60000) moves
+    /// periodic PASSIVE checkpoints to a dedicated worker for this store.
+    pub background_checkpoint_ms: Option<u64>,
+    /// Soft trigger for a zero-busy-timeout TRUNCATE attempt. Active snapshots
+    /// can defer reclamation; this is not a hard WAL size or transaction limit.
+    pub wal_reclaim_threshold_bytes: Option<u64>,
+}
+
+impl SqliteOptions {
+    fn validate(&self, in_memory: bool) -> StoreResult<()> {
+        if let Some(bytes) = self.wal_reclaim_threshold_bytes {
+            if self.background_checkpoint_ms.is_none() || !(65_536..=1_099_511_627_776).contains(&bytes) {
+                return Err(StoreError::InvalidInput("wal_reclaim_threshold_bytes requires background checkpoint and 64 KiB..=1 TiB".into()));
+            }
+        }
+        if let Some(ms) = self.background_checkpoint_ms {
+            if in_memory || !(100..=60_000).contains(&ms) {
+                return Err(StoreError::InvalidInput(
+                    "background_checkpoint_ms requires a file database and 100..=60000 ms".into()));
+            }
+        }
+        Ok(())
+    }
+}
+
 pub struct SqliteStore {
     path: PathBuf,
+    // Stop/join maintenance before closing the pool's connections.
+    checkpoint: Option<crate::checkpoint::Checkpointer>,
     pool: Pool<SqliteConnectionManager>,
 }
 
@@ -34,8 +65,13 @@ impl std::fmt::Debug for SqliteStore {
 
 impl SqliteStore {
     pub fn new<P: Into<PathBuf>>(path: P) -> StoreResult<Self> {
+        Self::new_with_options(path, SqliteOptions::default())
+    }
+
+    pub fn new_with_options<P: Into<PathBuf>>(path: P, options: SqliteOptions) -> StoreResult<Self> {
         let path = path.into();
         let as_str = path.to_string_lossy();
+        options.validate(as_str == ":memory:")?;
         if as_str == ":memory:" {
             return Self::new_in_memory();
         }
@@ -55,13 +91,24 @@ impl SqliteStore {
             ensure_schema(&conn)?;
         }
         
+        let checkpoint = if let Some(ms) = options.background_checkpoint_ms {
+            let mut conn = Connection::open(&path)?;
+            configure_connection(&mut conn, true)?;
+            Some(crate::checkpoint::Checkpointer::start(conn, std::time::Duration::from_millis(ms), options.wal_reclaim_threshold_bytes)?)
+        } else { None };
+        let background = checkpoint.is_some();
         let manager = SqliteConnectionManager::file(&path)
-            .with_init(|conn| configure_connection(conn, true));
+            .with_init(move |conn| {
+                configure_connection(conn, true)?;
+                if background { conn.pragma_update(None, "wal_autocheckpoint", 0)?; }
+                Ok(())
+            });
         let pool = Pool::new(manager)
             .map_err(|err| StoreError::Storage(err.to_string()))?;
         
         Ok(Self {
             path,
+            checkpoint,
             pool,
         })
     }
@@ -80,6 +127,7 @@ impl SqliteStore {
         
         Ok(Self {
             path: PathBuf::from(":memory:"),
+            checkpoint: None,
             pool,
         })
     }
@@ -167,11 +215,27 @@ impl SqliteStore {
         F: FnOnce(&mut Connection) -> StoreResult<T>,
     {
         let mut conn = self.pool.get().map_err(|err| StoreError::Storage(err.to_string()))?;
-        f(&mut conn)
+        if let Some(checkpoint) = &self.checkpoint {
+            if checkpoint.failed.load(std::sync::atomic::Ordering::Acquire) {
+                conn.pragma_update(None, "wal_autocheckpoint", 1000)?;
+                return f(&mut conn);
+            }
+            let before: i64 = conn.query_row("SELECT total_changes()", [], |r|r.get(0))?;
+            let result = f(&mut conn);
+            // Includes trigger-maintained postings. Rollbacks may cause an extra
+            // wakeup, but writes are never queued or acknowledged before commit.
+            let after: rusqlite::Result<i64> = conn.query_row("SELECT total_changes()", [], |r|r.get(0));
+            if after.map_or(true, |n| n != before) { checkpoint.notify(); }
+            result
+        } else {
+            f(&mut conn)
+        }
     }
 }
 
 fn configure_connection(conn: &mut Connection, use_wal: bool) -> Result<(), rusqlite::Error> {
+    crate::indexed_recall::register(conn)?;
+    conn.set_prepared_statement_cache_capacity(64);
     conn.busy_timeout(std::time::Duration::from_secs(5))?;
     if use_wal {
         conn.execute_batch(
@@ -191,6 +255,7 @@ fn configure_connection(conn: &mut Connection, use_wal: bool) -> Result<(), rusq
 
 fn ensure_schema(conn: &Connection) -> StoreResult<()> {
     crate::documents::ensure_schema(conn)?;
+    crate::pools::ensure_schema(conn)?;
     conn.execute_batch(
         "
             CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -432,10 +497,33 @@ fn ensure_schema(conn: &Connection) -> StoreResult<()> {
         )?;
     }
 
+    crate::indexed_recall::ensure_schema(conn)?;
     Ok(())
 }
 
 impl Store for SqliteStore {
+    fn storage_status(&self) -> StoreResult<serde_json::Value> {
+        Ok(serde_json::json!({"supported": true, "backend": "sqlite",
+            "sqlite_version": rusqlite::version(),
+            "checkpoint": self.checkpoint.as_ref().map(|c|c.status()).unwrap_or_else(||
+                serde_json::json!({"mode": if self.path == Path::new(":memory:") { "memory" } else { "automatic" }}))}))
+    }
+    fn recall_candidates(&self, scope: &Scope, pools: &[String], query: Option<&str>, limit: usize) -> StoreResult<Option<crate::RecallCandidates>> {
+        crate::indexed_recall::query(self, scope, pools, query, limit).map(Some)
+    }
+    fn pool_facts(&self, scope: &Scope, pool: &str) -> StoreResult<Vec<crate::PoolFact>> {
+        crate::pools::list(self, scope, pool)
+    }
+    fn put_pool_fact(&self, scope: &Scope, pool: &str, fact: Fact, expected: Option<u64>) -> StoreResult<crate::PoolFact> {
+        let key = fact.fact_key.clone();
+        crate::pools::write(self, scope, pool, &key, Some(fact), expected)?.ok_or(StoreError::NotFound)
+    }
+    fn forget_pool_fact(&self, scope: &Scope, pool: &str, key: &str, expected: Option<u64>) -> StoreResult<bool> {
+        Ok(crate::pools::write(self, scope, pool, key, None, expected)?.is_some())
+    }
+    fn mutate_documents_checked(&self, scope: &Scope, mutations: &[crate::Mutation], guards: &[crate::PoolRevision]) -> StoreResult<()> {
+        crate::documents::mutate_checked(self, scope, mutations, guards)
+    }
     fn documents(&self, scope: &Scope, prefix: &[String]) -> StoreResult<Vec<crate::Document>> {
         crate::documents::list(self, scope, prefix)
     }
@@ -726,26 +814,7 @@ impl Store for SqliteStore {
             }
 
             let mut stmt = conn.prepare(&sql)?;
-            let rows = stmt.query_map(params_from_iter(params), |row| {
-                let value_json: String = row.get(2)?;
-                let status: String = row.get(3)?;
-                let sources: String = row.get(7)?;
-                let scope_level: String = row.get(8)?;
-                Ok(Fact {
-                    fact_id: row.get(0)?,
-                    fact_key: row.get(1)?,
-                    value: decode_json_row(&value_json)?,
-                    status: parse_enum(&status, fact_status_from_str)?,
-                    validity: memweft_types::Validity {
-                        valid_from: row.get::<_, Option<i64>>(4)?.map(from_millis),
-                        valid_to: row.get::<_, Option<i64>>(5)?.map(from_millis),
-                    },
-                    confidence: row.get(6)?,
-                    sources: decode_json_row(&sources)?,
-                    scope_level: parse_enum(&scope_level, scope_level_from_str)?,
-                    notes: row.get(9)?,
-                })
-            })?;
+            let rows = stmt.query_map(params_from_iter(params), decode_fact_row)?;
 
             let mut facts = Vec::new();
             for fact in rows {
@@ -757,7 +826,7 @@ impl Store for SqliteStore {
 
     fn upsert_fact(&self, scope: &Scope, fact: Fact) -> StoreResult<()> {
         self.with_connection(|conn| {
-            conn.execute(
+            conn.prepare_cached(
                 "
                 INSERT INTO facts (
                     tenant_id, user_id, agent_id, fact_id, fact_key, value_json, status,
@@ -773,8 +842,7 @@ impl Store for SqliteStore {
                               sources = excluded.sources,
                               scope_level = excluded.scope_level,
                               notes = excluded.notes
-                ",
-                params_from_iter(vec![
+                ")?.execute(params_from_iter(vec![
                     SqlValue::Text(scope.tenant_id.clone()),
                     SqlValue::Text(scope.user_id.clone()),
                     SqlValue::Text(scope.agent_id.clone()),
@@ -788,8 +856,7 @@ impl Store for SqliteStore {
                     SqlValue::Text(encode_json(&fact.sources)?),
                     SqlValue::Text(scope_level_to_str(&fact.scope_level).to_string()),
                     SqlValue::Text(fact.notes),
-                ]),
-            )?;
+                ]))?;
             Ok(())
         })
     }
@@ -1557,6 +1624,52 @@ mod tests {
     };
     use serde_json::json;
 
+    #[test]
+    fn background_checkpoint_preserves_commit_visibility_and_restores_fallback() {
+        use std::sync::atomic::Ordering;
+        assert_eq!(rusqlite::version(), "3.51.3", "runtime must use the verified bundled WAL-reset fix");
+        let path = std::env::temp_dir().join(format!("memweft-checkpoint-{}-{}.db",
+            std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()));
+        assert!(SqliteStore::new_with_options(":memory:", SqliteOptions { background_checkpoint_ms: Some(100), ..Default::default() }).is_err());
+        assert!(SqliteStore::new_with_options(&path, SqliteOptions { background_checkpoint_ms: Some(0), ..Default::default() }).is_err());
+        assert!(!path.exists());
+        assert!(SqliteStore::new_with_options(&path, SqliteOptions {
+            wal_reclaim_threshold_bytes: Some(65536), ..Default::default()
+        }).is_err());
+        let store = SqliteStore::new_with_options(&path, SqliteOptions { background_checkpoint_ms: Some(100), ..Default::default() }).unwrap();
+        store.with_connection(|conn| {
+            assert_eq!(conn.query_row("PRAGMA wal_autocheckpoint", [], |r|r.get::<_,i64>(0))?, 0);
+            assert_eq!(conn.query_row("PRAGMA synchronous", [], |r|r.get::<_,i64>(0))?, 1);
+            conn.execute("CREATE TABLE checkpoint_probe(x)", [])?;
+            conn.execute("INSERT INTO checkpoint_probe VALUES(1)", [])?;
+            Ok(())
+        }).unwrap();
+        let reader = Connection::open(&path).unwrap();
+        reader.execute_batch("BEGIN; SELECT * FROM checkpoint_probe").unwrap();
+        store.with_connection(|conn| {
+            conn.execute("INSERT INTO checkpoint_probe VALUES(2)", [])?;
+            Ok(())
+        }).unwrap();
+        // A live snapshot remains stable while background maintenance runs.
+        std::thread::sleep(std::time::Duration::from_millis(250));
+        assert_eq!(reader.query_row("SELECT count(*) FROM checkpoint_probe", [], |r|r.get::<_,i64>(0)).unwrap(), 1);
+        reader.execute_batch("COMMIT").unwrap();
+        assert_eq!(reader.query_row("SELECT count(*) FROM checkpoint_probe", [], |r|r.get::<_,i64>(0)).unwrap(), 2);
+        assert!(!store.checkpoint.as_ref().unwrap().failed.load(Ordering::Acquire));
+        store.checkpoint.as_ref().unwrap().failed.store(true, Ordering::Release);
+        store.with_connection(|conn| {
+            assert_eq!(conn.query_row("PRAGMA wal_autocheckpoint", [], |r|r.get::<_,i64>(0))?, 1000);
+            Ok(())
+        }).unwrap();
+        drop(reader);
+        drop(store);
+        let conn = Connection::open(&path).unwrap();
+        assert_eq!(conn.query_row("SELECT count(*) FROM checkpoint_probe", [], |r|r.get::<_,i64>(0)).unwrap(), 2);
+        assert_eq!(conn.query_row("PRAGMA integrity_check", [], |r|r.get::<_,String>(0)).unwrap(), "ok");
+        drop(conn);
+        std::fs::remove_file(path).unwrap();
+    }
+
     fn sample_scope() -> Scope {
         Scope {
             tenant_id: "default".to_string(),
@@ -1784,3 +1897,25 @@ mod tests {
         assert_eq!(builds.len(), 1);
     }
 }
+
+// Shared projection used by list_facts and indexed candidate fetches.
+pub(crate) fn decode_fact_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<Fact> {
+                let value_json: String = row.get(2)?;
+                let status: String = row.get(3)?;
+                let sources: String = row.get(7)?;
+                let scope_level: String = row.get(8)?;
+                Ok(Fact {
+                    fact_id: row.get(0)?,
+                    fact_key: row.get(1)?,
+                    value: decode_json_row(&value_json)?,
+                    status: parse_enum(&status, fact_status_from_str)?,
+                    validity: memweft_types::Validity {
+                        valid_from: row.get::<_, Option<i64>>(4)?.map(from_millis),
+                        valid_to: row.get::<_, Option<i64>>(5)?.map(from_millis),
+                    },
+                    confidence: row.get(6)?,
+                    sources: decode_json_row(&sources)?,
+                    scope_level: parse_enum(&scope_level, scope_level_from_str)?,
+                    notes: row.get(9)?,
+                })
+            }

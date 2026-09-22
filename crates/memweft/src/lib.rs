@@ -7,8 +7,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::sync::Arc;
 mod langgraph;
+mod pools;
+mod recall;
 pub use memweft_learning as learning;
+pub use memweft_store::SqliteOptions;
 pub use memweft_learning::{AcceptancePolicy, Evaluation, Feedback, Proposal, Strategy, Target};
+pub use pools::{
+    ConflictPolicy, MemoryConfig, PoolAccess, PoolBinding, PoolFact, PoolRef, PoolRevision,
+};
 
 fn default_name() -> String {
     "default".into()
@@ -46,6 +52,8 @@ pub struct UserScope {
     pub tenant_id: String,
     #[serde(default = "default_name")]
     pub agent_id: String,
+    #[serde(default)]
+    pub memory_config: MemoryConfig,
 }
 impl UserScope {
     pub fn new(user: impl Into<String>) -> Self {
@@ -53,12 +61,14 @@ impl UserScope {
             user_id: user.into(),
             tenant_id: default_name(),
             agent_id: default_name(),
+            memory_config: MemoryConfig::default(),
         }
     }
     fn scope(&self) -> StoreResult<Scope> {
         validate_id("user_id", &self.user_id)?;
         validate_id("tenant_id", &self.tenant_id)?;
         validate_id("agent_id", &self.agent_id)?;
+        self.memory_config.validate()?;
         Ok(Scope {
             tenant_id: self.tenant_id.clone(),
             user_id: self.user_id.clone(),
@@ -77,12 +87,16 @@ impl Memory {
     pub fn open(path: impl Into<std::path::PathBuf>) -> StoreResult<Self> {
         Ok(Self::from_store(Arc::new(SqliteStore::new(path)?)))
     }
+    pub fn open_with_options(path: impl Into<std::path::PathBuf>, options: SqliteOptions) -> StoreResult<Self> {
+        Ok(Self::from_store(Arc::new(SqliteStore::new_with_options(path, options)?)))
+    }
     pub fn in_memory() -> StoreResult<Self> {
         Ok(Self::from_store(Arc::new(SqliteStore::new_in_memory()?)))
     }
     pub fn from_store(store: Arc<dyn Store>) -> Self {
         Self { store }
     }
+    pub fn storage_status(&self) -> StoreResult<Value> { self.store.storage_status() }
     pub fn user(&self, id: impl Into<String>) -> StoreResult<UserMemory> {
         self.scoped(UserScope::new(id))
     }
@@ -90,6 +104,7 @@ impl Memory {
         Ok(UserMemory {
             store: self.store.clone(),
             scope: scope.scope()?,
+            memory_config: scope.memory_config,
         })
     }
 
@@ -97,14 +112,33 @@ impl Memory {
     pub fn request(&self, value: Value) -> StoreResult<Value> {
         let request: Request = serde_json::from_value(value)?;
         match request {
+            Request::StorageStatus => self.store.storage_status(),
             Request::StoreBatch { scope, operations } => langgraph::batch(self, scope, operations),
-            Request::Remember { scope, key, value } => Ok(serde_json::to_value(
-                self.scoped(scope)?.remember(&key, value)?,
+            Request::Remember {
+                scope,
+                key,
+                value,
+                pool_id,
+                expected_revision,
+            } => Ok(serde_json::to_value(self.scoped(scope)?.remember_in(
+                pool_id.as_deref(),
+                &key,
+                value,
+                expected_revision,
+            )?)?),
+            Request::Memories { scope, pool_id } => Ok(serde_json::to_value(
+                self.scoped(scope)?.memory_records(pool_id.as_deref())?,
             )?),
-            Request::Memories { scope } => {
-                Ok(serde_json::to_value(self.scoped(scope)?.memories()?)?)
-            }
-            Request::Forget { scope, key } => Ok(json!(self.scoped(scope)?.forget(&key)?)),
+            Request::Forget {
+                scope,
+                key,
+                pool_id,
+                expected_revision,
+            } => Ok(json!(self.scoped(scope)?.forget_in(
+                pool_id.as_deref(),
+                &key,
+                expected_revision
+            )?)),
             Request::AddMessage {
                 scope,
                 session_id,
@@ -146,10 +180,11 @@ impl Memory {
                 case_ids,
             } => {
                 let user = self.scoped(scope)?;
-                let keys: std::collections::HashSet<_> =
-                    user.memories()?.into_iter().map(|f| f.fact_key).collect();
-                if proposal.source_keys.iter().any(|k| !keys.contains(k)) {
-                    return Err(invalid("proposal references a missing memory key"));
+                if !proposal.source_keys.is_empty() {
+                    let private = user.memory_records(Some("private"))?;
+                    if proposal.source_keys.iter().any(|key| !private.iter().any(|r| &r.fact.fact_key == key)) {
+                        return Err(invalid("proposal references a missing private memory key"));
+                    }
                 }
                 Ok(serde_json::to_value(user.learning().start(
                     &id,
@@ -227,39 +262,21 @@ impl Memory {
 pub struct UserMemory {
     store: Arc<dyn Store>,
     scope: Scope,
+    memory_config: MemoryConfig,
 }
 impl UserMemory {
     pub fn remember(&self, key: &str, value: Value) -> StoreResult<Fact> {
-        validate_id("key", key)?;
-        let fact = Fact {
-            fact_id: format!("memweft:key:{key}"),
-            fact_key: key.into(),
-            value,
-            status: FactStatus::Active,
-            validity: Validity::default(),
-            confidence: 1.0,
-            sources: vec![],
-            scope_level: ScopeLevel::User,
-            notes: String::new(),
-        };
-        self.store.upsert_fact(&self.scope, fact.clone())?;
-        Ok(fact)
+        Ok(self.remember_in(None, key, value, None)?.fact)
     }
     pub fn memories(&self) -> StoreResult<Vec<Fact>> {
-        self.store.list_facts(
-            &self.scope,
-            FactFilter {
-                status: Some(vec![FactStatus::Active]),
-                valid_at: Some(Utc::now()),
-                limit: None,
-            },
-        )
+        Ok(self
+            .memory_records(None)?
+            .into_iter()
+            .map(|r| r.fact)
+            .collect())
     }
     pub fn forget(&self, key: &str) -> StoreResult<bool> {
-        validate_id("key", key)?;
-        // SQLite deletes the fact, derived strategies and saved context snapshots
-        // in one transaction, advancing the learning epoch at the same time.
-        self.store.forget_fact(&self.scope, key)
+        self.forget_in(None, key, None)
     }
     pub fn session(&self, session_id: &str) -> StoreResult<Session> {
         validate_id("session_id", session_id)?;
@@ -269,7 +286,13 @@ impl UserMemory {
         })
     }
     pub fn learning(&self) -> learning::Learning {
-        learning::Learning::new(self.store.clone(), self.scope.clone())
+        learning::Learning::new(self.store.clone(), self.scope.clone()).with_memory_pools(
+            self.memory_config
+                .read_pools
+                .iter()
+                .map(|b| b.pool_id.clone())
+                .collect(),
+        )
     }
 }
 
@@ -364,11 +387,27 @@ impl Session {
         if options.conversation_window > 10_000 || options.max_facts > 10_000 {
             return Err(invalid("context item limits must be <= 10000"));
         }
-        let mut memories = self.user.memories()?;
-        memories.sort_by(|a, b| a.fact_key.cmp(&b.fact_key).then(a.fact_id.cmp(&b.fact_id)));
+        if options
+            .query
+            .as_ref()
+            .is_some_and(|query| query.len() > 4096)
+        {
+            return Err(invalid("context query must be at most 4096 UTF-8 bytes"));
+        }
+        const DIAGNOSTIC_LIMIT: usize = 64;
+        let (candidates, retrieval) = self.user.context_candidates(options.query.as_deref(), options.max_facts + DIAGNOSTIC_LIMIT)?;
+        let records = candidates.records;
+        let shadowed = candidates.shadowed;
+        let mut memories: Vec<_> = records.iter().map(|r| r.fact.clone()).collect();
+        let ranking = recall::Ranking::new(&mut memories, options.query.as_deref());
         let mut omissions = Vec::new();
+        let mut omissions_truncated = candidates.has_more;
         for f in memories.iter().skip(options.max_facts) {
-            omissions.push(json!({"section":"memories","id":f.fact_id,"reason":"max_facts"}));
+            if omissions.len() == DIAGNOSTIC_LIMIT { omissions_truncated = true; break; }
+            omissions.push(
+                json!({"section":"memories","id":f.fact_id,"reason":"max_facts",
+                "relevance_score":ranking.matches[&f.fact_id].score}),
+            );
         }
         memories.truncate(options.max_facts);
         let mut messages = if options.include_messages {
@@ -379,6 +418,7 @@ impl Session {
         if messages.len() > options.conversation_window {
             let keep = messages.len() - options.conversation_window;
             for m in &messages[..keep] {
+                if omissions.len() == DIAGNOSTIC_LIMIT { omissions_truncated = true; break; }
                 omissions
                     .push(json!({"section":"messages","id":m.key,"reason":"conversation_window"}));
             }
@@ -408,8 +448,28 @@ impl Session {
             } else {
                 break (String::new(), 0);
             };
-            omissions.push(json!({"section":dropped.0,"id":dropped.1,"reason":"budget"}));
+            let mut omission = json!({"section":dropped.0,"id":dropped.1,"reason":"budget"});
+            if dropped.0 == "memories" {
+                omission["relevance_score"] = json!(ranking.matches[&dropped.1].score);
+            }
+            if omissions.len() < DIAGNOSTIC_LIMIT { omissions.push(omission); }
+            else { omissions_truncated = true; }
         };
+        let recall = json!({"method": ranking.method(), "query_terms": ranking.query_terms,
+            "retrieval":retrieval, "ranking_plan":candidates.ranking_plan, "candidate_limit":options.max_facts + DIAGNOSTIC_LIMIT,
+            "candidates_truncated":candidates.has_more,
+            "counts_apply_to":"loaded_candidates", "index_entries_visited":null,
+            "inspected_facts":ranking.matches.len(),
+            "matched_facts":ranking.matches.values().filter(|m| m.score > 0).count(),
+            "selected":memories.iter().map(|f| json!({"id":f.fact_id,
+                "score":ranking.matches[&f.fact_id].score,
+                "key_terms":ranking.matches[&f.fact_id].key_terms,
+                "value_terms":ranking.matches[&f.fact_id].value_terms})).collect::<Vec<_>>()});
+        let pool_report = json!({"conflict_policy":self.user.memory_config.conflict_policy,
+            "shadowed_truncated":candidates.shadowed_truncated,
+            "shadowed_scope":if retrieval=="sqlite_inverted_v1" {"loaded_candidate_keys"} else {"all_visible_keys"},
+            "shadowed":shadowed, "selected":records.iter().filter(|r| memories.iter().any(|f| f.fact_id == r.fact.fact_id))
+                .map(|r| json!({"key":r.fact.fact_key,"pool_id":r.pool_id,"revision":r.revision,"writer_agent_id":r.writer_agent_id})).collect::<Vec<_>>()});
         Ok(Context {
             text,
             memories,
@@ -417,7 +477,13 @@ impl Session {
             strategies,
             report: json!({"max_tokens":options.max_tokens,"estimated_tokens":estimate,
                 "estimator":"ceil(utf8_bytes/4)","budget_applies_to":"text", "omissions":omissions,
-                "selection":"active facts by key; recent messages; accepted task strategy",
+                "diagnostic_limit":DIAGNOSTIC_LIMIT,"omissions_truncated":omissions_truncated,
+                "selection":if ranking.query_terms.is_empty() {
+                    "active facts by key; recent messages; accepted task strategy"
+                } else {
+                    "active facts by lexical relevance then key; recent messages; accepted task strategy"
+                },
+                "recall":recall, "pools":pool_report,
                 "model_token_limit_guaranteed":false}),
         })
     }
@@ -480,6 +546,9 @@ pub struct ContextOptions {
     pub max_facts: usize,
     pub include_messages: bool,
     pub task_type: Option<String>,
+    /// Current task text for lexical fact ranking before max_facts/budget cuts.
+    /// None preserves key ordering. This does not select the learned task strategy.
+    pub query: Option<String>,
 }
 impl Default for ContextOptions {
     fn default() -> Self {
@@ -489,6 +558,7 @@ impl Default for ContextOptions {
             max_facts: default_facts(),
             include_messages: yes(),
             task_type: None,
+            query: None,
         }
     }
 }
@@ -496,6 +566,7 @@ impl Default for ContextOptions {
 #[derive(Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 enum Request {
+    StorageStatus,
     StoreBatch {
         scope: UserScope,
         operations: Vec<langgraph::Operation>,
@@ -504,13 +575,18 @@ enum Request {
         scope: UserScope,
         key: String,
         value: Value,
+        pool_id: Option<String>,
+        expected_revision: Option<u64>,
     },
     Memories {
         scope: UserScope,
+        pool_id: Option<String>,
     },
     Forget {
         scope: UserScope,
         key: String,
+        pool_id: Option<String>,
+        expected_revision: Option<u64>,
     },
     AddMessage {
         scope: UserScope,
