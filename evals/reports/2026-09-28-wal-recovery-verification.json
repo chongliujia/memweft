@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "command": ".venv/bin/python -m unittest discover -s evals -p 'test_*.py' -v",
+  "passed": 64,
+  "failed": 0,
+  "log": "data/evals/wal-recovery-verification/offline-tests.log",
+  "log_sha256": "2c45be0af08ad1e3bd15d431b257a44a3d7c4e1e52627fe7e1c9761a7ad11c1c",
+  "note": "This round changes benchmark/verification code and documentation; the Rust maintenance implementation is unchanged."
+}

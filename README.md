@@ -20,6 +20,8 @@ MemWeft gives agents persistent facts, resumable conversations and relevant mode
 
 **Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
+**Development status (2026-09-28):** core SDK features are implemented and undergoing pre-release hardening. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. Package versions are still `0.1.0`; the current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database.
+
 ## What you can build
 
 | Need | Available today |
@@ -164,9 +166,38 @@ The executor sees the shared port, while the planner's work style stays private.
 
 ## Performance
 
-Measurements below are from local runs on **2026-09-22**, with source/build hashes and raw-result summaries. They describe tested workloads, not production SLOs.
+The latest measurements are from **2026-09-27–28 on macOS arm64**, using Rust 1.89.0 release builds. Earlier Linux measurements are retained separately below. Results describe tested workloads, not production SLOs; gains are calculated only within each paired experiment.
 
-### One million facts: mixed reads and writes
+### One million facts: exact bitmap retrieval
+
+Schema v3 adds exact 64-ID bitmaps to the existing postings index. It preserves lexical scores, pool precedence, validity checks and complete context output. The strongest improvement is for interleaved, dense two-term lists with few common records.
+
+| Metric | v2 ordered-ID blocks | v3 exact bitmaps |
+|---|---:|---:|
+| Serial two-term query p50 | 170.620 ms | **7.471 ms** |
+| Concurrent queries completed / offered | 16,910 / 30,000 | **29,995 / 30,000** |
+| Concurrent query p95, all query types | 189.06 ms | **11.61 ms** |
+| Concurrent write p99 | 0.97 ms | 1.37 ms |
+| Concurrent writes completed / offered | 59,975 / 60,000 | 59,973 / 60,000 |
+| Observed WAL peak | 926.80 MiB | 669.16 MiB |
+| WAL after idle recovery with clients open | 0.00 MiB | 0.00 MiB |
+
+Serial queries use one warmup and 20 measured complete Python SDK `context()` calls. The separate concurrent comparison uses four readers and four writers for five minutes, targeting 100 primary queries/s and 200 writes/s. An extra reader pins a snapshot for 90 seconds, followed by 45 seconds of idle observation with all SDK clients still open. Both builds use the same 1,000 ms maintenance interval and 16 MiB soft reclamation threshold. Missed arrival slots are counted, not queued; there is one sequential run per build.
+
+**Costs and limits:** the million-fact database grew from 823.30 to 889.90 MiB (**8.1%**); first open/upgrade/close took 3.80 seconds. Serial private-insert p50 rose from 0.113 to 0.345 ms. These are final file sizes, not peak migration space. Sparse IDs may see little benefit, and the 100k large-overlap fallback stayed around 181 ms. WAL reclamation remains opt-in and its threshold is not a space cap.
+
+All **30 complete context comparisons** matched. The correctness suite includes **1,309 differential ranking checks**, plus bitmap, signed-ID, migration rollback and concurrent-write cases. [Query, write and space report](evals/reports/2026-09-28-bitmap-recall.md) · [JSON](evals/reports/2026-09-28-bitmap-recall.json) · [WAL recovery configuration comparison](evals/reports/2026-09-28-wal-recovery.md)
+
+### Long conversations
+
+With 100,000 messages in the target session and 100,000 in other sessions, reading a ten-message context fell from **762.607 to 0.374 ms p50**. Complete context hashes matched at 1k, 10k and 100k target messages. This was a separate, warm, single-client document-index experiment; its database grew from 68.43 to 84.79 MiB. It does not measure the additional v3 bitmap cost. [Document hardening report](evals/reports/2026-09-27-document-hardening.md) · [Window behavior and limits](docs/long_conversations.md)
+
+Exact lexical ranking uses word/number matches and Chinese ideograph pairs, not BM25 or vector search. Three-or-more-term queries, large intersections and strict conflict validation can still require broad scans. Million-fact tests do not establish ten-million or hundred-million scale support. [Index behavior and migration](docs/indexed_retrieval.md)
+
+<details>
+<summary><b>Earlier Linux measurements — 2026-09-22, before the bitmap optimization</b></summary>
+
+### Coordinated maintenance on selected fast queries
 
 ![Before/after SQLite maintenance: write p99 33.58 to 4.32 ms, query p95 3.00 to 2.92 ms, WAL peak 107.45 to 117.33 MiB.](docs/assets/maintenance-performance.svg)
 
@@ -183,13 +214,15 @@ Measurements below are from local runs on **2026-09-22**, with source/build hash
 
 Write p99 fell **87.1%**, but both new runs recorded **zero successful WAL truncations** during measurement. The 16 MiB threshold is soft, and proactive reclamation remains opt-in. Runs were sequential on a shared local machine; read paths were selected fast paths. [Full report and both new runs](evals/reports/2026-09-22-wal-coordination.md) · [JSON](evals/reports/2026-09-22-wal-coordination.json)
 
-### Query shape matters
+### Earlier query-shape baseline
 
 ![Million-fact retrieval p95 on a logarithmic axis: fast paths around 1–2 ms, difficult two-term query around 338 ms.](docs/assets/retrieval-performance.svg)
 
 The SDK query includes retrieval, context construction and serialization. Exact lexical ranking uses word/number matches and Chinese ideograph pairs; it is not BM25 or vector search. Difficult queries still inspect many index entries. The comparison preserved complete context output and includes **1,273 differential ranking checks**. [Query report](evals/reports/2026-09-22-wal-and-agent.md) · [Index behavior and migration](docs/indexed_retrieval.md)
 
-Figures are generated from versioned JSON by [`evals/plot_readme_metrics.py`](evals/plot_readme_metrics.py). Million-fact tests do not establish ten-million or hundred-million scale support.
+These historical figures are generated from their versioned JSON by [`evals/plot_readme_metrics.py`](evals/plot_readme_metrics.py). They do not show the subsequent macOS bitmap results.
+
+</details>
 
 ## Agent evaluations
 
@@ -241,15 +274,17 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 - **Forgetting** removes facts and dependent scoped records; messages or content already copied into external prompts require separate deletion.
 - **Durability** uses SQLite WAL with `synchronous=NORMAL`. Process-crash tests do not prove power-loss durability. The bundled engine is SQLite 3.51.3; [source and fix provenance](vendor/libsqlite3-sys/MEMWEFT-PATCH.md) are retained.
 - **Isolation needs trusted identity:** callers must bind tenant/user/agent scopes correctly. Memory pools are not a production IAM service.
-- **Platform validation:** local measurements cover Linux. The CI matrix defines Linux, macOS and Windows builds; other platforms require successful CI runs.
+- **Platform validation:** recorded local measurements cover Linux and macOS arm64 in separate experiments. The CI matrix defines Linux, macOS and Windows builds; the latest hardening was verified locally on macOS, not by a new three-platform CI run.
+- **Database compatibility:** opening a legacy/v1/v2 database with this build upgrades its recall index to v3. Upgrade all processes together and retain a verified pre-upgrade backup; switching only the executable back is unsupported. [Upgrade and recovery](docs/upgrade_v3.md)
 
 ## Roadmap
 
 | Stage | Focus |
 |---|---|
-| Implemented | Scoped pools, indexed lexical recall, evaluation gates, coordinated local maintenance |
-| Under validation | Real Agent behavior, input boundaries, tool authorization and legitimate-operation completion |
-| Next | Long business conversations, multi-agent tool concurrency, longer storage soak tests and WAL space control |
+| Implemented | Scoped pools, exact bitmap recall, bounded conversation windows, private-source invalidation, evaluation gates and coordinated local maintenance |
+| Locally verified | Million-fact queries, five-minute multiwriter pressure, pinned snapshots and idle WAL recovery; [latest evidence](evals/reports/2026-09-28-bitmap-recall.md) |
+| Next: distributable preview | Successful native SDK CI on all three platforms, installable Python/Node artifacts, fresh-install smoke checks and application-specific upgrade/recovery rehearsals |
+| Next: business validation | Real long conversations, memory/learning task quality, concurrent tools, hours-long storage soak tests, write-heavy and sparse-term workloads |
 | Planned | Bounded hot-data preloading, staged background jobs, sharding; RDMA only after measuring a relevant bottleneck |
 
 ## Guides
@@ -259,6 +294,7 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 | [Memory pools](docs/memory_pools.md) | Private/shared configuration, precedence and concurrent revisions |
 | [Long conversations](docs/long_conversations.md) | Bounded message windows, document indexes and upgrade behavior |
 | [Indexed retrieval](docs/indexed_retrieval.md) | Ranking, bounded loading, fallbacks and migration |
+| [Upgrade and recovery](docs/upgrade_v3.md) | Schema v3 compatibility, verified backups, migration checks and restoring the old build |
 | [Learning design](docs/rust_learning_and_integrations.md) | Evaluation gates, strategy lifecycle and integration |
 | [Reference boundaries](docs/reference_boundaries.md) | Python input projection, content pins and information loss |
 | [Confirmed commands](docs/confirmed_commands.md) | Application confirmation, input binding, cancellation and execution checks |

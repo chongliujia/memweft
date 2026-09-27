@@ -14,10 +14,11 @@ retain fact-key/fact-ID order. A key-ordered index fills remaining slots when
 there are fewer positive matches than requested, including for empty queries.
 This is `lexical_overlap_v1`, not BM25 or vector retrieval.
 
-Index schema version 2 orders each scoped term's postings by descending weight.
-A B-tree seek now exposes its maximum weight without aggregating the entire list.
-This reorders the existing primary key; it does not add a second large postings
-index. Queries first try an exact bounded-prefix plan:
+Index schema version 3 retains v2's descending-weight postings order, exposing
+each scoped term's maximum weight with a B-tree seek. It also stores exact 64-ID
+bitmaps per scope, term and weight. Dense two-term intersections can compare
+these bitmaps without stepping through every individual posting. Queries first
+try an exact bounded-prefix plan:
 
 1. Consume short posting lists completely (at most 64 entries each). For longer
    lists, retain their maximum weights as conservative score bounds.
@@ -30,7 +31,10 @@ index. Queries first try an exact bounded-prefix plan:
 4. When two query terms leave a loose bound, try a competitive intersection:
    if the qualified prefix proves tie order at the current Kth score, enumerate
    every single-term list and weight-pair intersection that can score strictly
-   higher. Rescore the resulting union with the same qualification rules.
+   higher. Each weight pair uses two ordered bitmap cursors, buffering at most
+   256 bitmap rows each. Cursors seek past disjoint ID ranges; bitwise AND finds
+   the exact common IDs within aligned 64-ID blocks. Rescore the resulting
+   union with the same qualification rules.
 5. If either proof fails, run the original full postings aggregation.
 
 The plan includes one extra candidate to preserve the exact `has_more` flag.
@@ -40,6 +44,10 @@ two terms, at most four pools, and the existing 1/2/3 weights. It aborts to the
 general plan if its candidate union exceeds 2,048; the cap never silently drops
 winners. Disjoint frequent terms with a late overlapping match test this path.
 Three or more terms and large intersections can still require aggregation.
+The bitmap table adds disk space and write work. Each set bit denotes an actual
+posting, not a probabilistic match or a cached query answer. If a term occupies
+only one ID per block, it gets no compression benefit. Cursors bound buffered
+rows, not total query work; adversarial sparse IDs can still require many blocks.
 This is not WAND or Block-Max; worst-case query work
 still grows with matching postings. Prefix qualification can itself visit many
 entries when records are inactive or shadowed.
@@ -59,6 +67,10 @@ high-level `remember`/`forget` and low-level `Store` writes. Shared CAS failures
 transaction rollbacks cannot leave index-only changes. Selection, shadow sampling
 and fact-body retrieval use one SQLite read transaction, so concurrent updates
 cannot invalidate the chosen record between these steps.
+Posting insert/update/delete triggers maintain bitmap bits in that same
+transaction, including item deletion through foreign-key cascades. Clearing the
+last bit deletes the empty block. Bits use all 64 positions, including the signed
+SQLite integer high bit; item ID reconstruction preserves signed 64-bit IDs.
 Connections cache prepared query and fact-write statements, including their
 trigger programs. Statement reuse does not cache query results or weaken CAS,
 read snapshots, or commit durability.
@@ -109,21 +121,27 @@ UTF-8-byte estimate, not a model-tokenizer guarantee.
 
 ## Existing databases and deployment
 
-On first open, the new SDK creates index schema version 2 and backfills existing
+For executable backup, first-open checks and restoration steps, use the
+[schema v3 upgrade and recovery guide](upgrade_v3.md). Schema v3 is independent
+of the development SDK package version, which is still `0.1.0`.
+
+On first open, the new SDK creates index schema version 3 and backfills existing
 private facts and live shared records in one immediate transaction. Existing
 fact/document tables and shared revision tombstones remain authoritative. Failure
 rolls back the entire index migration, including its schema. Later opens reuse
 that version. The one-time backfill takes additional time and disk space; it is
 reported separately from steady-state query latency in the benchmark.
 
-Existing version 1 indexes migrate atomically by copying their postings into the
-new primary-key order and replacing the maintenance triggers; facts and item IDs
-are preserved. Migration failure rolls back the version, tables, and triggers.
+Existing version 2 indexes retain their postings and item IDs, backfill the bitmap
+table, then install its maintenance triggers in one immediate transaction. Version
+1 additionally copies postings into v2's primary-key order. Facts and item IDs are
+preserved. Migration failure rolls back the version, tables, and triggers.
 The copy needs temporary additional disk space and a write lock. Freed pages stay
 in the SQLite file for reuse: the file need not shrink when the old table is
-dropped. No automatic `VACUUM` is performed. Version 1 SDKs reject a version 2
+dropped. No automatic `VACUUM` is performed. Older v1/v2 SDKs reject a version 3
 database, so upgrade all processes before reopening a migrated persistent file.
-Allow space for the migration's WAL as well as both postings layouts; final file
+Allow space for the bitmap backfill, temporary grouping, migration WAL and (for
+v1) both postings layouts; final file
 size is not a measurement of peak migration disk usage.
 
 Run the first migration during a maintenance/startup window before admitting
@@ -150,7 +168,13 @@ Use a normal database backup before upgrading persistent application data.
   migration tests verify preserved weights, rollback, trigger maintenance, and
   subsequent cached writes/deletes.
 - Another 97 differential checks cover competitive intersections, weight tiers,
-  pool precedence and candidate-cap fallback (1,273 differential checks total).
+  pool precedence and candidate-cap fallback.
+- Another 36 differential checks cover 255/256/257 and 511/512/513-entry list
+  boundaries, disjoint lists, trailing overlaps, and updates/deletions that change
+  index-ID order (1,309 differential checks total).
+- Bitmap tests additionally cover signed high bits, minimum/maximum item IDs,
+  cursor-page boundaries, v2 backfill failure/rollback, posting weight changes
+  and cascaded deletion. v1 and legacy migrations now end at v3.
 - A dedicated batched-diagnostic test checks relevance-ordered keys, pool order,
   differing values and the 64-entry truncation boundary. SQLite upgrade and
   final full-context comparisons are in the [WAL/Agent follow-up](../evals/reports/2026-09-22-wal-and-agent.md).
@@ -173,6 +197,16 @@ adds fixed-rate read/write comparisons and a second exact query path, without
 changing index schema version 2. [Background checkpointing](async_pipeline.md)
 is a separate opt-in storage option; normal write acknowledgements still follow
 the source/index transaction commit.
+
+The [posting-block comparison](../evals/reports/2026-09-27-intersections.md) measures
+the existing v2 index with and without ordered block seeks across interleaved,
+clustered, skewed and large-overlap fixtures. It checks full context equality and
+retains the aggregation fallback's slower timings alongside the improvements.
+
+The [v3 bitmap comparison](../evals/reports/2026-09-28-bitmap-recall.md) separately
+measures migration, disk size, write costs and complete SDK queries on copied v2
+fixtures, then repeats the multiwriter pressure workload. Bitmap costs and slow
+fallbacks are reported alongside any query gains.
 
 The remaining performance boundaries are broad-term scoring, `error` mode's
 full-scan conflict validation, full history retrieval, and large explicit context

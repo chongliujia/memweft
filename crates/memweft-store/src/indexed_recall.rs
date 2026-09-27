@@ -53,7 +53,7 @@ fn version(conn: &Connection) -> StoreResult<Option<i64>> {
             r.get(0)
         })
         .optional()?;
-    if !matches!(version, Some(1 | 2)) {
+    if !matches!(version, Some(1 | 2 | 3)) {
         return Err(StoreError::Storage(
             "unsupported recall index version".into(),
         ));
@@ -65,12 +65,12 @@ fn version(conn: &Connection) -> StoreResult<Option<i64>> {
 // mutation, including low-level Store writes. A client missing the versioned
 // tokenizer fails its write rather than silently leaving stale index entries.
 pub(crate) fn ensure_schema(conn: &Connection) -> StoreResult<()> {
-    if version(conn)? == Some(2) {
+    if version(conn)? == Some(3) {
         return Ok(());
     }
     let tx = Transaction::new_unchecked(conn, TransactionBehavior::Immediate)?;
     let previous = version(&tx)?;
-    if previous == Some(2) {
+    if previous == Some(3) {
         return Ok(());
     }
     if previous == Some(1) {
@@ -95,6 +95,14 @@ pub(crate) fn ensure_schema(conn: &Connection) -> StoreResult<()> {
             UPDATE memweft_recall_version SET version=2;",
         )?;
         install_triggers(&tx, false)?;
+        install_blocks(&tx)?;
+        tx.execute("UPDATE memweft_recall_version SET version=3", [])?;
+        tx.commit()?;
+        return Ok(());
+    }
+    if previous == Some(2) {
+        install_blocks(&tx)?;
+        tx.execute("UPDATE memweft_recall_version SET version=3", [])?;
         tx.commit()?;
         return Ok(());
     }
@@ -117,8 +125,43 @@ pub(crate) fn ensure_schema(conn: &Connection) -> StoreResult<()> {
         CREATE INDEX memweft_recall_term_item ON memweft_recall_terms(item_id);",
     )?;
     install_triggers(&tx, true)?;
-    tx.execute("INSERT INTO memweft_recall_version VALUES(2)", [])?;
+    install_blocks(&tx)?;
+    tx.execute("INSERT INTO memweft_recall_version VALUES(3)", [])?;
     tx.commit()?;
+    Ok(())
+}
+
+/// Exact 64-ID bitmaps reduce dense intersections without changing the score.
+/// Scope, term and weight remain separate; no Bloom-filter false positives.
+fn install_blocks(tx: &Transaction<'_>) -> StoreResult<()> {
+    tx.execute_batch("CREATE TABLE memweft_recall_blocks(
+        tenant_id TEXT NOT NULL,user_id TEXT NOT NULL,agent_id TEXT NOT NULL,
+        pool_id TEXT NOT NULL,term TEXT NOT NULL,weight INTEGER NOT NULL,
+        block_id INTEGER NOT NULL,bits INTEGER NOT NULL,
+        PRIMARY KEY(tenant_id,user_id,agent_id,pool_id,term,weight DESC,block_id)
+        ) WITHOUT ROWID;
+        INSERT INTO memweft_recall_blocks
+        SELECT tenant_id,user_id,agent_id,pool_id,term,weight,item_id >> 6,
+               SUM(1 << (item_id & 63)) FROM memweft_recall_terms
+        GROUP BY tenant_id,user_id,agent_id,pool_id,term,weight,item_id >> 6;")?;
+    // Bits in each group are unique by the postings primary key. SUM is thus
+    // bitwise OR, including the signed high bit, without integer overflow.
+    let insert = "INSERT INTO memweft_recall_blocks
+        VALUES(new.tenant_id,new.user_id,new.agent_id,new.pool_id,new.term,new.weight,
+               new.item_id >> 6,1 << (new.item_id & 63))
+        ON CONFLICT(tenant_id,user_id,agent_id,pool_id,term,weight,block_id)
+        DO UPDATE SET bits=bits | excluded.bits;";
+    let delete = "UPDATE memweft_recall_blocks SET bits=bits & ~(1 << (old.item_id & 63))
+        WHERE tenant_id=old.tenant_id AND user_id=old.user_id AND agent_id=old.agent_id
+          AND pool_id=old.pool_id AND term=old.term AND weight=old.weight AND block_id=old.item_id >> 6;
+        DELETE FROM memweft_recall_blocks WHERE tenant_id=old.tenant_id AND user_id=old.user_id
+          AND agent_id=old.agent_id AND pool_id=old.pool_id AND term=old.term AND weight=old.weight
+          AND block_id=old.item_id >> 6 AND bits=0;";
+    // Postings triggers also cover FK cascades, direct index maintenance and
+    // transaction rollback. Empty blocks disappear in the same source write.
+    tx.execute_batch(&format!("CREATE TRIGGER memweft_recall_blocks_insert AFTER INSERT ON memweft_recall_terms BEGIN {insert} END;
+        CREATE TRIGGER memweft_recall_blocks_delete AFTER DELETE ON memweft_recall_terms BEGIN {delete} END;
+        CREATE TRIGGER memweft_recall_blocks_update AFTER UPDATE ON memweft_recall_terms BEGIN {delete} {insert} END;"))?;
     Ok(())
 }
 
@@ -236,6 +279,42 @@ const ELIGIBLE: &str = "i.active=1 AND (i.valid_from IS NULL OR i.valid_from<=?4
 
 type OrderedItem = (String, String, i64);
 type ScoredItem = (i64, String, String, i64);
+
+/// A weight-specific bitmap list, read in bounded pages. Seeking skips disjoint
+/// ID ranges, while bitwise AND handles interleaved IDs within a 64-ID block.
+#[derive(Default)]
+struct PostingCursor {
+    block: Vec<(i64, i64)>,
+    exhausted: bool,
+}
+
+impl PostingCursor {
+    const BLOCK_SIZE: usize = 256;
+
+    fn seek(
+        &mut self,
+        statement: &mut rusqlite::Statement<'_>,
+        scope: &Scope,
+        agent: &str,
+        pool: &str,
+        posting: (&str, i64),
+        lower: i64,
+    ) -> StoreResult<Option<(i64, i64)>> {
+        let index = self.block.partition_point(|(id, _)| *id < lower);
+        if let Some(id) = self.block.get(index) {
+            return Ok(Some(*id));
+        }
+        if self.exhausted {
+            return Ok(None);
+        }
+        self.block = statement.query_map(params![scope.tenant_id, scope.user_id,
+            agent, pool, posting.0, posting.1, lower, Self::BLOCK_SIZE as i64],
+            |r| Ok((r.get(0)?, r.get(1)?)))?.collect::<Result<_, _>>()?;
+        self.exhausted = self.block.len() < Self::BLOCK_SIZE;
+        Ok(self.block.first().copied())
+    }
+}
+
 struct Search<'a, 'conn> {
     tx: &'a Transaction<'conn>,
     scope: &'a Scope,
@@ -366,11 +445,9 @@ impl Search<'_, '_> {
         let mut single = self.tx.prepare_cached("SELECT item_id FROM memweft_recall_terms
             WHERE tenant_id=?1 AND user_id=?2 AND agent_id=?3 AND pool_id=?4 AND term=?5
               AND weight>?6 LIMIT ?7")?;
-        let mut pair = self.tx.prepare_cached("SELECT a.item_id FROM memweft_recall_terms a
-            CROSS JOIN memweft_recall_terms b
-            WHERE a.tenant_id=?1 AND a.user_id=?2 AND a.agent_id=?3 AND a.pool_id=?4 AND a.term=?5 AND a.weight=?7
-              AND b.tenant_id=?1 AND b.user_id=?2 AND b.agent_id=?3 AND b.pool_id=?4 AND b.term=?6 AND b.weight=?8
-              AND b.item_id=a.item_id LIMIT ?9")?;
+        let mut postings = self.tx.prepare_cached("SELECT block_id,bits FROM memweft_recall_blocks
+            WHERE tenant_id=?1 AND user_id=?2 AND agent_id=?3 AND pool_id=?4 AND term=?5
+              AND weight=?6 AND block_id>=?7 ORDER BY block_id LIMIT ?8")?;
         for pool in self.pools {
             let agent = if pool == "private" { self.scope.agent_id.as_str() } else { "" };
             let mut weights = [0_i64; 2];
@@ -391,11 +468,27 @@ impl Search<'_, '_> {
             for a in 1..=weights[0].min(floor) {
                 for b in 1..=weights[1].min(floor) {
                     if a+b <= floor { continue; }
-                    let rows = pair.query_map(params![self.scope.tenant_id,self.scope.user_id,agent,pool,terms[0],terms[1],a,b,
-                        (CAP+1) as i64], |r|r.get::<_,i64>(0))?.collect::<Result<Vec<_>,_>>()?;
-                    if rows.len() > CAP { return Ok(false); }
-                    ids.extend(rows);
-                    if ids.len() > CAP { return Ok(false); }
+                    let mut left = PostingCursor::default();
+                    let mut right = PostingCursor::default();
+                    let mut lower = i64::MIN;
+                    loop {
+                        let Some((x, x_bits)) = left.seek(&mut postings, self.scope, agent, pool, (terms[0], a), lower)?
+                            else { break; };
+                        let Some((y, y_bits)) = right.seek(&mut postings, self.scope, agent, pool, (terms[1], b), x)?
+                            else { break; };
+                        if x == y {
+                            let mut common = (x_bits & y_bits) as u64;
+                            while common != 0 {
+                                ids.insert((x << 6) | i64::from(common.trailing_zeros()));
+                                if ids.len() > CAP { return Ok(false); }
+                                common &= common - 1;
+                            }
+                            let Some(next) = x.checked_add(1) else { break; };
+                            lower = next;
+                        } else {
+                            lower = y;
+                        }
+                    }
                 }
             }
         }
@@ -526,6 +619,7 @@ mod tests {
         }
     }
     fn remove_index(conn: &Connection) {
+        remove_blocks(conn);
         for table in ["facts", "memweft_pool_facts"] {
             for op in ["insert", "update", "delete"] {
                 conn.execute_batch(&format!("DROP TRIGGER memweft_recall_{table}_{op}"))
@@ -533,6 +627,101 @@ mod tests {
             }
         }
         conn.execute_batch("DROP TABLE memweft_recall_terms; DROP TABLE memweft_recall_items; DROP TABLE memweft_recall_version;").unwrap();
+    }
+    fn remove_blocks(conn: &Connection) {
+        conn.execute_batch("DROP TRIGGER memweft_recall_blocks_insert;
+            DROP TRIGGER memweft_recall_blocks_update;
+            DROP TRIGGER memweft_recall_blocks_delete;
+            DROP TABLE memweft_recall_blocks;").unwrap();
+    }
+
+    fn assert_blocks_match_postings(conn: &Connection) {
+        let mut expected = BTreeMap::<(String, i64), u64>::new();
+        let mut stmt = conn.prepare("SELECT json_array(tenant_id,user_id,agent_id,pool_id,term,weight),item_id FROM memweft_recall_terms").unwrap();
+        for row in stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?))).unwrap() {
+            let (key, id) = row.unwrap();
+            *expected.entry((key, id >> 6)).or_default() |= 1_u64 << (id & 63);
+        }
+        let mut stmt = conn.prepare("SELECT json_array(tenant_id,user_id,agent_id,pool_id,term,weight),block_id,bits FROM memweft_recall_blocks").unwrap();
+        let actual = stmt.query_map([], |r| Ok(((r.get::<_, String>(0)?, r.get::<_, i64>(1)?), r.get::<_, i64>(2)? as u64)))
+            .unwrap().collect::<Result<BTreeMap<_, _>, _>>().unwrap();
+        assert_eq!(actual, expected);
+    }
+
+    fn insert_test_posting(conn: &Connection, id: i64, term: &str, weight: i64) {
+        conn.execute("INSERT OR IGNORE INTO memweft_recall_items(id,tenant_id,user_id,agent_id,pool_id,identity,fact_id,fact_key,active)
+            VALUES(?,'t','u','a','private',?2,?2,?2,1)", params![id, id.to_string()]).unwrap();
+        conn.execute("INSERT INTO memweft_recall_terms VALUES('t','u','a','private',?,?,?)", params![term,id,weight]).unwrap();
+    }
+
+    #[test]
+    fn bitmap_high_bits_id_extremes_cascades_updates_and_backfill_are_exact() {
+        let store = SqliteStore::new_in_memory().unwrap();
+        store.with_connection(|conn| {
+            for id in (0..128).chain([i64::MIN, -65, -64, -1, i64::MAX]) {
+                insert_test_posting(conn, id, "red", 1);
+                if id & 1 == 0 { insert_test_posting(conn, id, "blue", 3); }
+            }
+            assert_eq!(conn.query_row("SELECT bits FROM memweft_recall_blocks WHERE term='red' AND block_id=0", [], |r|r.get::<_,i64>(0))?, -1);
+            assert_blocks_match_postings(conn);
+            remove_blocks(conn);
+            conn.execute("UPDATE memweft_recall_version SET version=2", [])?;
+            // Fail after CREATE/INSERT, proving DDL and backfill both roll back.
+            conn.execute_batch("CREATE TRIGGER memweft_recall_blocks_insert AFTER INSERT ON facts BEGIN SELECT 1; END;")?;
+            assert!(ensure_schema(conn).is_err());
+            assert_eq!(version(conn)?, Some(2));
+            assert!(!conn.prepare("SELECT 1 FROM sqlite_master WHERE name='memweft_recall_blocks'")?.exists([])?);
+            conn.execute_batch("DROP TRIGGER memweft_recall_blocks_insert")?;
+            ensure_schema(conn)?;
+            ensure_schema(conn)?;
+            assert_eq!(version(conn)?, Some(3));
+            assert_blocks_match_postings(conn);
+            conn.execute("UPDATE memweft_recall_terms SET weight=2 WHERE term='red' AND item_id<0", [])?;
+            assert_blocks_match_postings(conn);
+            let tx = conn.transaction()?;
+            tx.execute("DELETE FROM memweft_recall_items WHERE id>=0", [])?;
+            assert_blocks_match_postings(&tx);
+            tx.rollback()?;
+            assert_blocks_match_postings(conn);
+            conn.execute("DELETE FROM memweft_recall_items", [])?;
+            assert_eq!(conn.query_row("SELECT count(*) FROM memweft_recall_blocks", [], |r|r.get::<_,i64>(0))?, 0);
+            Ok(())
+        }).unwrap();
+    }
+
+    #[test]
+    fn bitmap_cursor_pages_preserve_gaps_tails_and_signed_ids() {
+        for size in [255, 256, 257, 511, 512, 513] {
+            let store = SqliteStore::new_in_memory().unwrap();
+            store.with_connection(|conn| {
+                let tx = conn.transaction()?;
+                let mut expected = BTreeSet::new();
+                for block in 0..size {
+                    let id = block * 64;
+                    insert_test_posting(&tx, id, "blue", 1);
+                    insert_test_posting(&tx, id + 1, "red", 1);
+                    if block % 127 == 0 || block == size - 1 {
+                        insert_test_posting(&tx, id + 63, "blue", 1);
+                        insert_test_posting(&tx, id + 63, "red", 1);
+                        expected.insert(id + 63);
+                    }
+                }
+                for id in [i64::MIN, -1, i64::MAX] {
+                    insert_test_posting(&tx, id, "blue", 1);
+                    insert_test_posting(&tx, id, "red", 1);
+                    expected.insert(id);
+                }
+                let scope = scope();
+                let pools = vec!["private".to_string()];
+                let terms = BTreeSet::from(["blue".to_string(), "red".to_string()]);
+                let search = Search { tx: &tx, scope: &scope, pools: &pools, bindings: "[]", terms: "[]", now: 0 };
+                let mut ids = BTreeSet::new();
+                assert!(search.competitive_pairs(&terms, 1, &mut ids)?);
+                assert_eq!(ids, expected);
+                assert_blocks_match_postings(&tx);
+                Ok(())
+            }).unwrap();
+        }
     }
     #[test]
     fn legacy_backfill_is_atomic_idempotent_and_supports_shared_tombstones() {
@@ -620,11 +809,12 @@ mod tests {
     }
 
     #[test]
-    fn v1_migration_preserves_postings_and_cached_writes_then_reuses_v2() {
+    fn v1_migration_preserves_postings_and_cached_writes_then_reuses_v3() {
         let store = SqliteStore::new_in_memory().unwrap();
         store.upsert_fact(&scope(), fact("port", "port host")).unwrap();
         store.put_pool_fact(&scope(), "team", fact("shared", "port"), None).unwrap();
         store.with_connection(|conn| {
+            remove_blocks(conn);
             // Build the exact v1 layout while retaining its items and triggers.
             for table in ["facts", "memweft_pool_facts"] {
                 for op in ["insert", "update", "delete"] {
@@ -653,7 +843,8 @@ mod tests {
             conn.execute_batch("ALTER TABLE memweft_recall_terms DROP COLUMN unexpected")?;
             ensure_schema(conn)?;
             ensure_schema(conn)?;
-            assert_eq!(version(conn)?, Some(2));
+            assert_eq!(version(conn)?, Some(3));
+            assert_blocks_match_postings(conn);
             assert_eq!(conn.query_row("SELECT sum(weight) FROM memweft_recall_terms", [], |r|r.get::<_,i64>(0))?, 7);
             // Maximum-weight probing uses the primary key, without temp sorting.
             let mut stmt = conn.prepare("EXPLAIN QUERY PLAN SELECT weight,item_id FROM memweft_recall_terms
@@ -671,6 +862,7 @@ mod tests {
         assert_eq!(r.records[0].fact.fact_key, "port");
         store.forget_pool_fact(&scope(), "team", "shared", None).unwrap();
         store.with_connection(|conn| {
+            assert_blocks_match_postings(conn);
             assert_eq!(conn.query_row("PRAGMA integrity_check", [], |r|r.get::<_,String>(0))?, "ok");
             assert!(!conn.prepare("PRAGMA foreign_key_check")?.exists([])?);
             Ok(())

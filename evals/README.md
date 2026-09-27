@@ -637,6 +637,129 @@ comparisons. A busy truncation is deferred,
 so the configured size is a soft threshold, not a cap. Do not mix performance
 runs with model evaluation or other deliberate heavy loads.
 
+## Ordered posting-block comparison
+
+`benchmark_intersections.py` prepares a disposable SQLite fixture with the native
+SDK's exact index, then measures the complete Python `context()` call. Archive
+the old native library before rebuilding. Use one process per native build and
+run the following commands sequentially, without other deliberate heavy loads:
+
+```bash
+PYTHONPATH=python/src python evals/benchmark_intersections.py \
+  --prepare --database data/evals/intersections-new.db --facts 100000 \
+  --native /path/to/old-native-library.so --label before \
+  --output data/evals/intersections-before.json --samples 20
+PYTHONPATH=python/src python evals/benchmark_intersections.py \
+  --database data/evals/intersections-new.db \
+  --native /path/to/new-native-library.so --label after \
+  --output data/evals/intersections-after.json --samples 20
+```
+
+Native extension filenames vary by platform. The default fixture has four user
+scopes, each containing `--facts` records plus one late two-term match:
+interleaved disjoint lists, contiguous disjoint lists, one dense/one short list,
+and a large overlap that must use exact aggregation. Add `--profiles balanced
+--facts 1000000` to preparation for a million-record interleaved fixture. Setup,
+index backfill and integrity checks are outside request timings. Each query has
+one discarded warmup; all measured samples and full context hashes (including
+diagnostics) are retained. Pair reports by profile/query and require identical
+context, runner and database hashes. The script also checks repeated-call
+equality and that querying leaves the fixture database file unchanged.
+
+These are warm, serial local measurements, not concurrent throughput or cold-I/O
+claims. See the [measured report](reports/2026-09-27-intersections.md).
+This runner assumes both builds reuse the same index schema and checks that the
+database file stays unchanged. For a v2→v3 upgrade, use separate copies with the
+bitmap runner below instead of opening the original v2 fixture with a v3 build.
+
+## Exact bitmap index comparison
+
+`benchmark_bitmaps.py` compares the v2 ordered-ID implementation with v3 exact
+64-ID bitmaps. Use existing v2 fixtures from `benchmark_intersections.py`; the
+runner copies each fixture for each build and measures first open/upgrade/close
+separately from warm query timing. It also measures private/shared inserts and
+updates. Archive the old native library before rebuilding:
+
+```bash
+PYTHONPATH=python/src python evals/benchmark_bitmaps.py \
+  --before /path/to/v2-native.so --after /path/to/v3-native.so \
+  --source data/evals/intersections-100k.db \
+  --source data/evals/intersections-million.db \
+  --output data/evals/bitmap-comparison-new-run
+PYTHONPATH=python/src python evals/benchmark_wal_recovery.py \
+  --native /path/to/v3-native.so --source data/evals/intersections-million.db \
+  --output data/evals/bitmap-pressure-new-run --mode reclaim
+PYTHONPATH=python/src python evals/report_bitmap_recall.py \
+  --micro data/evals/bitmap-comparison-new-run \
+  --before-pressure data/evals/v2-pressure-run \
+  --after-pressure data/evals/bitmap-pressure-new-run \
+  --output data/evals/bitmap-report
+```
+
+The v2 pressure run must use the same source and pressure runner/options as v3;
+the verifier rejects mismatched fixtures, query contexts, runner hashes or
+settings. Default micro measurements use one warmup plus 20 samples per query
+and 200 writes per operation. Each binary runs in a separate process. Upgrades
+are performed only on disposable copies; the original fixtures remain reusable
+with the older binary. Opening v3 files with v1/v2 SDKs is unsupported.
+
+Archive manifests, binaries, scripts, raw samples and databases under `data/evals/`.
+Final database size is not peak migration space; the v3 bitmap table increases
+storage and trigger work even for sparse terms. See the
+[measured query/space/write/concurrency report](reports/2026-09-28-bitmap-recall.md).
+
+## Multiple writers, slow queries and idle WAL recovery
+
+`benchmark_wal_recovery.py` complements the previous pressure runner with several
+independent writers, a slow two-term query, and an idle observation phase that
+keeps every SDK client open. It requires a disposable `balanced` fixture from
+`benchmark_intersections.py`; a million-record example is:
+
+```bash
+PYTHONPATH=python/src python evals/benchmark_intersections.py \
+  --prepare --database data/evals/recovery-source.db \
+  --facts 1000000 --profiles balanced --native /path/to/native.so \
+  --label recovery-fixture --output data/evals/recovery-fixture.json
+PYTHONPATH=python/src python evals/benchmark_wal_recovery.py \
+  --native /path/to/native.so --source data/evals/recovery-source.db \
+  --output data/evals/recovery-passive --mode passive
+PYTHONPATH=python/src python evals/benchmark_wal_recovery.py \
+  --native /path/to/native.so --source data/evals/recovery-source.db \
+  --output data/evals/recovery-reclaim --mode reclaim
+PYTHONPATH=python/src python evals/report_wal_recovery.py \
+  --passive data/evals/recovery-passive --reclaim data/evals/recovery-reclaim \
+  --output data/evals/recovery-comparison
+```
+
+Run the two modes sequentially. Defaults are 300 seconds, four reader processes,
+four writer processes, total offered rates of 100 primary queries/s and 200
+writes/s, a 90-second pinned snapshot starting at second 60, and 45 seconds of
+idle recovery. Both modes use a 1,000 ms background checkpoint interval; only
+`reclaim` enables the 16 MiB soft reclamation threshold. Each writer owns a
+different shared key, so SQLite write-lock contention is exercised without
+intentional same-key CAS conflicts. The six-query cycle includes one slow
+two-term query. Each successful primary query checks its complete saved Context,
+then checks all writers' live generations, mirrors and revisions in a separate
+snapshot. That extra validation is outside primary-query timing but consumes
+load-scheduling time. Late slots are skipped; there is no catch-up queue.
+
+The controller samples allocated WAL file length every 100 ms during load and
+recovery. A drain barrier confirms all foreground work has ended before recovery;
+an explicit release gate prevents SDK close-time cleanup from being counted as
+background recovery. The subsequent integrity checkpoint is also outside that
+window. All clients sample maintenance status during both phases. The report
+verifier checks native/runner hashes, raw latencies, offered/completed slots,
+monotonic revisions, persisted acknowledgements, pinned snapshots and connection
+lifetimes. It accepts unreclaimed space as an outcome rather than silently
+extending the run or invoking an extra checkpoint to make recovery pass.
+
+Each run archives its native binary and runner sources alongside raw JSON and a
+database copy. A failed run keeps its status and available evidence. This runner
+needs local multiprocessing IPC; it makes no network or model calls. Keep database
+copies, binaries and raw logs under Git-ignored `data/evals/`. Neither a single
+five-minute run nor the idle phase establishes hours/days endurance or production
+throughput. See the [measured follow-up](reports/2026-09-28-wal-recovery.md).
+
 ## Local LangGraph Agent lifecycle replay
 
 ```bash

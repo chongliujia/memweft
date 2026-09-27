@@ -432,3 +432,43 @@ fn competitive_intersections_preserve_weights_shadowing_and_candidate_cap() {
     }).unwrap();
     assert_eq!(result.report["recall"]["ranking_plan"], "postings_aggregate");
 }
+
+#[test]
+fn posting_blocks_preserve_boundary_matches_gaps_and_mutations() {
+    let m = Memory::in_memory().unwrap();
+    for size in [255, 256, 257, 511, 512, 513] {
+        let user = m.user(format!("blocks-{size}")).unwrap();
+        for i in 0..size {
+            // Interleaved, disjoint IDs require traversal across full blocks.
+            user.remember(&format!("a_{i:04}"), json!("blue")).unwrap();
+            user.remember(&format!("b_{i:04}"), json!("red")).unwrap();
+        }
+        check(&user, Some("red blue"), 10);
+        // Replace rows at and around each block boundary. Updated index IDs
+        // move to the end, independently of the fact-key ranking order.
+        let boundaries: Vec<_> = [0, 254, 255, 256, 510, 511, 512].into_iter()
+            .filter(|i| *i < size).map(|i| format!("b_{i:04}")).collect();
+        for key in &boundaries {
+            user.remember(key, json!("red blue")).unwrap();
+        }
+        user.remember("z_last", json!("red blue")).unwrap();
+        for k in [1, 10, 194] { check(&user, Some("red blue"), k); }
+        let result = user.session("s").unwrap().context(ContextOptions {
+            query: Some("blue red".into()), max_facts: 10, include_messages: false,
+            ..Default::default()
+        }).unwrap();
+        assert_eq!(result.report["recall"]["ranking_plan"], "bounded_intersection");
+        // Exhausting a short final block must still retain its cached tail;
+        // removing every overlap must restore the exact single-term tie order.
+        for key in &boundaries { user.forget(key).unwrap(); }
+        user.remember("z_last", json!("blue")).unwrap();
+        check(&user, Some("red blue"), 10);
+        // A long ID gap can be skipped even when only the trailing row matches.
+        for i in 0..300 {
+            user.remember(&format!("c_{i:04}"), json!("blue")).unwrap();
+        }
+        user.remember("z_last", json!("red blue")).unwrap();
+        check(&user, Some("red blue"), 10);
+        assert_eq!(oracle(&user, Some("red blue"), 1)[0].fact_key, "z_last");
+    }
+}
