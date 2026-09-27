@@ -96,7 +96,8 @@ fn references(value: &Value, pool: &str, key: &str) -> bool {
 fn invalidate(tx: &Transaction<'_>, scope: &Scope, pool: &str, key: &str) -> StoreResult<()> {
     let mut stmt = tx.prepare(
         "SELECT agent_id, document FROM memweft_documents
-        WHERE tenant_id=? AND user_id=?",
+        WHERE tenant_id=? AND user_id=?
+        AND namespace >= '[\"learning\",' AND namespace < '[\"learning\"^'",
     )?;
     let rows = stmt.query_map(params![scope.tenant_id, scope.user_id], |r| {
         Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))

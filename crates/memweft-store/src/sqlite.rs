@@ -6,7 +6,7 @@ use memweft_types::{
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::types::{Type, Value as SqlValue};
-use rusqlite::{params_from_iter, Connection};
+use rusqlite::{params_from_iter, Connection, OptionalExtension};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashSet;
@@ -392,6 +392,8 @@ fn ensure_schema(conn: &Connection) -> StoreResult<()> {
             );
             CREATE INDEX IF NOT EXISTS facts_scope_status
                 ON facts (tenant_id, user_id, agent_id, status);
+            CREATE INDEX IF NOT EXISTS facts_scope_key
+                ON facts (tenant_id, user_id, agent_id, fact_key);
 
             CREATE TABLE IF NOT EXISTS episodes (
                 tenant_id TEXT NOT NULL,
@@ -527,6 +529,12 @@ impl Store for SqliteStore {
     fn documents(&self, scope: &Scope, prefix: &[String]) -> StoreResult<Vec<crate::Document>> {
         crate::documents::list(self, scope, prefix)
     }
+    fn document(&self, scope: &Scope, namespace: &[String], key: &str) -> StoreResult<Option<crate::Document>> {
+        crate::documents::get(self, scope, namespace, key)
+    }
+    fn recent_documents(&self, scope: &Scope, namespace: &[String], limit: usize, omission_limit: usize) -> StoreResult<crate::DocumentWindow> {
+        crate::documents::recent(self, scope, namespace, limit, omission_limit)
+    }
 
     fn mutate_documents(&self, scope: &Scope, mutations: &[crate::Mutation]) -> StoreResult<()> {
         crate::documents::mutate(self, scope, mutations)
@@ -535,7 +543,7 @@ impl Store for SqliteStore {
     fn forget_fact(&self, scope: &Scope, key: &str) -> StoreResult<bool> {
         self.with_connection(|conn| {
             let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-            crate::documents::forget_derived(&tx, scope, key)?;
+            crate::documents::invalidate_private_sources(&tx, scope, key)?;
             let count = tx.execute(
                 "DELETE FROM facts WHERE tenant_id=? AND user_id=? AND agent_id=? AND fact_key=?",
                 rusqlite::params![scope.tenant_id, scope.user_id, scope.agent_id, key],
@@ -826,7 +834,24 @@ impl Store for SqliteStore {
 
     fn upsert_fact(&self, scope: &Scope, fact: Fact) -> StoreResult<()> {
         self.with_connection(|conn| {
-            conn.prepare_cached(
+            let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+            let previous_key: Option<String> = tx.prepare_cached(
+                "SELECT fact_key FROM facts WHERE tenant_id=? AND user_id=? AND agent_id=? AND fact_id=?"
+            )?.query_row(rusqlite::params![scope.tenant_id, scope.user_id, scope.agent_id, fact.fact_id], |r| r.get(0)).optional()?;
+            // Low-level callers can rename an ID or insert a second ID for an
+            // existing key. Both the old and replaced key are source changes.
+            if previous_key.as_deref() != Some(&fact.fact_key) {
+                let replaces_key: bool = tx.prepare_cached(
+                    "SELECT EXISTS(SELECT 1 FROM facts WHERE tenant_id=? AND user_id=? AND agent_id=? AND fact_key=?)"
+                )?.query_row(rusqlite::params![scope.tenant_id, scope.user_id, scope.agent_id, fact.fact_key], |r| r.get(0))?;
+                if replaces_key {
+                    crate::documents::invalidate_private_sources(&tx, scope, &fact.fact_key)?;
+                }
+            }
+            if let Some(key) = previous_key {
+                crate::documents::invalidate_private_sources(&tx, scope, &key)?;
+            }
+            tx.prepare_cached(
                 "
                 INSERT INTO facts (
                     tenant_id, user_id, agent_id, fact_id, fact_key, value_json, status,
@@ -857,6 +882,7 @@ impl Store for SqliteStore {
                     SqlValue::Text(scope_level_to_str(&fact.scope_level).to_string()),
                     SqlValue::Text(fact.notes),
                 ]))?;
+            tx.commit()?;
             Ok(())
         })
     }

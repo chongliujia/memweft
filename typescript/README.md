@@ -51,8 +51,8 @@ console.log((await chat.context({ maxTokens: 1000 })).text);
 facts by lexical relevance before applying context limits. Inspect
 `context.explain().recall` for matched terms and scores. `LangGraphMemory.context`
 accepts the same option. Omitting `query` preserves key order. This does not
-perform vector search or avoid loading active facts; see the repository guide
-for ranking rules.
+perform vector search. SQLite uses indexed candidate loading; see the repository
+guide for ranking rules and fallback paths.
 
 ## Agent memory pools
 

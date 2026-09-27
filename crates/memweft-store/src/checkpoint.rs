@@ -330,7 +330,15 @@ mod tests {
         .into_bytes();
         name.push(0xff);
         let path = std::env::temp_dir().join(std::ffi::OsString::from_vec(name));
-        let conn = Connection::open(&path).unwrap();
+        let conn = match Connection::open(&path) {
+            Ok(conn) => conn,
+            // macOS may reject non-UTF-8 filenames before SQLite can report a
+            // filename. This also prevents starting uncoordinated maintenance.
+            #[cfg(target_os = "macos")]
+            Err(rusqlite::Error::SqliteFailure(error, _))
+                if error.code == rusqlite::ErrorCode::CannotOpen => return,
+            Err(error) => panic!("opening non-UTF-8 test path: {error}"),
+        };
         assert!(conn.path().is_none());
         let result = Checkpointer::start(conn, Duration::from_millis(100), None);
         assert!(matches!(result, Err(StoreError::InvalidInput(_))));

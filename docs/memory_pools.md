@@ -92,6 +92,16 @@ proposal = {
 
 Updating or deleting a shared source invalidates dependent jobs, saved strategy versions and active strategies across Agents in the same tenant/user. This also covers dependencies inherited from a baseline strategy. Updating to the same value still advances the revision and invalidates derivatives. Unrelated strategies survive. An Agent handle that no longer reads a required pool does not include that strategy in `active()` or context; learning history remains owned by the Agent.
 
+Updating or deleting a **private** source also invalidates its dependent jobs,
+saved versions and active strategies, including inherited dependencies, within
+that tenant/user/Agent only. Rewriting the same value counts as an update. The
+fact write and invalidation commit together; a failed write preserves both.
+Private facts still return `revision: null` and do not accept `expected_revision`.
+Their existing scope-level learning generation guards adoption and rollback, so
+an unrelated in-flight evaluation in the same private scope can also conflict;
+restart it with a new job ID. Unrelated accepted strategies remain available.
+Upgrade all writers together to obtain these invalidation semantics.
+
 Dependencies must be declared by the application. MemWeft cannot discover copies placed in arbitrary messages, external documents or model-generated text; those are not automatically removed.
 
 ## TypeScript

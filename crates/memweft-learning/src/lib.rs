@@ -212,11 +212,7 @@ impl Learning {
         Ok(guards)
     }
     fn find(&self, section: &str, key: &str) -> StoreResult<Option<Document>> {
-        Ok(self
-            .store
-            .documents(&self.scope, &ns(section))?
-            .into_iter()
-            .find(|d| d.namespace == ns(section) && d.key == key))
+        self.store.document(&self.scope, &ns(section), key)
     }
     pub fn feedback(&self, feedback: Feedback) -> StoreResult<Feedback> {
         if [
@@ -542,6 +538,12 @@ impl Learning {
         version: Option<&str>,
         expected_version: &str,
     ) -> StoreResult<Option<Strategy>> {
+        // Pin the generation BEFORE reading a saved strategy. A source update
+        // between this read and publication must fail the transaction's CAS.
+        let epoch = self
+            .find("epoch", "current")?
+            .map(|d| d.revision)
+            .unwrap_or(0);
         let key = slot(task, &target);
         let current = self.find("active", &key)?.ok_or(StoreError::NotFound)?;
         let active: Strategy = serde_json::from_value(current.value)?;
@@ -560,10 +562,6 @@ impl Learning {
                 Ok(s)
             })
             .transpose()?;
-        let epoch = self
-            .find("epoch", "current")?
-            .map(|d| d.revision)
-            .unwrap_or(0);
         self.store.mutate_documents_checked(
             &self.scope,
             &[

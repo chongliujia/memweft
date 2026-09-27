@@ -14,7 +14,7 @@ mod indexed_recall;
 mod lexical;
 pub use indexed_recall::RecallCandidates;
 pub use lexical::terms as lexical_terms;
-pub use documents::{Document, Mutation};
+pub use documents::{Document, DocumentWindow, Mutation};
 pub use pools::{PoolFact, PoolRef, PoolRevision};
 mod sqlite;
 mod checkpoint;
@@ -160,6 +160,22 @@ pub trait Store: Send + Sync {
     /// Versioned JSON documents. The initial implementation supports SQLite.
     fn documents(&self, _scope: &Scope, _prefix: &[String]) -> StoreResult<Vec<Document>> {
         Err(StoreError::InvalidInput("document API requires the sqlite backend".into()))
+    }
+    /// Fetch one exact namespace/key without enumerating the scope.
+    fn document(&self, scope: &Scope, namespace: &[String], key: &str) -> StoreResult<Option<Document>> {
+        Ok(self.documents(scope, namespace)?.into_iter()
+            .find(|d| d.namespace == namespace && d.key == key))
+    }
+    /// Latest documents in an exact namespace, returned chronologically. The
+    /// bounded omission sample lists the oldest excluded keys in the same snapshot.
+    fn recent_documents(&self, scope: &Scope, namespace: &[String], limit: usize, omission_limit: usize) -> StoreResult<DocumentWindow> {
+        let mut documents = self.documents(scope, namespace)?;
+        documents.retain(|d| d.namespace == namespace);
+        documents.sort_by(|a, b| a.created_at.cmp(&b.created_at).then(a.key.cmp(&b.key)));
+        let excluded = documents.len().saturating_sub(limit);
+        let omitted_keys = documents.iter().take(excluded.min(omission_limit)).map(|d| d.key.clone()).collect();
+        Ok(DocumentWindow { documents: documents.split_off(excluded), omitted_keys,
+            omissions_truncated: excluded > omission_limit })
     }
     fn mutate_documents(&self, _scope: &Scope, _mutations: &[Mutation]) -> StoreResult<()> {
         Err(StoreError::InvalidInput("document API requires the sqlite backend".into()))

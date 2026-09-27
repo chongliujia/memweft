@@ -257,6 +257,7 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 | Guide | Contents |
 |---|---|
 | [Memory pools](docs/memory_pools.md) | Private/shared configuration, precedence and concurrent revisions |
+| [Long conversations](docs/long_conversations.md) | Bounded message windows, document indexes and upgrade behavior |
 | [Indexed retrieval](docs/indexed_retrieval.md) | Ranking, bounded loading, fallbacks and migration |
 | [Learning design](docs/rust_learning_and_integrations.md) | Evaluation gates, strategy lifecycle and integration |
 | [Reference boundaries](docs/reference_boundaries.md) | Python input projection, content pins and information loss |

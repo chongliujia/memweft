@@ -1,5 +1,20 @@
 # Local model scenario evaluation
 
+For the offline long-conversation SDK benchmark, run after building the Python
+extension:
+
+```bash
+python evals/benchmark_documents.py --label current \
+  --output data/evals/documents-current.json
+```
+
+This uses no model service. It tests 1,000/10,000/100,000 messages plus the same
+number of unrelated messages, checks the selected window, and records raw timing
+samples and native/runner hashes. Run each build in a separate process with its
+own `PYTHONPATH` and compare `context_sha256` before comparing latency. Seeding,
+index construction and a context warmup are outside request timing. See the
+[2026-09-27 comparison](reports/2026-09-27-document-hardening.md) for scope and limits.
+
 Run synthetic, inspectable agent tasks against the real Rust memory and learning
 core and a local chat-completions endpoint. The runner uses Python's standard
 library and the MemWeft CLI; it needs no Python native extension or model SDK.

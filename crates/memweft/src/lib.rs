@@ -340,9 +340,7 @@ impl Session {
             Ok(()) => {}
             Err(StoreError::Conflict(_)) => {
                 let existing = self
-                    .messages()?
-                    .into_iter()
-                    .find(|m| m.key == id)
+                    .user.store.document(&self.user.scope, &self.namespace(), &id)?
                     .ok_or(StoreError::NotFound)?;
                 if existing.value["role"] == role && existing.value["content"] == content {
                     return Ok(existing);
@@ -353,9 +351,7 @@ impl Session {
             }
             Err(e) => return Err(e),
         }
-        self.messages()?
-            .into_iter()
-            .find(|m| m.key == id)
+        self.user.store.document(&self.user.scope, &self.namespace(), &id)?
             .ok_or(StoreError::NotFound)
     }
     pub fn messages(&self) -> StoreResult<Vec<Document>> {
@@ -410,20 +406,14 @@ impl Session {
             );
         }
         memories.truncate(options.max_facts);
-        let mut messages = if options.include_messages {
-            self.messages()?
-        } else {
-            vec![]
-        };
-        if messages.len() > options.conversation_window {
-            let keep = messages.len() - options.conversation_window;
-            for m in &messages[..keep] {
-                if omissions.len() == DIAGNOSTIC_LIMIT { omissions_truncated = true; break; }
-                omissions
-                    .push(json!({"section":"messages","id":m.key,"reason":"conversation_window"}));
-            }
-            messages.drain(..keep);
-        }
+        let window = if options.include_messages {
+            self.user.store.recent_documents(&self.user.scope, &self.namespace(),
+                options.conversation_window, DIAGNOSTIC_LIMIT - omissions.len())?
+        } else { Default::default() };
+        omissions_truncated |= window.omissions_truncated;
+        omissions.extend(window.omitted_keys.into_iter().map(|id|
+            json!({"section":"messages","id":id,"reason":"conversation_window"})));
+        let mut messages = window.documents;
         let mut strategies: Vec<Strategy> = if let Some(task) = &options.task_type {
             self.user
                 .learning()
