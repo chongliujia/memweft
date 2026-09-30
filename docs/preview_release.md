@@ -58,7 +58,7 @@ reproducible-build guarantee. The CLI is built by CI but is not part of the SDK
 installation smoke test. CI artifacts follow GitHub's retention policy.
 
 ```bash
-python -m pip install /path/to/memweft-0.2.0a1-<matching-tags>.whl
+python -m pip install '/path/to/memweft-0.2.0a1-<matching-tags>.whl'
 npm install /path/to/memweft-0.2.0-alpha.1.tgz
 ```
 
