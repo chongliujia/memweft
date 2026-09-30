@@ -1,0 +1,338 @@
+{
+  "version": "workflow-guard-v1",
+  "description": "Eight new synthetic typed-input workflow tasks: tls/refund/feature_scope/maintenance, two per category, one Chinese and one English question in each. Seven have a complete current fact set and one deliberately lacks a forgotten required key. This compares application-declared required-key completion with lexical retrieval; it does not test automatic relation discovery, free-text extraction, or improved cross-language semantic retrieval. Structured inputs and different tasks mean accuracy is not directly comparable with workflow-comparison-v1. The runner adds the same 16 archival distractors per case; lexical/required each receive two observations, at most 32 calls, including the missing-data case without changing denominators. Missing-data proposals are observed only and must never execute. Questions and expected answers are fixed before any model evaluation and must not change in response to model results.",
+  "cases": [
+    {
+      "id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "description": "中文：证书仍有效但主机时钟偏差超标；同名观测键在外部作用域有干扰值。",
+      "question": "检查边缘服务的 TLS 握手状态。时钟偏差的绝对值超过允许阈值时优先校时；否则，可信时间已达到证书到期时刻则续证，其余情况不采取动作。过期分钟数按可信时间减到期时刻计算，最少为零。请返回规定的动作、过期分钟数和证书负责人。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "tls.certificate",
+          "value": {
+            "version": 1,
+            "expires_minute": 525,
+            "owner": "clockwatch-desk-44"
+          }
+        },
+        {
+          "op": "remember",
+          "key": "clock.observation",
+          "value": {
+            "version": 1,
+            "now_minute": 480
+          }
+        },
+        {
+          "op": "remember",
+          "key": "host.clock",
+          "value": {
+            "version": 1,
+            "offset_seconds": -95,
+            "threshold_seconds": 45
+          }
+        },
+        {
+          "op": "remember",
+          "key": "clock.observation",
+          "value": {
+            "version": 1,
+            "now_minute": 900
+          },
+          "scope": {
+            "tenant_id": "guard-unrelated-tenant",
+            "user_id": "guard-unrelated-user",
+            "agent_id": "guard-unrelated-agent"
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "action": "synchronize_clock",
+        "expired_minutes": 0,
+        "owner": "clockwatch-desk-44"
+      }
+    },
+    {
+      "id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "description": "English: the certificate has expired while the host clock remains within tolerance.",
+      "question": "Review the TLS certificate against the current clock observation and host clock tolerance. Correct the clock first when its absolute offset exceeds the threshold; otherwise renew a certificate whose expiry time has been reached, and take no action while it remains valid. Report the action, nonnegative elapsed expiry minutes, and certificate owner using the required response format.",
+      "events": [
+        {
+          "op": "remember",
+          "key": "tls.certificate",
+          "value": {
+            "version": 1,
+            "expires_minute": 1090,
+            "owner": "edge-certistry-73"
+          }
+        },
+        {
+          "op": "remember",
+          "key": "clock.observation",
+          "value": {
+            "version": 1,
+            "now_minute": 1138
+          }
+        },
+        {
+          "op": "remember",
+          "key": "host.clock",
+          "value": {
+            "version": 1,
+            "offset_seconds": 5,
+            "threshold_seconds": 90
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 48,
+        "owner": "edge-certistry-73"
+      }
+    },
+    {
+      "id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "description": "中文：发货状态发生更新，在退款期限内按当前未发货数量计算整数最小货币单位金额。",
+      "question": "请处理这张订单尚未发货部分的退款。以当前订单状态为准；订单年龄不超过允许期限时退还未发货数量乘单价的金额，无需人工复核；超期则退款金额为零并转人工。单价和退款金额都以整数最小货币单位表示，币种沿用单价记录。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "refund.policy",
+          "value": {
+            "version": 1,
+            "window_days": 21
+          }
+        },
+        {
+          "op": "remember",
+          "key": "order.state",
+          "value": {
+            "version": 1,
+            "age_days": 13,
+            "ordered": 8,
+            "shipped": 2
+          }
+        },
+        {
+          "op": "remember",
+          "key": "price.unit",
+          "value": {
+            "version": 1,
+            "amount": 730,
+            "currency": "USD"
+          }
+        },
+        {
+          "op": "remember",
+          "key": "order.state",
+          "value": {
+            "version": 1,
+            "age_days": 13,
+            "ordered": 8,
+            "shipped": 5
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 2190,
+        "currency": "USD",
+        "needs_manual_review": false
+      }
+    },
+    {
+      "id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "description": "English: unshipped items exist, but the order is beyond the refund policy window.",
+      "question": "Apply the refund policy to the current order state and unit price. When the order age is within or equal to the allowed window, refund the unshipped quantity times the unit amount without manual review. Otherwise return zero refund and require manual review. Keep the recorded currency; all amounts are integer minor currency units. Return the required JSON fields.",
+      "events": [
+        {
+          "op": "remember",
+          "key": "refund.policy",
+          "value": {
+            "version": 1,
+            "window_days": 10
+          }
+        },
+        {
+          "op": "remember",
+          "key": "order.state",
+          "value": {
+            "version": 1,
+            "age_days": 16,
+            "ordered": 6,
+            "shipped": 2
+          }
+        },
+        {
+          "op": "remember",
+          "key": "price.unit",
+          "value": {
+            "version": 1,
+            "amount": 415,
+            "currency": "EUR"
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 0,
+        "currency": "EUR",
+        "needs_manual_review": true
+      }
+    },
+    {
+      "id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "description": "中文：离线能力仍被要求但尚未完成，已要求且完成的导出能力可纳入范围。",
+      "question": "根据当前产品要求和实现验收状态确定本期功能范围。某项功能只有同时被要求且已经就绪才纳入本期；离线功能被要求但尚未就绪时，未完成的离线工作会阻塞发布。请返回是否纳入离线、是否纳入 PDF 导出，以及未完成离线工作是否阻塞发布。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "product.requirements",
+          "value": {
+            "version": 1,
+            "offline_required": true,
+            "pdf_required": true
+          }
+        },
+        {
+          "op": "remember",
+          "key": "implementation.readiness",
+          "value": {
+            "version": 1,
+            "offline_ready": false,
+            "pdf_ready": true
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      }
+    },
+    {
+      "id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "description": "English: a ready but unrequested export capability must stay out of scope, while required offline work is ready.",
+      "question": "Compare the product requirements with implementation readiness. Include a capability only when it is both required and ready; being ready alone does not place it in scope. Unfinished offline work blocks release only when offline support is required but not ready. Return the offline inclusion, PDF export inclusion, and unfinished-offline blocking flags in the required JSON format.",
+      "events": [
+        {
+          "op": "remember",
+          "key": "product.requirements",
+          "value": {
+            "version": 1,
+            "offline_required": true,
+            "pdf_required": false
+          }
+        },
+        {
+          "op": "remember",
+          "key": "implementation.readiness",
+          "value": {
+            "version": 1,
+            "offline_ready": true,
+            "pdf_ready": true
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "include_offline": true,
+        "include_pdf_export": false,
+        "unfinished_offline_blocks_release": false
+      }
+    },
+    {
+      "id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "description": "中文：两个窗口都能容纳连续维护，选择剩余空闲最少的窗口而非直接选择最早的。",
+      "question": "安排一次不可拆分的连续维护。只考虑能完整容纳维护的候选时段，选择维护后空余分钟最少的一个；若空余相同，优先开始更早的，再按时段标识字典序选择。维护从选中时段开始立即进行。返回时段标识、HH:MM 格式的开始与结束时间及该时段剩余分钟数。所有分钟数均相对于同一天零点。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "maintenance.job",
+          "value": {
+            "version": 1,
+            "duration_minutes": 55
+          }
+        },
+        {
+          "op": "remember",
+          "key": "calendar.windows",
+          "value": {
+            "version": 1,
+            "windows": [
+              {
+                "id": "window-pine-61",
+                "start_minute": 540,
+                "end_minute": 615
+              },
+              {
+                "id": "window-birch-72",
+                "start_minute": 780,
+                "end_minute": 840
+              }
+            ]
+          }
+        }
+      ],
+      "expectation": "completed",
+      "expected": {
+        "window": "window-birch-72",
+        "start_time": "13:00",
+        "end_time": "13:55",
+        "unused_minutes": 5
+      }
+    },
+    {
+      "id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "description": "English: calendar windows are explicitly forgotten, leaving insufficient current facts for a defensible schedule.",
+      "question": "Schedule the maintenance job using the currently available calendar windows. Among windows long enough for uninterrupted work, choose the least unused time; break ties by earlier start, then lexicographic window identifier. Start immediately at the chosen window and report its identifier, HH:MM start and finish, and unused minutes. Use only current records, never recover forgotten windows or invent missing times.",
+      "events": [
+        {
+          "op": "remember",
+          "key": "maintenance.job",
+          "value": {
+            "version": 1,
+            "duration_minutes": 25
+          }
+        },
+        {
+          "op": "remember",
+          "key": "calendar.windows",
+          "value": {
+            "version": 1,
+            "windows": [
+              {
+                "id": "window-elm-83",
+                "start_minute": 420,
+                "end_minute": 470
+              },
+              {
+                "id": "window-maple-94",
+                "start_minute": 960,
+                "end_minute": 1000
+              }
+            ]
+          }
+        },
+        {
+          "op": "forget",
+          "key": "calendar.windows"
+        }
+      ],
+      "expectation": "needs_data",
+      "expected": null
+    }
+  ]
+}

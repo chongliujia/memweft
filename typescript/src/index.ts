@@ -25,7 +25,7 @@ export interface Strategy { version: string; parent: string | null; proposal: Pr
 export interface Job { id: string; proposal: Proposal; policy: Policy; dataset_version: string; evaluator_version: string; case_ids: string[]; baseline: Strategy | null; status: "evaluating" | "accepted" | "rejected" | "failed" | "cancelled"; reason: string; evaluation: Evaluation | null; pool_revisions: PoolRevision[] }
 export interface Feedback { id: string; task_type: string; session_id: string; run_id: string; success: boolean; details?: unknown }
 export interface StartJob { id: string; proposal: Proposal; policy?: Policy; dataset_version: string; evaluator_version: string; case_ids: string[] }
-export interface ContextOptions { maxTokens?: number; conversationWindow?: number; maxFacts?: number; includeMessages?: boolean; taskType?: string; query?: string }
+export interface ContextOptions { maxTokens?: number; conversationWindow?: number; maxFacts?: number; includeMessages?: boolean; taskType?: string; query?: string; requiredFactKeys?: string[] }
 export interface SqliteOptions { backgroundCheckpointMs?: number; walReclaimThresholdBytes?: number | null }
 export interface ContextData { text: string; memories: Fact[]; messages: Document[]; strategies: Strategy[]; report: Record<string, unknown> }
 export class Context implements ContextData {
@@ -83,6 +83,7 @@ export class Session {
       max_tokens: options.maxTokens, conversation_window: options.conversationWindow,
       max_facts: options.maxFacts, include_messages: options.includeMessages, task_type: options.taskType,
       query: options.query,
+      required_fact_keys: options.requiredFactKeys,
     }});
     return new Context(result);
   }

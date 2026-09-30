@@ -142,6 +142,13 @@ pub trait Store: Send + Sync {
     fn recall_candidates(&self, _scope: &Scope, _pools: &[String], _query: Option<&str>, _limit: usize) -> StoreResult<Option<RecallCandidates>> {
         Ok(None)
     }
+    /// Fetch required keys and ordinary candidates from one visibility snapshot.
+    /// Required records supplement (rather than consume) the diagnostic limit.
+    /// None asks the caller to use its full-scan compatibility fallback.
+    fn recall_candidates_with_required(&self, _scope: &Scope, _pools: &[String], _query: Option<&str>, _limit: usize,
+        _required_keys: &[String], _reject_conflicts: bool) -> StoreResult<Option<RecallCandidates>> {
+        Ok(None)
+    }
     fn pool_facts(&self, _scope: &Scope, _pool: &str) -> StoreResult<Vec<PoolFact>> {
         Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
     }

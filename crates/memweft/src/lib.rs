@@ -390,12 +390,39 @@ impl Session {
         {
             return Err(invalid("context query must be at most 4096 UTF-8 bytes"));
         }
+        if options.required_fact_keys.len() > 64 {
+            return Err(invalid("at most 64 required fact keys are supported"));
+        }
+        let mut required_positions = std::collections::BTreeMap::new();
+        for (index, key) in options.required_fact_keys.iter().enumerate() {
+            validate_id("required fact key", key)?;
+            if required_positions.insert(key.as_str(), index).is_some() {
+                return Err(invalid("duplicate required fact key"));
+            }
+        }
         const DIAGNOSTIC_LIMIT: usize = 64;
-        let (candidates, retrieval) = self.user.context_candidates(options.query.as_deref(), options.max_facts + DIAGNOSTIC_LIMIT)?;
+        let (candidates, retrieval) = self.user.context_candidates(options.query.as_deref(), options.max_facts + DIAGNOSTIC_LIMIT,
+            &options.required_fact_keys)?;
         let records = candidates.records;
         let shadowed = candidates.shadowed;
         let mut memories: Vec<_> = records.iter().map(|r| r.fact.clone()).collect();
         let ranking = recall::Ranking::new(&mut memories, options.query.as_deref());
+        // Stable sorting preserves lexical ranking among non-required records.
+        if !required_positions.is_empty() {
+            memories.sort_by_key(|fact| required_positions.get(fact.fact_key.as_str()).copied()
+                .unwrap_or(required_positions.len()));
+        }
+        let warnings = if ranking.query_terms.is_empty()
+            && (memories.len() > options.max_facts || candidates.has_more)
+        {
+            vec![json!({
+                "code":"unranked_fact_limit", "section":"memories", "reason":"max_facts",
+                "max_facts":options.max_facts,
+                "message":"Some facts were excluded by max_facts without query terms. Non-required fact selection uses key order; pass the current task as query to rank relevant facts before applying the limit."
+            })]
+        } else {
+            Vec::new()
+        };
         let mut omissions = Vec::new();
         let mut omissions_truncated = candidates.has_more;
         for f in memories.iter().skip(options.max_facts) {
@@ -445,8 +472,16 @@ impl Session {
             if omissions.len() < DIAGNOSTIC_LIMIT { omissions.push(omission); }
             else { omissions_truncated = true; }
         };
+        let included: Vec<_> = options.required_fact_keys.iter()
+            .filter(|key| memories.iter().any(|fact| &fact.fact_key == *key)).collect();
+        let missing: Vec<_> = options.required_fact_keys.iter()
+            .filter(|key| !records.iter().any(|record| &record.fact.fact_key == *key)).collect();
+        let excluded: Vec<_> = options.required_fact_keys.iter()
+            .filter(|key| !included.contains(key) && !missing.contains(key)).collect();
+        let requirements = json!({"requested":options.required_fact_keys,"included":included,
+            "missing":missing,"excluded":excluded,"complete":missing.is_empty() && excluded.is_empty()});
         let recall = json!({"method": ranking.method(), "query_terms": ranking.query_terms,
-            "retrieval":retrieval, "ranking_plan":candidates.ranking_plan, "candidate_limit":options.max_facts + DIAGNOSTIC_LIMIT,
+            "retrieval":retrieval, "ranking_plan":candidates.ranking_plan, "candidate_limit":options.max_facts + DIAGNOSTIC_LIMIT + options.required_fact_keys.len(),
             "candidates_truncated":candidates.has_more,
             "counts_apply_to":"loaded_candidates", "index_entries_visited":null,
             "inspected_facts":ranking.matches.len(),
@@ -467,8 +502,11 @@ impl Session {
             strategies,
             report: json!({"max_tokens":options.max_tokens,"estimated_tokens":estimate,
                 "estimator":"ceil(utf8_bytes/4)","budget_applies_to":"text", "omissions":omissions,
+                "warnings":warnings,"requirements":requirements,
                 "diagnostic_limit":DIAGNOSTIC_LIMIT,"omissions_truncated":omissions_truncated,
-                "selection":if ranking.query_terms.is_empty() {
+                "selection":if !options.required_fact_keys.is_empty() {
+                    "required facts by declaration order; remaining facts by lexical relevance then key; recent messages; accepted task strategy"
+                } else if ranking.query_terms.is_empty() {
                     "active facts by key; recent messages; accepted task strategy"
                 } else {
                     "active facts by lexical relevance then key; recent messages; accepted task strategy"
@@ -539,6 +577,9 @@ pub struct ContextOptions {
     /// Current task text for lexical fact ranking before max_facts/budget cuts.
     /// None preserves key ordering. This does not select the learned task strategy.
     pub query: Option<String>,
+    /// Trusted application-selected keys, prioritized in declaration order.
+    /// Never bypasses visibility, max_facts, or the token budget. At most 64 keys.
+    pub required_fact_keys: Vec<String>,
 }
 impl Default for ContextOptions {
     fn default() -> Self {
@@ -549,6 +590,7 @@ impl Default for ContextOptions {
             include_messages: yes(),
             task_type: None,
             query: None,
+            required_fact_keys: Vec::new(),
         }
     }
 }

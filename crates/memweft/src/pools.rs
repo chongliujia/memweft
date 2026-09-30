@@ -208,16 +208,23 @@ impl UserMemory {
         Ok((selected.into_values().collect(), shadowed))
     }
 
-    pub(crate) fn context_candidates(&self, query: Option<&str>, limit: usize)
+    pub(crate) fn context_candidates(&self, query: Option<&str>, limit: usize, required_keys: &[String])
         -> StoreResult<(memweft_store::RecallCandidates, &'static str)> {
-        // Error mode promises to reject conflicts anywhere in the visible pools,
-        // including keys outside Top-K. Keep that global check on the fallback.
-        if !matches!(self.memory_config.conflict_policy, ConflictPolicy::Error) {
+        // Error mode rejects conflicts anywhere in the visible pools. Required
+        // lookups can use a backend's snapshot-aware global conflict check;
+        // otherwise retain the established full-scan compatibility path.
+        let reject_conflicts = matches!(self.memory_config.conflict_policy, ConflictPolicy::Error);
+        if !reject_conflicts || !required_keys.is_empty() {
             let mut pools: Vec<_> = self.memory_config.read_pools.iter().map(|b|b.pool_id.clone()).collect();
             if matches!(self.memory_config.conflict_policy, ConflictPolicy::PrivateFirst) {
                 pools.sort_by_key(|p|p!="private");
             }
-            if let Some(candidates) = self.store.recall_candidates(&self.scope, &pools, query, limit)? {
+            let candidates = if required_keys.is_empty() {
+                self.store.recall_candidates(&self.scope, &pools, query, limit)?
+            } else {
+                self.store.recall_candidates_with_required(&self.scope, &pools, query, limit, required_keys, reject_conflicts)?
+            };
+            if let Some(candidates) = candidates {
                 return Ok((candidates, "sqlite_inverted_v1"));
             }
         }

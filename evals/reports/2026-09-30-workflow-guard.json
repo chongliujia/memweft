@@ -1,0 +1,2306 @@
+{
+  "report_version": "workflow-guard-report-v1",
+  "suite_version": "workflow-guard-v1",
+  "started_at": "2026-09-30T10:11:05.922644+00:00",
+  "model": "kimi-k2.6",
+  "summary": {
+    "completed_calls": 32,
+    "by_mode": {
+      "lexical": {
+        "observations": 16,
+        "answerable_observations": 14,
+        "raw_correct": 6,
+        "validated_correct": 6,
+        "incorrect_accepted": 0,
+        "incorrect_blocked": 8,
+        "correct_but_rejected": 0,
+        "false_rejection_with_complete_inputs": 0,
+        "missing_data_observations": 2,
+        "missing_data_rejected": 2,
+        "protocol_valid": 13,
+        "usage": {
+          "prompt_tokens": 8188,
+          "completion_tokens": 390,
+          "total_tokens": 8578
+        },
+        "context_and_model_median_ms": 1240.0408959068209,
+        "estimated_cny_without_cache_discount": 0.063752
+      },
+      "required_facts": {
+        "observations": 16,
+        "answerable_observations": 14,
+        "raw_correct": 13,
+        "validated_correct": 13,
+        "incorrect_accepted": 0,
+        "incorrect_blocked": 1,
+        "correct_but_rejected": 0,
+        "false_rejection_with_complete_inputs": 0,
+        "missing_data_observations": 2,
+        "missing_data_rejected": 2,
+        "protocol_valid": 14,
+        "usage": {
+          "prompt_tokens": 8174,
+          "completion_tokens": 391,
+          "total_tokens": 8565
+        },
+        "context_and_model_median_ms": 1314.3369164589494,
+        "estimated_cny_without_cache_discount": 0.063688
+      }
+    },
+    "estimated_cny_without_cache_discount": 0.12744
+  },
+  "cases": [
+    {
+      "id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "description": "中文：证书仍有效但主机时钟偏差超标；同名观测键在外部作用域有干扰值。",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [
+            "clock.observation",
+            "host.clock"
+          ],
+          "available_but_omitted_required_keys": [
+            "clock.observation",
+            "host.clock"
+          ],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.clock.observation.missing",
+              "facts.host.clock.missing"
+            ]
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "description": "English: the certificate has expired while the host clock remains within tolerance.",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "description": "中文：发货状态发生更新，在退款期限内按当前未发货数量计算整数最小货币单位金额。",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [
+            "refund.policy",
+            "order.state",
+            "price.unit"
+          ],
+          "available_but_omitted_required_keys": [
+            "refund.policy",
+            "order.state",
+            "price.unit"
+          ],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.refund.policy.missing",
+              "facts.order.state.missing",
+              "facts.price.unit.missing"
+            ]
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "description": "English: unshipped items exist, but the order is beyond the refund policy window.",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "description": "中文：离线能力仍被要求但尚未完成，已要求且完成的导出能力可纳入范围。",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [
+            "product.requirements",
+            "implementation.readiness"
+          ],
+          "available_but_omitted_required_keys": [
+            "product.requirements",
+            "implementation.readiness"
+          ],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.product.requirements.missing",
+              "facts.implementation.readiness.missing"
+            ]
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "description": "English: a ready but unrequested export capability must stay out of scope, while required offline work is ready.",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "description": "中文：两个窗口都能容纳连续维护，选择剩余空闲最少的窗口而非直接选择最早的。",
+      "expectation": "completed",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [
+            "maintenance.job",
+            "calendar.windows"
+          ],
+          "available_but_omitted_required_keys": [
+            "maintenance.job",
+            "calendar.windows"
+          ],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.maintenance.job.missing",
+              "facts.calendar.windows.missing"
+            ]
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [],
+          "context_missing_required_keys": [],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": true,
+            "errors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "description": "English: calendar windows are explicitly forgotten, leaving insufficient current facts for a defensible schedule.",
+      "expectation": "needs_data",
+      "modes": {
+        "lexical": {
+          "source_missing_required_keys": [
+            "calendar.windows"
+          ],
+          "context_missing_required_keys": [
+            "calendar.windows"
+          ],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.calendar.windows.missing"
+            ]
+          }
+        },
+        "required_facts": {
+          "source_missing_required_keys": [
+            "calendar.windows"
+          ],
+          "context_missing_required_keys": [
+            "calendar.windows"
+          ],
+          "available_but_omitted_required_keys": [],
+          "input_validation": {
+            "accepted": false,
+            "errors": [
+              "facts.calendar.windows.missing"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "observations": [
+    {
+      "case_id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "action": "synchronize_clock",
+        "expired_minutes": 0,
+        "owner": "clockwatch-desk-44"
+      },
+      "content": "{\"action\":\"no_action\",\"expired_minutes\":0,\"owner\":\"clockwatch-desk-44\"}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:action",
+        "actual": {
+          "action": "no_action",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "no_action",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.clock.observation.missing",
+            "facts.host.clock.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.clock.observation.missing",
+          "facts.host.clock.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "clock.observation",
+        "host.clock"
+      ],
+      "available_but_omitted_required_keys": [
+        "clock.observation",
+        "host.clock"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 509,
+        "completion_tokens": 25,
+        "total_tokens": 534,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "action": "synchronize_clock",
+        "expired_minutes": 0,
+        "owner": "clockwatch-desk-44"
+      },
+      "content": "{\"action\":\"renew_certificate\",\"expired_minutes\":0,\"owner\":\"clockwatch-desk-44\"}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:action",
+        "actual": {
+          "action": "renew_certificate",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "renew_certificate",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.clock.observation.missing",
+            "facts.host.clock.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.clock.observation.missing",
+          "facts.host.clock.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "clock.observation",
+        "host.clock"
+      ],
+      "available_but_omitted_required_keys": [
+        "clock.observation",
+        "host.clock"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 509,
+        "completion_tokens": 25,
+        "total_tokens": 534,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "action": "synchronize_clock",
+        "expired_minutes": 0,
+        "owner": "clockwatch-desk-44"
+      },
+      "content": "{\"action\":\"synchronize_clock\",\"expired_minutes\":0,\"owner\":\"clockwatch-desk-44\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "synchronize_clock",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "synchronize_clock",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 26,
+        "total_tokens": 525,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-clock-offset-cn",
+      "workflow": "tls",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "action": "synchronize_clock",
+        "expired_minutes": 0,
+        "owner": "clockwatch-desk-44"
+      },
+      "content": "{\"action\":\"synchronize_clock\",\"expired_minutes\":0,\"owner\":\"clockwatch-desk-44\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "synchronize_clock",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "synchronize_clock",
+          "expired_minutes": 0,
+          "owner": "clockwatch-desk-44"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 26,
+        "total_tokens": 525,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 48,
+        "owner": "edge-certistry-73"
+      },
+      "content": "{\"action\":\"renew_certificate\",\"expired_minutes\":48,\"owner\":\"edge-certistry-73\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 24,
+        "total_tokens": 523,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 48,
+        "owner": "edge-certistry-73"
+      },
+      "content": "{\"action\":\"renew_certificate\",\"expired_minutes\":48,\"owner\":\"edge-certistry-73\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 24,
+        "total_tokens": 523,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 48,
+        "owner": "edge-certistry-73"
+      },
+      "content": "{\"action\":\"renew_certificate\",\"expired_minutes\":48,\"owner\":\"edge-certistry-73\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 24,
+        "total_tokens": 523,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-tls-expired-certificate-en",
+      "workflow": "tls",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 48,
+        "owner": "edge-certistry-73"
+      },
+      "content": "{\"action\":\"renew_certificate\",\"expired_minutes\":48,\"owner\":\"edge-certistry-73\"}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "action": "renew_certificate",
+          "expired_minutes": 48,
+          "owner": "edge-certistry-73"
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 499,
+        "completion_tokens": 24,
+        "total_tokens": 523,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 2190,
+        "currency": "USD",
+        "needs_manual_review": false
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"CNY\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:refund_amount,currency,needs_manual_review",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "CNY",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "CNY",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.refund.policy.missing",
+            "facts.order.state.missing",
+            "facts.price.unit.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.refund.policy.missing",
+          "facts.order.state.missing",
+          "facts.price.unit.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "refund.policy",
+        "order.state",
+        "price.unit"
+      ],
+      "available_but_omitted_required_keys": [
+        "refund.policy",
+        "order.state",
+        "price.unit"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 481,
+        "completion_tokens": 21,
+        "total_tokens": 502,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 2190,
+        "currency": "USD",
+        "needs_manual_review": false
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"CNY\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:refund_amount,currency,needs_manual_review",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "CNY",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "CNY",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.refund.policy.missing",
+            "facts.order.state.missing",
+            "facts.price.unit.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.refund.policy.missing",
+          "facts.order.state.missing",
+          "facts.price.unit.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "refund.policy",
+        "order.state",
+        "price.unit"
+      ],
+      "available_but_omitted_required_keys": [
+        "refund.policy",
+        "order.state",
+        "price.unit"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 481,
+        "completion_tokens": 21,
+        "total_tokens": 502,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 2190,
+        "currency": "USD",
+        "needs_manual_review": false
+      },
+      "content": "{\"refund_amount\":2190,\"currency\":\"USD\",\"needs_manual_review\":false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 2190,
+          "currency": "USD",
+          "needs_manual_review": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 2190,
+          "currency": "USD",
+          "needs_manual_review": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 467,
+        "completion_tokens": 21,
+        "total_tokens": 488,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-updated-dispatch-cn",
+      "workflow": "refund",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 2190,
+        "currency": "USD",
+        "needs_manual_review": false
+      },
+      "content": "{\"refund_amount\":2190,\"currency\":\"USD\",\"needs_manual_review\":false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 2190,
+          "currency": "USD",
+          "needs_manual_review": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 2190,
+          "currency": "USD",
+          "needs_manual_review": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 467,
+        "completion_tokens": 21,
+        "total_tokens": 488,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 0,
+        "currency": "EUR",
+        "needs_manual_review": true
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"EUR\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 475,
+        "completion_tokens": 20,
+        "total_tokens": 495,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 0,
+        "currency": "EUR",
+        "needs_manual_review": true
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"EUR\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 475,
+        "completion_tokens": 20,
+        "total_tokens": 495,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 0,
+        "currency": "EUR",
+        "needs_manual_review": true
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"EUR\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 475,
+        "completion_tokens": 20,
+        "total_tokens": 495,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-refund-window-expired-en",
+      "workflow": "refund",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "refund_amount": 0,
+        "currency": "EUR",
+        "needs_manual_review": true
+      },
+      "content": "{\"refund_amount\":0,\"currency\":\"EUR\",\"needs_manual_review\":true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "refund_amount": 0,
+          "currency": "EUR",
+          "needs_manual_review": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 475,
+        "completion_tokens": 20,
+        "total_tokens": 495,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      },
+      "content": "{\"include_offline\": false, \"include_pdf_export\": false, \"unfinished_offline_blocks_release\": false}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:include_pdf_export,unfinished_offline_blocks_release",
+        "actual": {
+          "include_offline": false,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": false,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.product.requirements.missing",
+            "facts.implementation.readiness.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.product.requirements.missing",
+          "facts.implementation.readiness.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "product.requirements",
+        "implementation.readiness"
+      ],
+      "available_but_omitted_required_keys": [
+        "product.requirements",
+        "implementation.readiness"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 431,
+        "completion_tokens": 26,
+        "total_tokens": 457,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      },
+      "content": "{\"include_offline\": false, \"include_pdf_export\": false, \"unfinished_offline_blocks_release\": false}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:include_pdf_export,unfinished_offline_blocks_release",
+        "actual": {
+          "include_offline": false,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": false,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.product.requirements.missing",
+            "facts.implementation.readiness.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.product.requirements.missing",
+          "facts.implementation.readiness.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "product.requirements",
+        "implementation.readiness"
+      ],
+      "available_but_omitted_required_keys": [
+        "product.requirements",
+        "implementation.readiness"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 431,
+        "completion_tokens": 26,
+        "total_tokens": 457,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      },
+      "content": "{\"include_offline\":false,\"include_pdf_export\":true,\"unfinished_offline_blocks_release\":true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": false,
+          "include_pdf_export": true,
+          "unfinished_offline_blocks_release": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": false,
+          "include_pdf_export": true,
+          "unfinished_offline_blocks_release": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 425,
+        "completion_tokens": 24,
+        "total_tokens": 449,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-offline-unready-cn",
+      "workflow": "feature_scope",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      },
+      "content": "{\"include_offline\": false, \"include_pdf_export\": true, \"unfinished_offline_blocks_release\": true}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": false,
+          "include_pdf_export": true,
+          "unfinished_offline_blocks_release": true
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": false,
+          "include_pdf_export": true,
+          "unfinished_offline_blocks_release": true
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 425,
+        "completion_tokens": 26,
+        "total_tokens": 451,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": true,
+        "include_pdf_export": false,
+        "unfinished_offline_blocks_release": false
+      },
+      "content": "{\"include_offline\":true,\"include_pdf_export\":false,\"unfinished_offline_blocks_release\":false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 432,
+        "completion_tokens": 24,
+        "total_tokens": 456,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": true,
+        "include_pdf_export": false,
+        "unfinished_offline_blocks_release": false
+      },
+      "content": "{\"include_offline\": true, \"include_pdf_export\": false, \"unfinished_offline_blocks_release\": false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 432,
+        "completion_tokens": 26,
+        "total_tokens": 458,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": true,
+        "include_pdf_export": false,
+        "unfinished_offline_blocks_release": false
+      },
+      "content": "{\"include_offline\":true,\"include_pdf_export\":false,\"unfinished_offline_blocks_release\":false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 432,
+        "completion_tokens": 24,
+        "total_tokens": 456,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-feature-ready-unrequested-en",
+      "workflow": "feature_scope",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "include_offline": true,
+        "include_pdf_export": false,
+        "unfinished_offline_blocks_release": false
+      },
+      "content": "{\"include_offline\":true,\"include_pdf_export\":false,\"unfinished_offline_blocks_release\":false}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "include_offline": true,
+          "include_pdf_export": false,
+          "unfinished_offline_blocks_release": false
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 432,
+        "completion_tokens": 24,
+        "total_tokens": 456,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "window": "window-birch-72",
+        "start_time": "13:00",
+        "end_time": "13:55",
+        "unused_minutes": 5
+      },
+      "content": "{\"error\": \"无合格窗口\"}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_fields",
+        "actual": {
+          "error": "无合格窗口"
+        },
+        "protocol": {
+          "accepted": false,
+          "errors": [
+            "proposal.unknown_fields",
+            "proposal.window.missing",
+            "proposal.start_time.missing",
+            "proposal.end_time.missing",
+            "proposal.unused_minutes.missing"
+          ]
+        }
+      },
+      "decision": {
+        "proposal": {
+          "error": "无合格窗口"
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.maintenance.job.missing",
+            "facts.calendar.windows.missing",
+            "proposal.unknown_fields",
+            "proposal.window.missing",
+            "proposal.start_time.missing",
+            "proposal.end_time.missing",
+            "proposal.unused_minutes.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.maintenance.job.missing",
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "maintenance.job",
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [
+        "maintenance.job",
+        "calendar.windows"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 639,
+        "completion_tokens": 11,
+        "total_tokens": 650,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "window": "window-birch-72",
+        "start_time": "13:00",
+        "end_time": "13:55",
+        "unused_minutes": 5
+      },
+      "content": "{\"window\": \"archive_00\", \"start_time\": \"00:00\", \"end_time\": \"00:00\", \"unused_minutes\": 0}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:window,start_time,end_time,unused_minutes",
+        "actual": {
+          "window": "archive_00",
+          "start_time": "00:00",
+          "end_time": "00:00",
+          "unused_minutes": 0
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "archive_00",
+          "start_time": "00:00",
+          "end_time": "00:00",
+          "unused_minutes": 0
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.maintenance.job.missing",
+            "facts.calendar.windows.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.maintenance.job.missing",
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "maintenance.job",
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [
+        "maintenance.job",
+        "calendar.windows"
+      ],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 639,
+        "completion_tokens": 37,
+        "total_tokens": 676,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "completed",
+      "expected": {
+        "window": "window-birch-72",
+        "start_time": "13:00",
+        "end_time": "13:55",
+        "unused_minutes": 5
+      },
+      "content": "{\"window\":\"window-birch-72\",\"start_time\":\"13:00\",\"end_time\":\"13:55\",\"unused_minutes\":5}",
+      "grade": {
+        "score": 1,
+        "reason": "pass",
+        "actual": {
+          "window": "window-birch-72",
+          "start_time": "13:00",
+          "end_time": "13:55",
+          "unused_minutes": 5
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "window-birch-72",
+          "start_time": "13:00",
+          "end_time": "13:55",
+          "unused_minutes": 5
+        },
+        "validation": {
+          "accepted": true,
+          "errors": []
+        },
+        "status": "validated",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 662,
+        "completion_tokens": 33,
+        "total_tokens": 695,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-least-unused-cn",
+      "workflow": "maintenance",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "completed",
+      "expected": {
+        "window": "window-birch-72",
+        "start_time": "13:00",
+        "end_time": "13:55",
+        "unused_minutes": 5
+      },
+      "content": "{\"window\":\"window-pine-61\",\"start_time\":\"09:00\",\"end_time\":\"09:55\",\"unused_minutes\":20}",
+      "grade": {
+        "score": 0,
+        "reason": "wrong_values:window,start_time,end_time,unused_minutes",
+        "actual": {
+          "window": "window-pine-61",
+          "start_time": "09:00",
+          "end_time": "09:55",
+          "unused_minutes": 20
+        },
+        "protocol": {
+          "accepted": true,
+          "errors": []
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "window-pine-61",
+          "start_time": "09:00",
+          "end_time": "09:55",
+          "unused_minutes": 20
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "proposal.window.rule_mismatch",
+            "proposal.start_time.rule_mismatch",
+            "proposal.end_time.rule_mismatch",
+            "proposal.unused_minutes.rule_mismatch"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": true,
+        "errors": []
+      },
+      "context_missing_required_keys": [],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 662,
+        "completion_tokens": 32,
+        "total_tokens": 694,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "mode": "lexical",
+      "repeat": 0,
+      "expectation": "needs_data",
+      "expected": null,
+      "content": "{\"window\":\"maintenance.job\",\"start_time\":\"00:00\",\"end_time\":\"00:25\",\"unused_minutes\":0}",
+      "grade": {
+        "score": null,
+        "reason": "unanswerable_expected",
+        "actual": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "protocol": {
+          "accepted": false,
+          "errors": [
+            "proposal.window.invalid_value"
+          ]
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.calendar.windows.missing",
+            "proposal.window.invalid_value"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 628,
+        "completion_tokens": 30,
+        "total_tokens": 658,
+        "cached_tokens": 512,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "mode": "lexical",
+      "repeat": 1,
+      "expectation": "needs_data",
+      "expected": null,
+      "content": "{\"window\":\"maintenance.job\",\"start_time\":\"00:00\",\"end_time\":\"00:25\",\"unused_minutes\":0}",
+      "grade": {
+        "score": null,
+        "reason": "unanswerable_expected",
+        "actual": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "protocol": {
+          "accepted": false,
+          "errors": [
+            "proposal.window.invalid_value"
+          ]
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.calendar.windows.missing",
+            "proposal.window.invalid_value"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 628,
+        "completion_tokens": 30,
+        "total_tokens": 658,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "mode": "required_facts",
+      "repeat": 0,
+      "expectation": "needs_data",
+      "expected": null,
+      "content": "{\"window\":\"maintenance.job\",\"start_time\":\"00:00\",\"end_time\":\"00:25\",\"unused_minutes\":0}",
+      "grade": {
+        "score": null,
+        "reason": "unanswerable_expected",
+        "actual": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "protocol": {
+          "accepted": false,
+          "errors": [
+            "proposal.window.invalid_value"
+          ]
+        }
+      },
+      "decision": {
+        "proposal": {
+          "window": "maintenance.job",
+          "start_time": "00:00",
+          "end_time": "00:25",
+          "unused_minutes": 0
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.calendar.windows.missing",
+            "proposal.window.invalid_value"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 628,
+        "completion_tokens": 30,
+        "total_tokens": 658,
+        "cached_tokens": 256,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        }
+      }
+    },
+    {
+      "case_id": "guard-maintenance-withdrawn-windows-en",
+      "workflow": "maintenance",
+      "mode": "required_facts",
+      "repeat": 1,
+      "expectation": "needs_data",
+      "expected": null,
+      "content": "{\"error\": \"No available calendar windows found in current records\"}",
+      "grade": {
+        "score": null,
+        "reason": "unanswerable_expected",
+        "actual": {
+          "error": "No available calendar windows found in current records"
+        },
+        "protocol": {
+          "accepted": false,
+          "errors": [
+            "proposal.unknown_fields",
+            "proposal.window.missing",
+            "proposal.start_time.missing",
+            "proposal.end_time.missing",
+            "proposal.unused_minutes.missing"
+          ]
+        }
+      },
+      "decision": {
+        "proposal": {
+          "error": "No available calendar windows found in current records"
+        },
+        "validation": {
+          "accepted": false,
+          "errors": [
+            "facts.calendar.windows.missing",
+            "proposal.unknown_fields",
+            "proposal.window.missing",
+            "proposal.start_time.missing",
+            "proposal.end_time.missing",
+            "proposal.unused_minutes.missing"
+          ]
+        },
+        "status": "rejected",
+        "executed_actions": []
+      },
+      "input_validation": {
+        "accepted": false,
+        "errors": [
+          "facts.calendar.windows.missing"
+        ]
+      },
+      "context_missing_required_keys": [
+        "calendar.windows"
+      ],
+      "available_but_omitted_required_keys": [],
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 628,
+        "completion_tokens": 16,
+        "total_tokens": 644,
+        "cached_tokens": 512,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "8道新合成结构化题，4类各中英文1题；不是客户业务任务，不能与上一轮20道自由文本题直接比较质量。",
+    "每题每模式重复2次，复用同一份冻结输入；重复观测有关联，不能将32次调用视为32个独立任务。",
+    "两组只改变required_fact_keys：必需事实键由应用事先声明，不是自动发现关系、自动提取事实或跨语言语义检索改进。",
+    "每模式可答题7道×2次=14个观测；缺数据题1道×2次=2个观测单列，不能把拦截算作任务答对。",
+    "原始正确与校验后正确均以14个可答观测为分母；后一项还要求提案通过应用规则。猜中答案但输入不完整仍会被拒绝。",
+    "false_rejection_with_complete_inputs只统计原始答案正确、当前输入完整却被拒绝的可答观测；correct_but_rejected还包含输入不完整的猜对。",
+    "同一校验器只读各组本次召回的事实，不从答案标签或其他组补值；它不修复模型答案，也不执行任何动作。",
+    "本基准为观察缺数行为仍调用模型一次再校验；正常应用示例应在输入缺失时提前停止，避免调用与执行。",
+    "当前应用规则固定：维护选择可容纳任务且空余最少的窗口，再按开始时间和标识排序；功能纳入条件是required AND ready。",
+    "同源事件、作用域与遗忘语义一致，每题添加16条档案干扰；两组最多8条事实、1200估算tokens，返回文本使用UTF-8字节数/4估算。",
+    "每次最多192输出tokens、16000字节messages JSON；已报告token阈值只停止后续调用，不是货币硬上限。",
+    "时延是预先测量的上下文构建加HTTP耗时，不包含写入、数据准备、限流等待或最终校验；不是完整端到端延迟。",
+    "费用按2026-09-30每百万输入¥6.50、输出¥27估算，未计缓存优惠，未经账单核对。",
+    "错误拦截、遗漏与原始答错是分别记录的观察，不能据此推断生产可靠性、统计显著性或所有场景的因果效果。"
+  ],
+  "pricing": {
+    "checked": "2026-09-30",
+    "input_cny_per_million": 6.5,
+    "output_cny_per_million": 27,
+    "source": "https://platform.kimi.com/docs/pricing/chat",
+    "cache_discount": false
+  },
+  "verification": {
+    "complete_unique_inputs": 16,
+    "complete_unique_observations": 32,
+    "raw_grades_and_guards_recomputed": true,
+    "requests_match_inputs": true,
+    "current_scope_source_values_match": true,
+    "source_sha256": {
+      "evals/run_workflow_guard.py": "80b07b98b3b17ff7c527d49a33cabccfbe6768b7c187be4dd6835cb4fa132eb8",
+      "examples/kimi_memory.py": "37ba4a874e972338201dd6b00c63f20e7d900726dfe8c8cfa5d986d4665b3694",
+      "examples/guarded_workflow_agent.py": "59d383ce4e18d1bdc3cf64f98adb4ec31a536cf4b5dbae41ad18bab9483c24d9",
+      "examples/workflow_guard.py": "5f1bc0a2d922934ad3f3bbd9955142f0a0d6033dd197e02169793fadf172f9f8",
+      "evals/run_local.py": "4c2047462cc353e94669c66566c297dcc8ed8dbb652bb358da6a6e3f600bfb1e",
+      "python/src/memweft/__init__.py": "a5131c3f3c3fbe709164f09b9077e5d83ace725ea8d7c7683dbc8dbcc34613da",
+      "python/src/memweft/api.py": "90ff44586ae261b2f7c0a79ed6d6853e197821dce5c18ccb8cb567e7306a7a99",
+      "python/src/memweft/client.py": "fbefad43e6bb3486250215345bd02882699c2498a0966926062c48242449192f",
+      "crates/memweft/src/bin/memweft.rs": "bd1e00fb77eaa4ab6822f5f4461a38340efb696c5b9393d8be07ba861eb505d9",
+      "crates/memweft/src/langgraph.rs": "429cd3de9ca4d7382a288a8c982477f94a777b1307d2fb3e90212070949ed163",
+      "crates/memweft/src/lib.rs": "1549ed7773e75f7ec712d600c8e71d7a3657f722884908b5d010acc651253227",
+      "crates/memweft/src/pools.rs": "122025358641bba43fa50aac6b4a3b97e24025496014916b6b997e3dfdbf7925",
+      "crates/memweft/src/recall.rs": "a5208c289f28c7e150e16d2720127228f0d430e229072909a6e3b3ac1e47bd40",
+      "crates/memweft-ffi/src/lib.rs": "012b75635481a08d37b5798e3530ae0466d06f18ea566b686447443a9c304bba",
+      "crates/memweft-learning/src/lib.rs": "895736e2b6ce129135ae59655f0aaff2ec1604859220aef4fa0e2e1816532109",
+      "crates/memweft-node/src/lib.rs": "73b65f48c91e7c78ca2b18ba35a7d736c97836fce25c958c8485323e8fbf2939",
+      "crates/memweft-store/src/checkpoint.rs": "39b912b19659a02028b7ff3577ff758d4634fc6a46f87f119034d727446af786",
+      "crates/memweft-store/src/composer.rs": "8ce0640e29d68b2afa15417c9ea61a0447f588600cef0e2df2f23c803db0f875",
+      "crates/memweft-store/src/documents.rs": "cc31089f2d6263dd2d432d8c404191eda5229a047a0fa2034f2b44fab95bca3f",
+      "crates/memweft-store/src/indexed_recall.rs": "b96bead580c4df029f0e6483d030c70ac4b928b01f5733a3b2e15f369d3331a9",
+      "crates/memweft-store/src/lexical.rs": "a3a4239ae4d244ac591c1ef77c51ce66f27c0c1dcbee901b08fada97cff43c0b",
+      "crates/memweft-store/src/lib.rs": "9b85a2ff9723f0ab2234a3e973ea6888b89b32ad6d7f673ba3243f9d09acfc26",
+      "crates/memweft-store/src/mysql.rs": "049e63ff30326201af7920a258a2ea265b38edfcceff38fc1ca2ac2cad034362",
+      "crates/memweft-store/src/pools.rs": "1cb0b97761a8b85c4633f3127c32e433b9e6ce120383486335260525d7df4a9a",
+      "crates/memweft-store/src/postgres.rs": "cec5d56d2dc0ca76a30061dd7dad4a5ed1bbfb27cef0981bf8a799b6d5f97657",
+      "crates/memweft-store/src/sqlite.rs": "35a03125116912f11f7cf7bf502548d4e47afa7cca20710c350dbd3f16b3e9a0",
+      "crates/memweft-types/src/lib.rs": "a902adeef3ece7dca0d292893bde5bc364a3bac13dd2882318103172465e7284"
+    },
+    "run_file_sha256": {
+      "suite.json": "6079e3610f152696c8b837ffa9e6eaf653d08c6f1471cb56e8c459c6dd2b3b73",
+      "metadata.json": "24a7c5979eceb911594becc4d82b944f5de9908e46efd630c6282c77e4027806",
+      "inputs.jsonl": "016035d33428a31caeb019633f310230854e0132814c9e35b06c5eb1f223154b",
+      "results.jsonl": "bdf60a649b099e05c01885519381dbfab84c067a71647923a1c61903866a0ae0",
+      "summary.json": "c1940ea03c113741615be1758eb28a26daf25407979edaeee82b18ac0e0bdd20",
+      "status.json": "fd5bfe0a309dd7463708373dc1997846a56417a9c37039c091332d22fa0f522d"
+    },
+    "suite_sha256": "6079e3610f152696c8b837ffa9e6eaf653d08c6f1471cb56e8c459c6dd2b3b73",
+    "reporter_sha256": "fa03b5bc0735e3c506768dffb24151187e19a4dbd95abbe1ccb24da38cb3ada1",
+    "native_sha256_recorded": "6a0435046a4a75a80e06489eda334c60969e1938ab8704b424462100f118ff83",
+    "native_note": "The runner recorded this binary digest before calls; the offline reporter does not independently verify or execute that binary."
+  }
+}

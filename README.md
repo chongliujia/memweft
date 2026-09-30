@@ -20,7 +20,7 @@ MemWeft gives agents persistent facts, resumable conversations and relevant mode
 
 **Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
-**Development status (2026-09-30):** core SDK features are implemented and undergoing pre-release hardening. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. Package versions are still `0.1.0`; the current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database.
+**Development status (2026-09-30):** the SQLite SDK is a developer preview, version `0.2.0-alpha.1` (Python `0.2.0a1`). Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. The current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database. See the [preview release guide](docs/preview_release.md) for scope, package provenance and acceptance checks.
 
 ## What you can build
 
@@ -56,11 +56,12 @@ is configured to build Python wheels for 3.10–3.12 on Linux, macOS and Windows
 plus one host-specific Node tarball per runner. Choose a wheel whose Python tag
 and platform match your interpreter, or a Node tarball built for your operating
 system, CPU and Linux libc. The artifact's `package-target.json` records the
-build host and hashes. Install the downloaded file directly:
+host, package versions, hashes and matching build record; `build-record.json`
+binds the build to its clean source commit. Install the downloaded file directly:
 
 ```bash
 python -m pip install /path/to/downloaded-wheel.whl
-npm install /path/to/memweft-0.1.0.tgz
+npm install /path/to/memweft-0.2.0-alpha.1.tgz
 ```
 
 These artifacts are verified in a fresh environment outside the checkout using
@@ -84,6 +85,24 @@ with Memory("./memory.db") as memory:
 ```
 
 Run it twice: the preference updates by key, and the event ID prevents duplicate messages. `memories()` inspects facts, `forget(key)` removes them, and `chat.clear()` clears session messages. Python also provides `AsyncMemory`.
+
+To try a hosted model, see the [Kimi short-answer example](examples/kimi_memory.py)
+and [26-call memory smoke test](evals/README.md#low-cost-kimi-smoke-test).
+They use K2.6 with thinking disabled, bounded output and explicit request pacing.
+Model calls are opt-in and separate from the memory SDK. The
+[first Kimi run](evals/reports/2026-09-30-kimi-smoke.md) records results, cost
+estimates and the query-free recall limitation.
+The [release-planning pilot](docs/kimi_release_pilot.md) uses this repository's
+actual package evidence and persistent decisions to draft the next release task.
+It can now explicitly collect commit-bound GitHub Actions evidence without a
+model call. The [frozen 20-task comparison](docs/workflow_comparison.md) compares
+full history, a deterministic state summary and MemWeft retrieval on equal source
+events. For recall, pass the current task as `query`; `context.explain().warnings`
+reports `unranked_fact_limit` when missing query terms leave facts excluded by
+the count limit. An empty warning list is not a completeness guarantee.
+For known task dependencies, [required facts and workflow validation](docs/required_facts.md)
+adds explicit key retrieval in Python and Node, completeness diagnostics, and an
+application example that rejects missing inputs or proposals that violate its rules.
 
 <details>
 <summary><b>TypeScript / Node.js</b></summary>

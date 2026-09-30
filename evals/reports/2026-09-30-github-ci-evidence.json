@@ -1,0 +1,59 @@
+{
+  "kind": "read_only_github_actions_snapshot",
+  "evidence": {
+    "captured_at": "2026-09-30T09:34:23.426546+00:00",
+    "head": "7aa5ed09f343a999b5e7cc017c19836ba593a361",
+    "worktree_dirty": true,
+    "ci_workflow_present": true,
+    "ci_for_current_source": "unavailable",
+    "github_ci": {
+      "provider": "github_actions",
+      "captured_at": "2026-09-30T09:34:20.843088+00:00",
+      "repository": "chongliujia/memweft",
+      "head": "7aa5ed09f343a999b5e7cc017c19836ba593a361",
+      "workflow_path": ".github/workflows/verify.yml",
+      "workflow_sha256": "81a699aedb6582416d259c3dc6a74c3ce26201af659f6f71a7ee39d8f20ea997",
+      "status": "not_run",
+      "reason": "no_run_for_commit",
+      "workflow_id": 363163123,
+      "run": null,
+      "applies_to_worktree": false,
+      "matrix_jobs_verified": false,
+      "release_artifacts_verified": false
+    },
+    "business_pilot": "not_verified",
+    "recorded_build_host": {
+      "os": "Darwin",
+      "machine": "arm64"
+    },
+    "artifacts": [
+      {
+        "name": "memweft-0.1.0-cp311-cp311-macosx_11_0_arm64.whl",
+        "sha256": "d0a146a07a746ed97012a3ec1d528ce6e8154ea8a654f794bf7542b8fb3ca5d6",
+        "matches_manifest": true
+      },
+      {
+        "name": "memweft-0.1.0.tgz",
+        "sha256": "1d2e921d5d5136fe324249ae1021fb024358555285a5182bd3ea318cd0dbf7c2",
+        "matches_manifest": true
+      }
+    ],
+    "manifest_error": null,
+    "local_artifacts_match_manifest": true,
+    "source_sha256": {
+      "README.md": "c444105722f63ea483f11caa695a2f5bdd1b56c6df538a0c41fa265037b20a7b",
+      "python/pyproject.toml": "bb7da297257ee1c4302be60995246483c8db915677f26aa1b00a3ce7edb6654f",
+      "typescript/package.json": "493003c00307c1527386d089c1f8633a67b903fd9619660679e92db278749a7b",
+      ".github/workflows/verify.yml": "81a699aedb6582416d259c3dc6a74c3ce26201af659f6f71a7ee39d8f20ea997",
+      "docs/upgrade_v3.md": "59b3872198ac1e7c2c9797a0c2a3e02b7155151f757d310a6890e3966c055f2f",
+      "dist/package-target.json": "246123708706a06e9bd9225e22d589f83b39ceb039b86973bf83e663a19e004e"
+    }
+  },
+  "raw_evidence_path": "data/evals/github-ci-evidence-2026-09-30.json",
+  "raw_evidence_sha256": "58a40dab3a36c2e06c661aaba8955fe11e06aeb3eea100eb32f81ca69c9f8f65",
+  "adapter_source_sha256": {
+    "examples/github_ci_evidence.py": "4ecad16412c34208ea92005a320c4cd00a84688f3818e25f6882fb4616558345",
+    "examples/kimi_release_agent.py": "2dd1885feff1ecf3c1d8cbc7b9d26a7bfff0e5a95e2a4debda9f5f9610be4ea7"
+  },
+  "scope": "Workflow overall conclusion only; no per-job or artifact provenance validation; no push, dispatch or publishing."
+}

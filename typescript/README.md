@@ -42,7 +42,7 @@ const user = memory.user("alice", { tenantId: "my-app", agentId: "assistant" });
 await user.remember("Prefers short answers", { key: "reply_style" });
 const chat = user.session("chat-001");
 await chat.addMessage("user", "Explain ownership", { eventId: "question-1" });
-console.log((await chat.context({ maxTokens: 1000 })).text);
+console.log((await chat.context({ query: "Explain ownership", maxTokens: 1000 })).text);
 ```
 
 `user.memories()`, `user.forget(key)`, `chat.messages()` and `chat.clear()` support inspection and deletion. `user.learning` provides `feedback`, `start`, `submit`, `get`, `jobs`, `cancel`, `active`, and `rollback`. Learning request/result fields use the shared Rust/Python snake_case contract; ordinary SDK options use camelCase.
@@ -53,6 +53,14 @@ facts by lexical relevance before applying context limits. Inspect
 accepts the same option. Omitting `query` preserves key order. This does not
 perform vector search. SQLite uses indexed candidate loading; see the repository
 guide for ranking rules and fallback paths.
+
+When the application knows a task's required facts, pass
+`requiredFactKeys: ["tls.certificate", "clock.observation", "host.clock"]` to
+`context`. Exact key retrieval honors the existing scope, pool and budget rules;
+required facts take priority in declaration order. Inspect
+`context.explain().requirements` for included, missing and excluded keys. A
+complete result only covers the declared keys. See [required facts and workflow
+validation](../docs/required_facts.md) for Python/Node examples and boundaries.
 
 ## Agent memory pools
 
@@ -79,12 +87,15 @@ operating system, CPU and Linux libc. Its `package-target.json` identifies the
 build target and tarball hash. Install the tarball in your application:
 
 ```bash
-npm install /path/to/memweft-0.1.0.tgz
+npm install /path/to/memweft-0.2.0-alpha.1.tgz
 ```
 
 This package is specific to the runner that built it. CI is configured to verify that the
 tarball installs and loads the native addon from a separate project, then tests
-context and persistence. No universal npm release or automatic platform
+required-fact diagnostics, scope isolation, updates, durable forgetting and
+persistence. The [release guide](../docs/preview_release.md) explains the
+source commit and hashes recorded with each preview artifact.
+No universal npm release or automatic platform
 selection exists yet. The tarballs are not published to npm.
 
 The native entry point is for Node.js, not browser/Edge runtimes. An HTTP client/server transport has not been implemented.

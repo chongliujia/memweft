@@ -1,0 +1,1199 @@
+{
+  "version": "workflow-comparison-v1",
+  "description": "New synthetic workflow benchmark: 20 independently designed tasks, five categories, for full_history/current_state_summary/memweft comparisons using the same source events. This is not customer-task evidence. Questions and answer keys are fixed before model evaluation; do not revise cases in response to model results. The runner supplies the same 16 unrelated archival facts per case; summaries maintain current state deterministically without seeing questions. Forget operations remove earlier values of the deleted key from all modes, and scope isolation applies equally to all modes.",
+  "cases": [
+    {
+      "id": "wf-handoff-render-bundle",
+      "category": "project_handoff",
+      "description": "制作项目向投放项目移交已验收的素材，处理交付包更新。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "render_delivery_bundle",
+          "value": "制作项目当前交付包是 render-pack-31。"
+        },
+        {
+          "op": "remember",
+          "key": "render_delivery_bundle",
+          "value": "制作项目当前交付包改为 render-pack-34；之前的交付包已撤回。"
+        },
+        {
+          "op": "remember",
+          "key": "render_acceptance",
+          "value": "当前交付包的画面检查与版权检查均已通过。"
+        },
+        {
+          "op": "remember",
+          "key": "campaign_receiver",
+          "value": "投放项目接收组代码为 media-intake-8。"
+        },
+        {
+          "op": "remember",
+          "key": "campaign_dependency",
+          "value": "投放项目还在等待制作项目移交交付包，其他上线准备已完成。"
+        }
+      ],
+      "question": "制作项目现在应向投放项目交接什么？只有当前交付包的画面和版权检查都通过才可移交，否则先补验收。返回当前 bundle、receiver 和 can_handoff；资料缺失的字符串字段填 null。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "bundle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receiver": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "can_handoff": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bundle",
+          "receiver",
+          "can_handoff"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "bundle": "render-pack-34",
+        "receiver": "media-intake-8",
+        "can_handoff": true
+      }
+    },
+    {
+      "id": "wf-handoff-consumer-contract",
+      "category": "project_handoff",
+      "description": "数据生产与消费两个项目交接时检查协议兼容，而非只检查文件到齐。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "producer_contract",
+          "value": "上游风控数据当前输出合同版本为 17，交付文件已经到齐。"
+        },
+        {
+          "op": "remember",
+          "key": "consumer_contract",
+          "value": "下游对账项目要求输入合同版本 18。"
+        },
+        {
+          "op": "remember",
+          "key": "contract_adapter",
+          "value": "版本 17 到版本 18 的转换器尚未验证，不可视为可用。"
+        },
+        {
+          "op": "remember",
+          "key": "adapter_owner",
+          "value": "合同转换器负责组代码为 bridge-team-6。"
+        }
+      ],
+      "question": "上游风控数据能否直接交给下游对账？仅版本相同或对应转换器验证通过时 can_start=true；否则 action 为 verify_adapter，通过时为 start_reconciliation。返回 can_start、action、转换器负责组 owner。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "can_start": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "can_start",
+          "action",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "can_start": false,
+        "action": "verify_adapter",
+        "owner": "bridge-team-6"
+      }
+    },
+    {
+      "id": "wf-handoff-shared-lab-slot",
+      "category": "project_handoff",
+      "description": "两个研发项目交接共享实验设备，计算最早接手时间。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "spectrometer_reservation",
+          "value": "光谱仪被材料项目占用至当天 15:20，此前不能让其他项目接手。"
+        },
+        {
+          "op": "remember",
+          "key": "spectrometer_cleanup",
+          "value": "材料项目结束后需清洁光谱仪 25 分钟；清洁不能与设备使用重叠。"
+        },
+        {
+          "op": "remember",
+          "key": "sensor_project_request",
+          "value": "传感器项目原计划当天 15:00 接手光谱仪，允许延后开始。"
+        },
+        {
+          "op": "remember",
+          "key": "spectrometer_handoff_owner",
+          "value": "设备交接负责人代码为 lab-coordinator-4。"
+        }
+      ],
+      "question": "安排材料项目到传感器项目的光谱仪交接：接手时间必须不早于预约结束加清洁时间，也不能早于原计划。返回最早 start_time（24小时 HH:MM）、相对原计划的 delay_minutes 和交接 owner。所有时间均为同一天同一时区。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_time": {
+            "type": "string"
+          },
+          "delay_minutes": {
+            "type": "integer"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "start_time",
+          "delay_minutes",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "start_time": "15:45",
+        "delay_minutes": 45,
+        "owner": "lab-coordinator-4"
+      }
+    },
+    {
+      "id": "wf-handoff-field-kit-shortfall",
+      "category": "project_handoff",
+      "description": "试验项目向外勤项目调拨物资，按整箱采购规则补足缺口。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "field_kit_requirement",
+          "value": "外勤项目本次需要 29 个完整采样套件。"
+        },
+        {
+          "op": "remember",
+          "key": "trial_kit_transfer",
+          "value": "试验项目可调拨 18 个完整采样套件，调拨已确认。"
+        },
+        {
+          "op": "remember",
+          "key": "kit_purchase_pack",
+          "value": "补购采样套件每箱 6 个，只能购买整箱。"
+        },
+        {
+          "op": "remember",
+          "key": "kit_purchase_receiver",
+          "value": "采购收货点代码为 field-depot-23。"
+        }
+      ],
+      "question": "试验项目调拨后，外勤项目最少还需买多少整箱采样套件？返回 boxes、满足本次需求后的 surplus_units 和收货点 receiver。只能使用已确认可调拨数量，采购必须向上取整。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "boxes": {
+            "type": "integer"
+          },
+          "surplus_units": {
+            "type": "integer"
+          },
+          "receiver": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "boxes",
+          "surplus_units",
+          "receiver"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "boxes": 2,
+        "surplus_units": 1,
+        "receiver": "field-depot-23"
+      }
+    },
+    {
+      "id": "wf-troubleshoot-report-query",
+      "category": "incident_triage",
+      "description": "区分报告查询慢与数据库容量、连接故障，依据更新后的诊断定位。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "report_query_latency",
+          "value": "报表查询 p95 为 940 毫秒，要求不超过 300 毫秒。"
+        },
+        {
+          "op": "remember",
+          "key": "report_query_plan",
+          "value": "报表查询诊断最初显示使用索引。"
+        },
+        {
+          "op": "remember",
+          "key": "report_query_plan",
+          "value": "报表查询最新执行计划显示全表扫描；没有使用已存在的订单日期索引。"
+        },
+        {
+          "op": "remember",
+          "key": "report_database_health",
+          "value": "数据库连接检查正常，磁盘使用率 42%，磁盘告警阈值 85%。"
+        },
+        {
+          "op": "remember",
+          "key": "report_query_owner",
+          "value": "报表查询优化负责组代码为 query-lab-12。"
+        }
+      ],
+      "question": "按最新证据确定报表查询的第一步处理：连接异常选 check_connection，磁盘达到告警阈值选 reclaim_space，否则若延迟超标且全表扫描选 inspect_index_usage，其余选 observe。返回 action、owner、latency_over_limit。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latency_over_limit": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action",
+          "owner",
+          "latency_over_limit"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "inspect_index_usage",
+        "owner": "query-lab-12",
+        "latency_over_limit": true
+      }
+    },
+    {
+      "id": "wf-troubleshoot-tls-window",
+      "category": "incident_triage",
+      "description": "区分证书过期与时钟偏移导致的握手问题。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "tls_certificate_window",
+          "value": "支付回调证书有效期截止到当天 09:10，证书链完整。"
+        },
+        {
+          "op": "remember",
+          "key": "tls_observation_time",
+          "value": "当前可信时间为同一天 09:35。"
+        },
+        {
+          "op": "remember",
+          "key": "tls_host_clock",
+          "value": "回调主机与可信时间相差 2 秒；时钟偏移超过 60 秒才需要校时。"
+        },
+        {
+          "op": "remember",
+          "key": "tls_certificate_owner",
+          "value": "支付回调证书维护组代码为 cert-desk-27。"
+        }
+      ],
+      "question": "支付回调握手失败该先做什么？如果时钟偏移超过阈值选 sync_clock，否则证书已过期选 renew_certificate，否则选 investigate_chain。返回 action、expired_minutes（未过期为0）和 owner。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "expired_minutes": {
+            "type": "integer"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "expired_minutes",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 25,
+        "owner": "cert-desk-27"
+      }
+    },
+    {
+      "id": "wf-troubleshoot-replayed-charge",
+      "category": "incident_triage",
+      "description": "超时重投时区分支付效果已提交与消息确认丢失，避免重复扣费。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "charge_event_receipt",
+          "value": "扣费事件 charge-evt-63 的账务效果已经提交，凭证编号为 ledger-slip-82。"
+        },
+        {
+          "op": "remember",
+          "key": "charge_queue_delivery",
+          "value": "队列因确认超时再次投递 charge-evt-63，事件标识与原事件相同。"
+        },
+        {
+          "op": "remember",
+          "key": "charge_receipt_state",
+          "value": "对账查询已验证 ledger-slip-82 有效且未撤销。"
+        }
+      ],
+      "question": "处理扣费队列重投：事件标识相同且有效账务凭证存在时，不可再次扣费，action 用 acknowledge_existing；否则 action 用 investigate_receipt 并暂不扣费。返回 action、charge_again 和 receipt。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "charge_again": {
+            "type": "boolean"
+          },
+          "receipt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "charge_again",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "acknowledge_existing",
+        "charge_again": false,
+        "receipt": "ledger-slip-82"
+      }
+    },
+    {
+      "id": "wf-troubleshoot-cache-generation",
+      "category": "incident_triage",
+      "description": "通过源版本和缓存版本判断页面旧值来自哪里，并排除其他作用域的干扰。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "price_source_revision",
+          "value": "当前项目价格源的修订号为 46，价格已通过审核。"
+        },
+        {
+          "op": "remember",
+          "key": "price_cache_revision",
+          "value": "当前项目页面缓存修订号为 43，最后一次刷新失败。"
+        },
+        {
+          "op": "remember",
+          "key": "price_origin_health",
+          "value": "当前项目价格源接口探测成功，网络连接正常。"
+        },
+        {
+          "op": "remember",
+          "key": "price_cache_owner",
+          "value": "当前项目缓存维护组代码为 edge-maint-19。"
+        },
+        {
+          "op": "remember",
+          "key": "price_cache_revision",
+          "value": "另一个租户的页面缓存修订号为 46，刷新成功。",
+          "scope": {
+            "user_id": "workflow-outsider",
+            "tenant_id": "workflow-other",
+            "agent_id": "workflow-reviewer"
+          }
+        }
+      ],
+      "question": "当前项目页面仍显示旧价格。只用当前作用域资料：若源接口异常选 repair_origin；否则缓存修订落后于源选 refresh_cache；否则选 inspect_rendering。返回 action、revision_gap（源修订减缓存修订）和 owner。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "revision_gap": {
+            "type": "integer"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "revision_gap",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "refresh_cache",
+        "revision_gap": 3,
+        "owner": "edge-maint-19"
+      }
+    },
+    {
+      "id": "wf-support-partial-shipment-refund",
+      "category": "support_resolution",
+      "description": "拆单发货退款仅覆盖尚未发出的物品，按期限与单价计算。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "order_refund_window",
+          "value": "这张订单允许付款后 14 天内退还未发货物品的货款，不收手续费。"
+        },
+        {
+          "op": "remember",
+          "key": "order_refund_age",
+          "value": "订单付款至今 11 天。"
+        },
+        {
+          "op": "remember",
+          "key": "order_dispatch_state",
+          "value": "本单共有 5 件同款商品，已发货 2 件，未发货 3 件；客户仅申请未发货部分退款。"
+        },
+        {
+          "op": "remember",
+          "key": "order_item_price",
+          "value": "每件实付 24 欧元，币种代码 EUR。"
+        }
+      ],
+      "question": "依据订单退款规则处理未发货部分：期限内只退客户申请且未发货的商品，超期则金额为0并转人工。返回 refund_amount（整数）、currency 和 needs_manual_review。不要把已发货商品计入退款。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "refund_amount": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "needs_manual_review": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "refund_amount",
+          "currency",
+          "needs_manual_review"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "refund_amount": 72,
+        "currency": "EUR",
+        "needs_manual_review": false
+      }
+    },
+    {
+      "id": "wf-support-forgotten-recipient",
+      "category": "support_resolution",
+      "description": "用户撤回联系方式后保留渠道选择，但不能从历史中恢复被删除号码。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "support_notice_channel",
+          "value": "维修进度通知采用渠道代码 sms。"
+        },
+        {
+          "op": "remember",
+          "key": "support_notice_recipient",
+          "value": "维修进度通知收件号码是 +8613900072468。"
+        },
+        {
+          "op": "remember",
+          "key": "support_notice_template",
+          "value": "当前维修通知模板代码为 repair-notice-16。"
+        },
+        {
+          "op": "forget",
+          "key": "support_notice_recipient"
+        }
+      ],
+      "question": "准备维修进度通知，仅使用当前仍保存的信息。若收件号码缺失，recipient 填 null，action 为 request_recipient；否则 action 为 prepare_notice。返回 channel、recipient、template 和 action，不要从历史恢复已遗忘号码。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recipient": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "template": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "recipient",
+          "template",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "channel": "sms",
+        "recipient": null,
+        "template": "repair-notice-16",
+        "action": "request_recipient"
+      }
+    },
+    {
+      "id": "wf-support-warranty-routing",
+      "category": "support_resolution",
+      "description": "设备已超过标准保修期且延保取消时，依据当前保障状态安排处理渠道。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "device_warranty_terms",
+          "value": "当前设备标准保修期为购买后 24 个月，期内维修免费。"
+        },
+        {
+          "op": "remember",
+          "key": "device_purchase_age",
+          "value": "当前设备购买至今 27 个月。"
+        },
+        {
+          "op": "remember",
+          "key": "device_extended_cover",
+          "value": "当前设备已购买有效延保。"
+        },
+        {
+          "op": "remember",
+          "key": "device_extended_cover",
+          "value": "当前设备延保已取消，不再有效。"
+        },
+        {
+          "op": "remember",
+          "key": "device_repair_queues",
+          "value": "免费维修受理队列代码为 covered-repair-22，自费维修受理队列代码为 quoted-repair-37。"
+        }
+      ],
+      "question": "当前设备应进入哪个维修队列？仍在标准保修期内或有有效延保则免费，否则先报价。返回 queue、free_repair 和超出标准保修的 months_over_standard；没有超出时该整数为0。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "queue": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "free_repair": {
+            "type": "boolean"
+          },
+          "months_over_standard": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "queue",
+          "free_repair",
+          "months_over_standard"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "queue": "quoted-repair-37",
+        "free_repair": false,
+        "months_over_standard": 3
+      }
+    },
+    {
+      "id": "wf-support-future-discount",
+      "category": "support_resolution",
+      "description": "区分已结算账单与下一周期生效优惠，避免追溯补偿。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "account_discount_terms",
+          "value": "已批准优惠仅在 2031-05 账期起生效，不追溯已结算账单。"
+        },
+        {
+          "op": "remember",
+          "key": "account_disputed_invoice",
+          "value": "客户咨询的账单属于 2031-04 账期，已结算且没有计费错误。"
+        },
+        {
+          "op": "remember",
+          "key": "account_next_discount",
+          "value": "2031-05 账期优惠金额为 18 元。"
+        },
+        {
+          "op": "remember",
+          "key": "account_billing_currency",
+          "value": "此账户使用币种代码 CNY。"
+        }
+      ],
+      "question": "客户希望把已批准优惠补到咨询的旧账单上。依据优惠起效范围和账单状态，返回 old_invoice_credit、next_cycle、next_cycle_discount 和 currency；不存在计费错误且规则不追溯时旧账单补偿金额为0。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "old_invoice_credit": {
+            "type": "integer"
+          },
+          "next_cycle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "next_cycle_discount": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "old_invoice_credit",
+          "next_cycle",
+          "next_cycle_discount",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "old_invoice_credit": 0,
+        "next_cycle": "2031-05",
+        "next_cycle_discount": 18,
+        "currency": "CNY"
+      }
+    },
+    {
+      "id": "wf-requirement-offline-scope-change",
+      "category": "requirement_change",
+      "description": "需求收缩后撤出已不要求的离线能力，保留仍受要求约束的导出功能。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "inspection_offline_requirement",
+          "value": "巡检应用本期必须支持离线采集。"
+        },
+        {
+          "op": "remember",
+          "key": "inspection_offline_requirement",
+          "value": "巡检应用本期已取消离线采集要求，仅需联网使用。"
+        },
+        {
+          "op": "remember",
+          "key": "inspection_export_requirement",
+          "value": "巡检应用本期仍必须支持 PDF 巡检单导出。"
+        },
+        {
+          "op": "remember",
+          "key": "inspection_feature_readiness",
+          "value": "离线采集功能尚未完成；PDF 导出已验收通过。"
+        }
+      ],
+      "question": "按巡检应用当前需求决定本期范围。仅保留仍被要求的能力；已撤销的未完成功能不阻塞本期。返回 include_offline、include_pdf_export、unfinished_offline_blocks_release 三个布尔字段。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "include_offline": {
+            "type": "boolean"
+          },
+          "include_pdf_export": {
+            "type": "boolean"
+          },
+          "unfinished_offline_blocks_release": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "include_offline",
+          "include_pdf_export",
+          "unfinished_offline_blocks_release"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": false
+      }
+    },
+    {
+      "id": "wf-requirement-client-migration",
+      "category": "requirement_change",
+      "description": "移除旧协议字段前核对所有消费者迁移状态。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "invoice_contract_consumers",
+          "value": "发票接口共有 3 个必须迁移的消费端。"
+        },
+        {
+          "op": "remember",
+          "key": "invoice_migrated_consumers",
+          "value": "目前 1 个发票接口消费端已完成新协议迁移。"
+        },
+        {
+          "op": "remember",
+          "key": "invoice_migrated_consumers",
+          "value": "最新确认 2 个发票接口消费端已完成新协议迁移。"
+        },
+        {
+          "op": "remember",
+          "key": "invoice_legacy_field",
+          "value": "拟移除旧字段代码为 vat_legacy_ref。"
+        },
+        {
+          "op": "remember",
+          "key": "invoice_transition_support",
+          "value": "接口目前同时提供新旧字段，双字段兼容已验证。"
+        }
+      ],
+      "question": "发票接口只有所有消费端迁移完成后才能移除旧字段，否则继续双字段兼容。返回 legacy_field、can_remove、remaining_consumers 和 mode；mode 使用 remove_legacy 或 dual_fields。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "legacy_field": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "can_remove": {
+            "type": "boolean"
+          },
+          "remaining_consumers": {
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "legacy_field",
+          "can_remove",
+          "remaining_consumers",
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "legacy_field": "vat_legacy_ref",
+        "can_remove": false,
+        "remaining_consumers": 1,
+        "mode": "dual_fields"
+      }
+    },
+    {
+      "id": "wf-requirement-audit-retention",
+      "category": "requirement_change",
+      "description": "新增导出功能的验收受到审计留存要求变更影响。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "export_audit_requirement",
+          "value": "管理端批量导出的验收要求审计日志至少保留 30 天。"
+        },
+        {
+          "op": "remember",
+          "key": "export_audit_setting",
+          "value": "管理端批量导出审计日志当前设置为保留 7 天。"
+        },
+        {
+          "op": "remember",
+          "key": "export_functional_check",
+          "value": "管理端批量导出的功能测试已经通过。"
+        },
+        {
+          "op": "remember",
+          "key": "export_audit_owner",
+          "value": "审计留存配置负责组代码为 compliance-config-11。"
+        }
+      ],
+      "question": "管理端批量导出能否验收？功能通过且审计留存天数达到要求才 can_accept=true。若不足，返回满足要求的最小 retention_days 和需增加的 additional_days，并返回配置 owner。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "can_accept": {
+            "type": "boolean"
+          },
+          "retention_days": {
+            "type": "integer"
+          },
+          "additional_days": {
+            "type": "integer"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "can_accept",
+          "retention_days",
+          "additional_days",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "can_accept": false,
+        "retention_days": 30,
+        "additional_days": 23,
+        "owner": "compliance-config-11"
+      }
+    },
+    {
+      "id": "wf-requirement-locale-readiness",
+      "category": "requirement_change",
+      "description": "新地区发布必须同时满足翻译与字体验收，部分条件达成不能视为全部就绪。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "kiosk_target_locales",
+          "value": "展馆终端本期新增语言代码为 pt-BR 和 ja-JP。"
+        },
+        {
+          "op": "remember",
+          "key": "kiosk_translation_check",
+          "value": "pt-BR 与 ja-JP 的界面翻译都已验收通过。"
+        },
+        {
+          "op": "remember",
+          "key": "kiosk_font_check",
+          "value": "pt-BR 的字体显示检查通过；ja-JP 存在缺字，字体检查未通过。"
+        },
+        {
+          "op": "remember",
+          "key": "kiosk_locale_independence",
+          "value": "两个语言包可以独立发布，不要求同时上线。"
+        }
+      ],
+      "question": "展馆终端每个语言包只有翻译和字体检查都通过才能发布，允许独立上线。返回本期可发布的 ready_locale、需暂缓的 deferred_locale 和 all_requested_ready。使用记录中的语言代码，不以翻译通过代替字体检查。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ready_locale": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "deferred_locale": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "all_requested_ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ready_locale",
+          "deferred_locale",
+          "all_requested_ready"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "ready_locale": "pt-BR",
+        "deferred_locale": "ja-JP",
+        "all_requested_ready": false
+      }
+    },
+    {
+      "id": "wf-plan-uninterrupted-maintenance",
+      "category": "planning_constraints",
+      "description": "在不可拆分维护时长和业务空窗约束下选择可容纳的时段。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "scanner_maintenance_duration",
+          "value": "扫描服务维护需要连续停机 45 分钟，不能拆成多段。"
+        },
+        {
+          "op": "remember",
+          "key": "scanner_maintenance_window_a",
+          "value": "同一天候选时段 window-a17 为 09:00 至 09:30。"
+        },
+        {
+          "op": "remember",
+          "key": "scanner_maintenance_window_b",
+          "value": "同一天候选时段 window-b28 为 13:00 至 14:00。"
+        },
+        {
+          "op": "remember",
+          "key": "scanner_maintenance_arrival",
+          "value": "维护人员能在任一候选时段开始时到场，没有额外准备时间。"
+        }
+      ],
+      "question": "为扫描服务选择能完整容纳维护的最早候选时段，并在该时段开始立即维护。返回 window、start_time、end_time（均为 HH:MM）和 unused_minutes；只能使用记录中给出的候选时段。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "unused_minutes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "window",
+          "start_time",
+          "end_time",
+          "unused_minutes"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "window": "window-b28",
+        "start_time": "13:00",
+        "end_time": "13:45",
+        "unused_minutes": 15
+      }
+    },
+    {
+      "id": "wf-plan-vendor-latency-budget",
+      "category": "planning_constraints",
+      "description": "供应商选择同时满足预算与延迟硬约束，不能仅选择报价最低者。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "document_job_budget",
+          "value": "当前项目每批文档转换预算上限为 90 元，p95 延迟必须不超过 180 毫秒。"
+        },
+        {
+          "op": "remember",
+          "key": "document_vendor_fast",
+          "value": "当前项目候选供应商 vendor-cobalt-5 每批报价 80 元，实测 p95 为 160 毫秒。"
+        },
+        {
+          "op": "remember",
+          "key": "document_vendor_economy",
+          "value": "当前项目候选供应商 vendor-copper-9 每批报价 65 元，实测 p95 为 240 毫秒。"
+        },
+        {
+          "op": "remember",
+          "key": "document_vendor_economy",
+          "value": "其他租户的供应商 vendor-copper-9 每批报价 65 元，实测 p95 为 120 毫秒。",
+          "scope": {
+            "user_id": "workflow-outsider",
+            "tenant_id": "workflow-other",
+            "agent_id": "workflow-reviewer"
+          }
+        }
+      ],
+      "question": "只依据当前项目资料选择同时满足预算和 p95 硬限制的文档转换供应商；若有多个合格者选最便宜的。返回 vendor、batch_cost 和 budget_remaining。不要使用其他作用域的测量结果。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "vendor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "batch_cost": {
+            "type": "integer"
+          },
+          "budget_remaining": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vendor",
+          "batch_cost",
+          "budget_remaining"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "vendor": "vendor-cobalt-5",
+        "batch_cost": 80,
+        "budget_remaining": 10
+      }
+    },
+    {
+      "id": "wf-plan-parallel-critical-path",
+      "category": "planning_constraints",
+      "description": "双团队并行准备后再联合验收，按最长前置路径计算总时长。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "launch_design_work",
+          "value": "活动设计团队需要 3 个完整工作日完成设计。"
+        },
+        {
+          "op": "remember",
+          "key": "launch_integration_work",
+          "value": "活动集成团队原估需要 2 个完整工作日完成集成。"
+        },
+        {
+          "op": "remember",
+          "key": "launch_integration_work",
+          "value": "活动集成团队最新估算需要 4 个完整工作日完成集成。"
+        },
+        {
+          "op": "remember",
+          "key": "launch_parallel_capacity",
+          "value": "设计与集成由独立团队同时开始，可以完全并行。"
+        },
+        {
+          "op": "remember",
+          "key": "launch_acceptance_work",
+          "value": "联合验收必须等设计和集成都完成后才能开始，需要 2 个完整工作日。"
+        }
+      ],
+      "question": "活动从设计和集成同时开工，到联合验收完成，最少需要多少工作日？使用最新工期，并行阶段取最长路径。返回 preparation_days、acceptance_days 和 total_days；不考虑周末或节假日换算。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "preparation_days": {
+            "type": "integer"
+          },
+          "acceptance_days": {
+            "type": "integer"
+          },
+          "total_days": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "preparation_days",
+          "acceptance_days",
+          "total_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "preparation_days": 4,
+        "acceptance_days": 2,
+        "total_days": 6
+      }
+    },
+    {
+      "id": "wf-plan-arrival-with-transfer",
+      "category": "planning_constraints",
+      "description": "参加现场培训时将接驳时间算入到场约束，而非只比较到站时刻。",
+      "events": [
+        {
+          "op": "remember",
+          "key": "training_arrival_deadline",
+          "value": "现场培训要求当天 10:00 前或准时到达教室，单程交通预算上限为 360 元。"
+        },
+        {
+          "op": "remember",
+          "key": "training_route_rail",
+          "value": "路线 route-rail-42 花费 280 元，当天 09:20 到站；车站到教室固定需要 30 分钟。"
+        },
+        {
+          "op": "remember",
+          "key": "training_route_air",
+          "value": "路线 route-air-56 花费 340 元，当天 09:10 到机场；机场到教室固定需要 70 分钟。"
+        },
+        {
+          "op": "remember",
+          "key": "training_transfer_cost",
+          "value": "两条路线的报价都已包含到教室的接驳费用，不再额外计费。"
+        }
+      ],
+      "question": "选择满足预算且能按时到达教室的培训路线；若多条合格选较便宜的。必须把接驳时间计入到达时刻。返回 route、classroom_arrival（HH:MM）、minutes_before_deadline 和 total_cost。所有记录时间均为同一天同一时区。",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "classroom_arrival": {
+            "type": "string"
+          },
+          "minutes_before_deadline": {
+            "type": "integer"
+          },
+          "total_cost": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "route",
+          "classroom_arrival",
+          "minutes_before_deadline",
+          "total_cost"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "route": "route-rail-42",
+        "classroom_arrival": "09:50",
+        "minutes_before_deadline": 10,
+        "total_cost": 280
+      }
+    }
+  ]
+}

@@ -11,8 +11,9 @@ with Memory("data/memweft.db") as memory:
     alice = memory.user("alice")
     alice.remember("Prefers concise answers", key="reply_style")
     chat = alice.session("chat-001")
-    chat.add_message("user", "Explain Rust ownership", event_id="question-1")
-    print(chat.context(max_tokens=1000).text)
+    question = "Explain Rust ownership"
+    chat.add_message("user", question, event_id="question-1")
+    print(chat.context(query=question, max_tokens=1000).text)
 ```
 
 The high-level API supports SQLite and an optional evaluated-learning workflow.
@@ -46,7 +47,27 @@ terms and scores. `AsyncSession.context` and `LangGraphMemory.context` also acce
 provide semantic similarity. Indexed candidate selection and exact fallback paths
 are described in the [retrieval guide](../docs/indexed_retrieval.md).
 
+Pass the current question as `query` even when you also save it with
+`add_message`: context does not infer a query from conversation history. When
+`max_facts` excludes facts and the query has no lexical terms (including a missing,
+empty or punctuation-only query), `context.explain()["warnings"]` contains a
+structured warning with `code="unranked_fact_limit"`. It explains that selection
+used key order and suggests supplying a query. The warning does not change
+selection or appear in `context.text`; inspect `omissions` and `recall` for the
+bounded selection diagnostics. The warning array is empty when this condition
+does not apply; an empty array is not a guarantee that the context is complete.
+
 ## Model reference boundaries
+
+Applications that know which facts a task needs can pass
+`required_fact_keys=["tls.certificate", "clock.observation", "host.clock"]`
+to synchronous or asynchronous `session.context(...)`. These keys are retrieved
+exactly and prioritized before ordinary lexical matches, within the same scope
+and existing count/text budgets. Inspect `context.explain()["requirements"]` for
+`requested`, `included`, `missing`, `excluded` and `complete`. Completeness covers
+only the declared keys, not factual correctness or every business dependency.
+See [required facts and application validation](../docs/required_facts.md) for the
+snapshot guarantees, limits and a runnable workflow example.
 
 For sensitive decisions, the optional `memweft.adapters.references` module exposes
 `ReferencePolicy` and `project_references`. Applications can allow finite fact
@@ -76,7 +97,10 @@ machine; optional LangGraph dependencies are separate. Preview wheels use the
 default SQLite build, without optional MySQL/PostgreSQL features. CI is configured
 for CPython 3.10, 3.11 and 3.12 on its Linux, macOS and Windows runner
 architectures. The artifacts are not published to PyPI. Each job checks an
-isolated wheel install, native context, persistence and schema v3. Before
+isolated wheel install, required-fact diagnostics, scope isolation, updates,
+durable forgetting, persistence and schema v3. The current Python preview is
+`0.2.0a1`; the [release guide](../docs/preview_release.md) explains how each
+artifact's build record identifies its source commit and hashes. Before
 upgrading existing data, follow the [v3 backup and recovery guide](../docs/upgrade_v3.md).
 
 ### Build from source

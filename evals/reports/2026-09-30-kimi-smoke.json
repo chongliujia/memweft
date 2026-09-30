@@ -1,0 +1,771 @@
+{
+  "calls": 26,
+  "by_mode": {
+    "no_memory": {
+      "passed": 2,
+      "total": 13
+    },
+    "memory": {
+      "passed": 12,
+      "total": 13
+    }
+  },
+  "usage": {
+    "prompt_tokens": 5639,
+    "completion_tokens": 283,
+    "total_tokens": 5922
+  },
+  "estimated_cny_without_cache_discount": 0.044295,
+  "pricing_source": "https://platform.kimi.com/docs/pricing/chat",
+  "pricing_checked": "2026-09-30",
+  "failures": [
+    {
+      "case_id": "preference-language",
+      "mode": "no_memory",
+      "reason": "wrong_values:language,timezone"
+    },
+    {
+      "case_id": "preference-format",
+      "mode": "no_memory",
+      "reason": "wrong_values:format,programming_language"
+    },
+    {
+      "case_id": "session-next-step",
+      "mode": "no_memory",
+      "reason": "wrong_values:project,next_step"
+    },
+    {
+      "case_id": "session-retry",
+      "mode": "no_memory",
+      "reason": "wrong_values:release,owner"
+    },
+    {
+      "case_id": "update-region",
+      "mode": "no_memory",
+      "reason": "wrong_values:region"
+    },
+    {
+      "case_id": "update-branch",
+      "mode": "no_memory",
+      "reason": "wrong_values:branch"
+    },
+    {
+      "case_id": "forget-preserves-unrelated",
+      "mode": "no_memory",
+      "reason": "wrong_values:editor"
+    },
+    {
+      "case_id": "isolation-tenant-agent",
+      "mode": "no_memory",
+      "reason": "wrong_values:project"
+    },
+    {
+      "case_id": "recall-pressure",
+      "mode": "no_memory",
+      "reason": "wrong_values:port"
+    },
+    {
+      "case_id": "recall-pressure-control",
+      "mode": "no_memory",
+      "reason": "wrong_values:port"
+    },
+    {
+      "case_id": "recall-pressure-key-order",
+      "mode": "no_memory",
+      "reason": "wrong_values:port"
+    },
+    {
+      "case_id": "recall-pressure-key-order",
+      "mode": "memory",
+      "reason": "wrong_values:port"
+    }
+  ],
+  "metadata": {
+    "model": "kimi-k2.6",
+    "base_url": "https://api.moonshot.cn/v1",
+    "suite": "common-v3",
+    "suite_sha256": "dfee13e9dd3d6f955b97ea743eabdccadd8f129196fdd61d93526e132ad64d1b",
+    "runner_sha256": "8baf7c4faad08fb8ef0d243fb8d6ab1f93d56feb2e365932ff706c9ff16a4aaa",
+    "client_sha256": "37ba4a874e972338201dd6b00c63f20e7d900726dfe8c8cfa5d986d4665b3694",
+    "native_sha256": "910fd59e57c6fdc8f8ef4ef369de75689cebf6b9adfd3f391ccf93d5fccc3f0f",
+    "started_at": "2026-09-30T03:10:40.548788+00:00",
+    "max_calls": 26,
+    "max_output_tokens_per_call": 128,
+    "thinking": "disabled",
+    "retries": 0,
+    "request_interval_seconds": 21,
+    "check_memory": false,
+    "notes": "Synthetic explicit facts; no learning, extraction or production-data access."
+  },
+  "whole_session_reported_usage": {
+    "prompt_tokens": 6175,
+    "completion_tokens": 325,
+    "total_tokens": 6500
+  },
+  "whole_session_estimated_cny_without_cache_discount": 0.048912,
+  "initial_probe": {
+    "completed_calls": 3,
+    "next_request_http_status": 429,
+    "observed_account_rpm": 3
+  },
+  "latency_ms": {
+    "median": 1081.7485000000001,
+    "max": 1812.15
+  },
+  "protocol_valid": 26,
+  "recall_controls": [
+    {
+      "case_id": "recall-pressure",
+      "target_in_context": true,
+      "selected_facts": 30,
+      "method": "lexical_overlap_v1",
+      "target_omission": []
+    },
+    {
+      "case_id": "recall-pressure-control",
+      "target_in_context": true,
+      "selected_facts": 41,
+      "method": "lexical_overlap_v1",
+      "target_omission": []
+    },
+    {
+      "case_id": "recall-pressure-key-order",
+      "target_in_context": false,
+      "selected_facts": 30,
+      "method": "key_order",
+      "target_omission": [
+        {
+          "id": "memweft:key:z_deployment_port",
+          "reason": "max_facts",
+          "relevance_score": 0,
+          "section": "memories"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "case_id": "preference-language",
+      "category": "preferences",
+      "mode": "no_memory",
+      "expected": {
+        "language": "en",
+        "timezone": "Asia/Shanghai"
+      },
+      "content": "{\"language\":null,\"timezone\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:language,timezone",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 152,
+        "completion_tokens": 12,
+        "total_tokens": 164,
+        "cached_tokens": 152,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 152
+        }
+      },
+      "latency_ms": 1113.546
+    },
+    {
+      "case_id": "preference-language",
+      "category": "preferences",
+      "mode": "memory",
+      "expected": {
+        "language": "en",
+        "timezone": "Asia/Shanghai"
+      },
+      "content": "{\"language\":\"en\",\"timezone\":\"Asia/Shanghai\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 192,
+        "completion_tokens": 14,
+        "total_tokens": 206,
+        "cached_tokens": 192,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "latency_ms": 1086.574
+    },
+    {
+      "case_id": "preference-format",
+      "category": "preferences",
+      "mode": "memory",
+      "expected": {
+        "format": "bullets",
+        "programming_language": "rust"
+      },
+      "content": "{\"format\":\"bullets\",\"programming_language\":\"rust\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 192,
+        "completion_tokens": 15,
+        "total_tokens": 207,
+        "cached_tokens": 192,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "latency_ms": 1041.436
+    },
+    {
+      "case_id": "preference-format",
+      "category": "preferences",
+      "mode": "no_memory",
+      "expected": {
+        "format": "bullets",
+        "programming_language": "rust"
+      },
+      "content": "{\"format\":null,\"programming_language\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:format,programming_language",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 158,
+        "completion_tokens": 14,
+        "total_tokens": 172,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1812.15
+    },
+    {
+      "case_id": "session-next-step",
+      "category": "session_resume",
+      "mode": "no_memory",
+      "expected": {
+        "project": "cedar-17",
+        "next_step": "add_retry_budget"
+      },
+      "content": "{\"project\":null,\"next_step\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:project,next_step",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 146,
+        "completion_tokens": 13,
+        "total_tokens": 159,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1152.672
+    },
+    {
+      "case_id": "session-next-step",
+      "category": "session_resume",
+      "mode": "memory",
+      "expected": {
+        "project": "cedar-17",
+        "next_step": "add_retry_budget"
+      },
+      "content": "{\"project\":\"cedar-17\",\"next_step\":\"add_retry_budget\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 192,
+        "completion_tokens": 18,
+        "total_tokens": 210,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1254.197
+    },
+    {
+      "case_id": "session-retry",
+      "category": "session_resume",
+      "mode": "memory",
+      "expected": {
+        "release": "release-073",
+        "owner": "owner-k9"
+      },
+      "content": "{\"release\":\"release-073\",\"owner\":\"owner-k9\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 170,
+        "completion_tokens": 16,
+        "total_tokens": 186,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1250.734
+    },
+    {
+      "case_id": "session-retry",
+      "category": "session_resume",
+      "mode": "no_memory",
+      "expected": {
+        "release": "release-073",
+        "owner": "owner-k9"
+      },
+      "content": "{\"release\":null,\"owner\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:release,owner",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 137,
+        "completion_tokens": 12,
+        "total_tokens": 149,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1103.052
+    },
+    {
+      "case_id": "update-region",
+      "category": "fact_update",
+      "mode": "no_memory",
+      "expected": {
+        "region": "eu-central-1"
+      },
+      "content": "{\"region\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:region",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 125,
+        "completion_tokens": 8,
+        "total_tokens": 133,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 987.272
+    },
+    {
+      "case_id": "update-region",
+      "category": "fact_update",
+      "mode": "memory",
+      "expected": {
+        "region": "eu-central-1"
+      },
+      "content": "{\"region\":\"eu-central-1\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 153,
+        "completion_tokens": 11,
+        "total_tokens": 164,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1012.11
+    },
+    {
+      "case_id": "update-branch",
+      "category": "fact_update",
+      "mode": "memory",
+      "expected": {
+        "branch": "release/new-82"
+      },
+      "content": "{\"branch\":\"release/new-82\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 152,
+        "completion_tokens": 11,
+        "total_tokens": 163,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1116.821
+    },
+    {
+      "case_id": "update-branch",
+      "category": "fact_update",
+      "mode": "no_memory",
+      "expected": {
+        "branch": "release/new-82"
+      },
+      "content": "{\"branch\":\"main\"}",
+      "score": 0.0,
+      "reason": "wrong_values:branch",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 125,
+        "completion_tokens": 8,
+        "total_tokens": 133,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1071.295
+    },
+    {
+      "case_id": "forget-project-code",
+      "category": "forgetting",
+      "mode": "no_memory",
+      "expected": {
+        "project_code": null
+      },
+      "content": "{\"project_code\":null}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 134,
+        "completion_tokens": 9,
+        "total_tokens": 143,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1053.746
+    },
+    {
+      "case_id": "forget-project-code",
+      "category": "forgetting",
+      "mode": "memory",
+      "expected": {
+        "project_code": null
+      },
+      "content": "{\"project_code\":null}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 134,
+        "completion_tokens": 9,
+        "total_tokens": 143,
+        "cached_tokens": 134,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 134
+        }
+      },
+      "latency_ms": 882.185
+    },
+    {
+      "case_id": "forget-preserves-unrelated",
+      "category": "forgetting",
+      "mode": "memory",
+      "expected": {
+        "room": null,
+        "editor": "helix"
+      },
+      "content": "{\"room\":null,\"editor\":\"helix\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 166,
+        "completion_tokens": 13,
+        "total_tokens": 179,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1113.712
+    },
+    {
+      "case_id": "forget-preserves-unrelated",
+      "category": "forgetting",
+      "mode": "no_memory",
+      "expected": {
+        "room": null,
+        "editor": "helix"
+      },
+      "content": "{\"room\":null,\"editor\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:editor",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 141,
+        "completion_tokens": 12,
+        "total_tokens": 153,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1089.957
+    },
+    {
+      "case_id": "isolation-user",
+      "category": "scope_isolation",
+      "mode": "no_memory",
+      "expected": {
+        "project": null
+      },
+      "content": "{\"project\":null}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 126,
+        "completion_tokens": 8,
+        "total_tokens": 134,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1113.952
+    },
+    {
+      "case_id": "isolation-user",
+      "category": "scope_isolation",
+      "mode": "memory",
+      "expected": {
+        "project": null
+      },
+      "content": "{\"project\":null}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 126,
+        "completion_tokens": 8,
+        "total_tokens": 134,
+        "cached_tokens": 126,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 126
+        }
+      },
+      "latency_ms": 901.627
+    },
+    {
+      "case_id": "isolation-tenant-agent",
+      "category": "scope_isolation",
+      "mode": "memory",
+      "expected": {
+        "project": "own-project-118"
+      },
+      "content": "{\"project\":\"own-project-118\"}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 159,
+        "completion_tokens": 11,
+        "total_tokens": 170,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1090.189
+    },
+    {
+      "case_id": "isolation-tenant-agent",
+      "category": "scope_isolation",
+      "mode": "no_memory",
+      "expected": {
+        "project": "own-project-118"
+      },
+      "content": "{\"project\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:project",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 133,
+        "completion_tokens": 8,
+        "total_tokens": 141,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 993.259
+    },
+    {
+      "case_id": "recall-pressure",
+      "category": "recall_pressure",
+      "mode": "no_memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\": 3000}",
+      "score": 0.0,
+      "reason": "wrong_values:port",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 129,
+        "completion_tokens": 10,
+        "total_tokens": 139,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1025.209
+    },
+    {
+      "case_id": "recall-pressure",
+      "category": "recall_pressure",
+      "mode": "memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\":17443}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 679,
+        "completion_tokens": 9,
+        "total_tokens": 688,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1114.829
+    },
+    {
+      "case_id": "recall-pressure-control",
+      "category": "recall_control",
+      "mode": "memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\":17443}",
+      "score": 1.0,
+      "reason": "pass",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 877,
+        "completion_tokens": 9,
+        "total_tokens": 886,
+        "cached_tokens": 512,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        }
+      },
+      "latency_ms": 1016.526
+    },
+    {
+      "case_id": "recall-pressure-control",
+      "category": "recall_control",
+      "mode": "no_memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:port",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 129,
+        "completion_tokens": 8,
+        "total_tokens": 137,
+        "cached_tokens": 129,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 129
+        }
+      },
+      "latency_ms": 997.935
+    },
+    {
+      "case_id": "recall-pressure-key-order",
+      "category": "recall_key_order",
+      "mode": "no_memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\":8080}",
+      "score": 0.0,
+      "reason": "wrong_values:port",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 129,
+        "completion_tokens": 9,
+        "total_tokens": 138,
+        "cached_tokens": 129,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 129
+        }
+      },
+      "latency_ms": 1076.923
+    },
+    {
+      "case_id": "recall-pressure-key-order",
+      "category": "recall_key_order",
+      "mode": "memory",
+      "expected": {
+        "port": 17443
+      },
+      "content": "{\"port\":null}",
+      "score": 0.0,
+      "reason": "wrong_values:port",
+      "protocol_valid": true,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 683,
+        "completion_tokens": 8,
+        "total_tokens": 691,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 954.82
+    }
+  ],
+  "evidence_sha256": {
+    "calls.jsonl": "cdb58f585844f27a0265e1ea6f8276763ea1559deddf46378119d7388cd4a557",
+    "results.jsonl": "0aadabd3040081f94be7957acfbcd57402b917c43190632033b9ba0155fdb219",
+    "contexts.json": "17acfa27fb4e6db27d0251434325477ac208dce2869a22e1536b9e13b398bba4",
+    "metadata.json": "78e99dbc4bfe80d79562bfe91797d90f883c782cf28092e10158af953beb85d8",
+    "suite.json": "0d55cd8779153e8fb9eb3426fdff1184c78e8affff8afe5479ffdf46b21a77c1",
+    "status.json": "3f9fe0aa4f5050543663469b8029ea54a3a6e53c4896a4fde0f95ccde7f66481"
+  },
+  "offline_tests_passed": 69
+}

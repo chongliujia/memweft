@@ -1,0 +1,403 @@
+{
+  "calls": 10,
+  "usage": {
+    "prompt_tokens": 8431,
+    "completion_tokens": 583,
+    "total_tokens": 9014
+  },
+  "estimated_cny_without_cache_discount": 0.070542,
+  "price_checked": "2026-09-30",
+  "pricing_source": "https://platform.kimi.com/docs/pricing/chat",
+  "by_mode": {
+    "no_memory": {
+      "passed": 1,
+      "total": 5
+    },
+    "memory": {
+      "passed": 5,
+      "total": 5
+    }
+  },
+  "invalid_plans": 0,
+  "metadata": {
+    "started_at": "2026-09-30T08:47:06.027235+00:00",
+    "model": "kimi-k2.6",
+    "thinking": "disabled",
+    "max_calls": 10,
+    "max_completion_tokens": 256,
+    "request_interval_seconds": 21,
+    "native_sha256": "910fd59e57c6fdc8f8ef4ef369de75689cebf6b9adfd3f391ccf93d5fccc3f0f",
+    "source_sha256": {
+      "evals/run_kimi_release.py": "6dbea9b35359a3b6d014918ae52371bfa587dfb967fbf7798c9bea62ad6277f0",
+      "examples/kimi_release_agent.py": "101e46f00d1a577b4e1ec65fa1b90c47b02bdebceca002105c739876aa8cf892",
+      "examples/kimi_memory.py": "37ba4a874e972338201dd6b00c63f20e7d900726dfe8c8cfa5d986d4665b3694"
+    },
+    "scope": "One internal project case plus four controlled lifecycle rehearsals; no customer data or publishing."
+  },
+  "local_evidence": {
+    "captured_at": "2026-09-30T08:47:06.018272+00:00",
+    "head": "7aa5ed09f343a999b5e7cc017c19836ba593a361",
+    "worktree_dirty": true,
+    "ci_workflow_present": true,
+    "ci_for_current_source": "not_verified",
+    "business_pilot": "not_verified",
+    "recorded_build_host": {
+      "os": "Darwin",
+      "machine": "arm64"
+    },
+    "artifacts": [
+      {
+        "name": "memweft-0.1.0-cp311-cp311-macosx_11_0_arm64.whl",
+        "sha256": "d0a146a07a746ed97012a3ec1d528ce6e8154ea8a654f794bf7542b8fb3ca5d6",
+        "matches_manifest": true
+      },
+      {
+        "name": "memweft-0.1.0.tgz",
+        "sha256": "1d2e921d5d5136fe324249ae1021fb024358555285a5182bd3ea318cd0dbf7c2",
+        "matches_manifest": true
+      }
+    ],
+    "manifest_error": null,
+    "local_artifacts_match_manifest": true,
+    "source_sha256": {
+      "README.md": "968d566a9114d6cd47c45e80bc8b3426edab8891f9de2ee3c331e66a59c6df8b",
+      "python/pyproject.toml": "bb7da297257ee1c4302be60995246483c8db915677f26aa1b00a3ce7edb6654f",
+      "typescript/package.json": "493003c00307c1527386d089c1f8633a67b903fd9619660679e92db278749a7b",
+      ".github/workflows/verify.yml": "81a699aedb6582416d259c3dc6a74c3ce26201af659f6f71a7ee39d8f20ea997",
+      "docs/upgrade_v3.md": "59b3872198ac1e7c2c9797a0c2a3e02b7155151f757d310a6890e3966c055f2f",
+      "dist/package-target.json": "246123708706a06e9bd9225e22d589f83b39ceb039b86973bf83e663a19e004e"
+    }
+  },
+  "offline_tests_passed": 74,
+  "results": [
+    {
+      "case_id": "resume_project",
+      "kind": "internal_project_pilot",
+      "mode": "no_memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": false,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "记忆中无已保存的发布目标与交付方式决策，需先明确：选择 developer_preview/bounded_production 及 downloadable_artifacts/registries。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "resume_project",
+      "kind": "internal_project_pilot",
+      "mode": "memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "actual": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false,
+        "reason": "工作区未清理，当前源码CI未验证通过，且缺少跨平台构建证据，需先核验CI。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "change_target",
+      "kind": "controlled_rehearsal",
+      "mode": "memory",
+      "expected": {
+        "target": "bounded_production",
+        "delivery": "downloadable_artifacts",
+        "next_action": "run_business_pilot",
+        "ready": false
+      },
+      "actual": {
+        "target": "bounded_production",
+        "delivery": "downloadable_artifacts",
+        "next_action": "run_business_pilot",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": "bounded_production",
+        "delivery": "downloadable_artifacts",
+        "next_action": "run_business_pilot",
+        "ready": false,
+        "reason": "工作区未清理（worktree_dirty=true），CI未验证当前源码，业务试点未确认，需先完成真实业务试点。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "change_target",
+      "kind": "controlled_rehearsal",
+      "mode": "no_memory",
+      "expected": {
+        "target": "bounded_production",
+        "delivery": "downloadable_artifacts",
+        "next_action": "run_business_pilot",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": false,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "记忆中无已保存的 release.decisions.target 与 delivery 记录，需先明确发布目标和交付方式。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "forget_delivery",
+      "kind": "controlled_rehearsal",
+      "mode": "no_memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": false,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "记忆中没有已保存的 release.decisions.target 和 release.decisions.delivery 记录，需先明确发布目标和交付方式。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "forget_delivery",
+      "kind": "controlled_rehearsal",
+      "mode": "memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "actual": {
+        "target": "developer_preview",
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": "developer_preview",
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "目标已恢复为 developer_preview，但交付方式缺失。需先确认交付方式（downloadable_artifacts 或 registries），才能进入后续流程。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "other_user",
+      "kind": "controlled_rehearsal",
+      "mode": "memory",
+      "expected": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "记忆中没有已保存的 release.decisions.target 或 release.decisions.delivery 记录，无法恢复。请先明确发布目标和交付方式。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "other_user",
+      "kind": "controlled_rehearsal",
+      "mode": "no_memory",
+      "expected": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "记忆中无已保存的发布目标与交付方式决策，需先明确这两项关键决策，方可进入后续验证流程。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "stale_ci_note",
+      "kind": "controlled_rehearsal",
+      "mode": "no_memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "actual": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false
+      },
+      "task_passed": false,
+      "proposal": {
+        "target": null,
+        "delivery": null,
+        "next_action": "clarify_decisions",
+        "ready": false,
+        "reason": "未找到已保存的发布目标与交付方式决策记录，需先明确这两项关键决策。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    },
+    {
+      "case_id": "stale_ci_note",
+      "kind": "controlled_rehearsal",
+      "mode": "memory",
+      "expected": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "actual": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false
+      },
+      "task_passed": true,
+      "proposal": {
+        "target": "developer_preview",
+        "delivery": "downloadable_artifacts",
+        "next_action": "verify_cross_platform_ci",
+        "ready": false,
+        "reason": "工作区未清理(dirty)，当前源码CI未验证，且构建仅来自arm64 Darwin，缺少跨平台CI通过证据。"
+      },
+      "validation_error": null,
+      "blockers": [
+        "current_source_ci_not_verified",
+        "worktree_dirty_or_unknown",
+        "business_pilot_not_verified"
+      ],
+      "executed_actions": []
+    }
+  ],
+  "evidence_sha256": {
+    "results.jsonl": "b38665822098bd8c95960226f5eed7cc0d98866a69c013c28f1fce26b58238ac",
+    "evidence.json": "e0bc764e38550da6400e2abb03839c3e1231c09ea147fc7f542b6e97a582f043",
+    "cases.json": "f72c33393998dc14dbc098fb3d59e8285b3f751e7b74a52b4925c4576acfeab9",
+    "metadata.json": "590aa8fb449312796465d7542c56ef1875e052eb433837e2a51f295bfd549b67",
+    "summary.json": "6304288ed0cb90c354320b63e2055b877220c7983b8f72f126b82ce1aeb7541d",
+    "status.json": "419e9474393a614de0c58cf73f28432beb4094aff157e9ab5439af9662eea8dd",
+    "next-steps.md": "acdc4b5f1626753e82db0fd88f363f3fe39443f6838768ce37c92d5695c91d2f"
+  }
+}

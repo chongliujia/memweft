@@ -42,6 +42,23 @@ test('task query reaches shared Rust ranking', async () => {
   } finally { memory.close(); }
 });
 
+test('required fact keys prioritize without bypassing context limits', async () => {
+  const memory = await Memory.open({inMemory:true});
+  try {
+    const user = memory.user('requirements');
+    await user.remember('needle', {key:'a_search'});
+    await user.remember('approval needed', {key:'z_policy'});
+    const session = user.session('s');
+    const context = await session.context({query:'needle',requiredFactKeys:['z_policy','unknown'],maxFacts:1});
+    assert.equal(context.memories[0].fact_key,'z_policy');
+    assert.deepEqual(context.explain().requirements, {
+      requested:['z_policy','unknown'],included:['z_policy'],missing:['unknown'],excluded:[],complete:false,
+    });
+    assert.deepEqual((await session.context({requiredFactKeys:['z_policy'],maxTokens:0})).explain().requirements.excluded,['z_policy']);
+    await assert.rejects(session.context({requiredFactKeys:['z_policy','z_policy']}), /duplicate required fact key/);
+  } finally { memory.close(); }
+});
+
 test('native persistence, scopes, retries and deletion', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'memweft-'));
   const path = join(dir, 'memory.db');

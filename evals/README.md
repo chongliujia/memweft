@@ -1,5 +1,125 @@
 # Local model scenario evaluation
 
+## Low-cost Kimi smoke test
+
+After installing the Python SDK, run the existing 13 `common-v3` memory cases
+through the real SDK and Kimi K2.6, with and without persistent context:
+
+```bash
+python evals/run_kimi.py --check-memory  # offline, no API key
+python evals/run_kimi.py --prompt-key    # hidden prompt; key is never saved
+# Or export MOONSHOT_API_KEY using your secret manager and omit --prompt-key.
+```
+
+This is an opt-in paid API test: 26 calls, at most 128 output tokens each,
+`thinking: disabled`, provider-default sampling, and JSON-object output with
+explicit field instructions. It does not use vLLM-specific fields or automatic
+retries/model fallback. Calls start at least 21 seconds apart by default, to
+accommodate a 3 RPM account; a complete run takes about nine minutes. Adjust
+`--interval` only to match your account limits. A 429 stops the run and preserves
+partial results. Wait for the quota window before starting a new run.
+
+The default endpoint is `https://api.moonshot.cn/v1`; select
+`--base-url https://api.moonshot.ai/v1` explicitly for an international key.
+The runner never automatically tries a credential on another endpoint. It uses
+direct HTTPS without environment proxies, refuses redirects, and reads keys
+only from the environment or hidden terminal input; `.env` is not auto-loaded.
+There is no API key command-line argument, and authentication headers are not
+logged. See [`examples/kimi_memory.py`](../examples/kimi_memory.py) for a reusable
+short-answer client and a one-call example using explicitly saved demo facts.
+
+Each case closes and reopens SQLite before recall. Fixtures cover preferences,
+session recovery/idempotency, fact updates, forgetting, scope isolation and
+recall among distractors. Expected answers are used only by the local evaluator;
+they are not sent to the model. Model answers are not copied into memory.
+Both modes use identical instructions and JSON contracts. Truncated answers,
+extra/missing fields and incorrect types fail strict scoring.
+
+Results, exact requests (without credentials), usage, contexts, fixture and
+code/native hashes are written to a new directory under `data/evals/`. Use
+`--output PATH` to choose another new directory; old runs are never overwritten.
+The summary estimates CN cost from reported input/output tokens using the
+2026-09-30 [published rates](https://platform.kimi.com/docs/pricing/chat)
+(¥6.50 / ¥27 per million, excluding cache discounts). This is an estimate, not
+a billing receipt or an enforced currency budget. International runs omit the
+CNY estimate. Model parameters follow the [official K2.6 guide](https://platform.kimi.com/docs/guide/kimi-k2-6-quickstart).
+
+These are synthetic, previously used fixtures with manually supplied facts,
+one observation per mode and no learning phase. They demonstrate integration
+and memory availability, not real customer benefit, automatic extraction,
+statistical confidence, or a comparison of model quality.
+
+The [2026-09-30 Kimi run](reports/2026-09-30-kimi-smoke.md) completed all 26 calls:
+12/13 with memory and 2/13 without. The one memory failure is the deliberately
+query-free key-order control; its target fact was omitted by `max_facts`.
+
+For an internal workflow pilot on this repository's actual local release
+evidence, use `python evals/run_kimi_release.py --prompt-key`. This makes 10 calls
+with a 256-token output cap and 21-second pacing. It pairs one project planning
+case and four controlled lifecycle rehearsals, without publishing anything.
+See the [pilot guide](../docs/kimi_release_pilot.md) for the usable Agent CLI,
+scope boundaries and what the task scores do and do not establish.
+
+## Frozen workflow context comparison
+
+The [20-task workflow comparison](../docs/workflow_comparison.md) pairs full
+history, a query-independent deterministic current-state summary, and actual
+MemWeft retrieval. All modes share the same source events, scope/forgetting
+semantics, questions and output contracts. These are new synthetic tasks across
+five workflow categories, frozen before observing model answers.
+
+```bash
+python evals/run_workflow_comparison.py --check-memory --output data/evals/workflow-offline-new
+python evals/run_workflow_comparison.py --prompt-key --output data/evals/workflow-live-new
+```
+
+The paid run makes at most 60 Kimi calls, with 192 output tokens per call and
+21-second pacing. It freezes all actual inputs before calling the provider and
+preserves incorrect answers. The summary baseline uses no model, query or answer
+oracle. MemWeft selects at most eight facts under a 1,200 estimated-token context
+budget; the other modes preserve all visible information. Actual prompt size is
+part of the comparison. See the guide for cost limits and measurement boundaries.
+
+The [2026-09-30 measured report](reports/2026-09-30-workflow-comparison.md) records
+18/20 for full history, 19/20 for the deterministic summary and 16/20 for MemWeft.
+MemWeft used 58.53% fewer input tokens than full history, with lower accuracy in
+this run; this is not evidence of equal-quality savings. All 60 calls cost an
+estimated ¥0.340876 without cache discounts. Four MemWeft failures include two
+omitted dependencies and two decisions that were incorrect despite available
+facts. The report preserves baseline failures as well.
+
+## Required-fact and workflow-guard comparison
+
+The [required-fact guide](../docs/required_facts.md) describes a second frozen
+fixture: eight new structured tasks, two recall modes and two observations per
+mode, for 32 calls. Both modes share source events and the same application
+rules; only `required_fact_keys` changes recall. The guard checks both sets of
+raw proposals without changing answers or reading expected labels.
+
+```bash
+python evals/run_workflow_guard.py --check-memory --output data/evals/guard-offline-new
+python evals/run_workflow_guard.py --prompt-key --output data/evals/guard-live-new
+```
+
+One task deliberately lacks a required fact after forgetting. The benchmark
+observes raw model output before rejection, while the usable example makes no
+model call when preflight fails. Reports keep 14 answerable observations per mode
+as the completion denominator, separate from missing-data rejections, blocked
+errors and correct answers withheld. Rejecting everything cannot count as task
+completion. These typed, application-adapted inputs do not support a direct
+quality comparison with the preceding free-text fixture.
+
+The [2026-09-30 measured report](reports/2026-09-30-workflow-guard.md) records
+6/14 raw and validated correct answers with lexical recall, versus 13/14 with
+required facts. The one incorrect proposal with complete required inputs was
+rejected by the application rule check; it remains a failed task observation.
+Both modes rejected 2/2 missing-data observations, with no incorrect acceptance
+or correct-answer rejection in this sample. All 32 calls cost an estimated
+¥0.127440 without cache discounts. Gains concentrate in the bilingual schema
+matching cases, not evidence of general semantic retrieval improvements.
+
+## Local evaluation and storage benchmarks
+
 For the offline long-conversation SDK benchmark, run after building the Python
 extension:
 

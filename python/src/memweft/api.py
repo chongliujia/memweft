@@ -60,10 +60,11 @@ class Session:
 
     def context(self, *, max_tokens: int = 2048, conversation_window: int = 10,
                 max_facts: int = 30, include_messages: bool = True, task_type: str | None = None,
-                query: str | None = None) -> Context:
+                query: str | None = None, required_fact_keys: list[str] | None = None) -> Context:
         return Context(**self.user._request("context", session_id=self.session_id, options={
             "max_tokens": max_tokens, "conversation_window": conversation_window,
             "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type, "query": query,
+            "required_fact_keys": [] if required_fact_keys is None else required_fact_keys,
         }))
 
 
@@ -138,10 +139,11 @@ class AsyncSession(Session):
         return await super().clear()
 
     async def context(self, *, max_tokens=2048, conversation_window=10, max_facts=30,
-                      include_messages=True, task_type=None, query=None):
+                      include_messages=True, task_type=None, query=None, required_fact_keys=None):
         data = await self.user._request("context", session_id=self.session_id, options={
             "max_tokens": max_tokens, "conversation_window": conversation_window,
             "max_facts": max_facts, "include_messages": include_messages, "task_type": task_type, "query": query,
+            "required_fact_keys": [] if required_fact_keys is None else required_fact_keys,
         })
         return Context(**data)
 

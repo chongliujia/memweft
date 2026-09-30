@@ -325,6 +325,47 @@ struct Search<'a, 'conn> {
 }
 
 impl Search<'_, '_> {
+    /// Exact scoped key seeks, independent of the lexical candidate window.
+    fn required(&self, keys: &[String]) -> StoreResult<Vec<i64>> {
+        if keys.is_empty() { return Ok(Vec::new()); }
+        let keys = serde_json::to_string(keys)?;
+        let sql = format!("{BINDINGS} SELECT i.id FROM json_each(?5) k
+            CROSS JOIN bindings b CROSS JOIN memweft_recall_items i INDEXED BY memweft_recall_order
+            WHERE i.tenant_id=?1 AND i.user_id=?2 AND i.agent_id=b.agent AND i.pool_id=b.pool
+              AND i.fact_key=k.value AND {ELIGIBLE}
+            ORDER BY CAST(k.key AS INTEGER)");
+        Ok(self.tx.prepare_cached(&sql)?.query_map(params![self.scope.tenant_id,
+            self.scope.user_id,self.bindings,self.now,keys], |r|r.get(0))?.collect::<Result<_,_>>()?)
+    }
+
+    /// Error policy checks every visible key, including keys outside Top-K.
+    /// This deliberately retains full-scan cost, within this read snapshot.
+    fn check_conflicts(&self) -> StoreResult<()> {
+        let sql = format!("{BINDINGS} SELECT i.id FROM bindings b
+            CROSS JOIN memweft_recall_items i INDEXED BY memweft_recall_order
+            WHERE i.tenant_id=?1 AND i.user_id=?2 AND i.agent_id=b.agent AND i.pool_id=b.pool
+              AND i.active=1 AND (i.valid_from IS NULL OR i.valid_from<=?4)
+              AND (i.valid_to IS NULL OR i.valid_to>=?4)
+            ORDER BY b.rank,i.fact_key,i.fact_id");
+        let mut statement = self.tx.prepare_cached(&sql)?;
+        let ids = statement.query_map(params![self.scope.tenant_id,self.scope.user_id,
+            self.bindings,self.now], |r|r.get::<_,i64>(0))?;
+        let mut winners = BTreeMap::<String, PoolFact>::new();
+        for id in ids {
+            let record = read_record(self.tx, id?)?;
+            let key = &record.fact.fact_key;
+            if let Some(winner) = winners.get(key) {
+                if winner.fact.value != record.fact.value {
+                    return Err(StoreError::Conflict(format!("memory key {key} differs between pools {} and {}",
+                        winner.pool_id, record.pool_id)));
+                }
+            } else {
+                winners.insert(key.clone(), record);
+            }
+        }
+        Ok(())
+    }
+
     /// Complete key prefix of qualified winners. Pool precedence applies before
     /// the limit; an actual tuple range skips wholly shadowed later pools.
     fn ordered(&self, needed: usize, exclude: &[i64]) -> StoreResult<Vec<OrderedItem>> {
@@ -518,6 +559,13 @@ pub(crate) fn query(
     query: Option<&str>,
     limit: usize,
 ) -> StoreResult<RecallCandidates> {
+    query_with_required(store, scope, pools, query, limit, &[], false)
+}
+
+pub(crate) fn query_with_required(
+    store: &SqliteStore, scope: &Scope, pools: &[String], query: Option<&str>,
+    limit: usize, required_keys: &[String], reject_conflicts: bool,
+) -> StoreResult<RecallCandidates> {
     if pools.len() > 32 || limit > 10_064 || query.is_some_and(|q| q.len() > 4096) {
         return Err(StoreError::InvalidInput(
             "recall request exceeds limits".into(),
@@ -530,6 +578,12 @@ pub(crate) fn query(
             "recall pools must be nonempty and distinct".into(),
         ));
     }
+    if required_keys.len() > 64
+        || required_keys.iter().any(|key| key.trim().is_empty() || key.len() > 1024)
+        || required_keys.iter().collect::<HashSet<_>>().len() != required_keys.len()
+    {
+        return Err(StoreError::InvalidInput("required fact keys must be at most 64 distinct nonempty keys of at most 1024 bytes".into()));
+    }
     store.with_connection(|conn| {
         // Qualification, candidate selection and record fetches share a snapshot.
         let tx = conn.transaction()?;
@@ -540,6 +594,7 @@ pub(crate) fn query(
         let terms = serde_json::to_string(&query_terms)?;
         let now = chrono::Utc::now().timestamp_millis();
         let search = Search { tx: &tx, scope, pools, bindings: &bindings, terms: &terms, now };
+        if reject_conflicts { search.check_conflicts()?; }
         let mut ids = Vec::new();
         let mut ranking_plan = "key_order";
         if !query_terms.is_empty() && !pools.is_empty() {
@@ -557,6 +612,9 @@ pub(crate) fn query(
         }
         let has_more = ids.len()>limit;
         ids.truncate(limit);
+        for id in search.required(required_keys)? {
+            if !ids.contains(&id) { ids.push(id); }
+        }
         let records = ids.iter().map(|id|read_record(&tx,*id)).collect::<StoreResult<Vec<_>>>()?;
         let mut shadowed = Vec::new();
         let mut shadowed_truncated = false;
@@ -618,6 +676,44 @@ mod tests {
             notes: String::new(),
         }
     }
+
+    #[test]
+    fn required_key_fetch_shares_snapshot_with_candidates_during_a_committed_update() {
+        let path = std::env::temp_dir().join(format!("memweft-required-{}-{}.db", std::process::id(), rand::random::<u64>()));
+        let store = SqliteStore::new(&path).unwrap();
+        let writer = SqliteStore::new(&path).unwrap();
+        store.upsert_fact(&scope(), fact("a_candidate", "old")).unwrap();
+        store.upsert_fact(&scope(), fact("z_required", "old")).unwrap();
+        let pools = vec!["private".to_string()];
+        let keys = vec!["z_required".to_string()];
+        store.with_connection(|conn| {
+            let tx = conn.transaction()?;
+            let bindings = json!([{"pool":"private","agent":"a","rank":0}]).to_string();
+            let request_scope = scope();
+            let search = Search {tx:&tx, scope:&request_scope, pools:&pools,
+                bindings:&bindings, terms:"[]", now:chrono::Utc::now().timestamp_millis()};
+            let ordinary = search.ordered(1, &[])?;
+            assert_eq!(read_record(&tx, ordinary[0].2)?.fact.value, "old");
+            // Commit between lexical candidate selection and the exact key read.
+            writer.with_connection(|conn| {
+                conn.execute("UPDATE facts SET value_json=? WHERE tenant_id='t' AND user_id='u' AND agent_id='a'",
+                    [json!("new").to_string()])?;
+                Ok(())
+            })?;
+            let required = search.required(&keys)?;
+            assert_eq!(required.len(), 1);
+            assert_eq!(read_record(&tx, required[0])?.fact.value, "old");
+            tx.commit()?;
+            Ok(())
+        }).unwrap();
+        let fresh = store.recall_candidates_with_required(&scope(), &pools, None, 1, &keys, false).unwrap().unwrap();
+        assert_eq!(fresh.records.len(), 2);
+        assert!(fresh.records.iter().all(|r|r.fact.value == "new"));
+        drop(writer);
+        drop(store);
+        std::fs::remove_file(path).unwrap();
+    }
+
     fn remove_index(conn: &Connection) {
         remove_blocks(conn);
         for table in ["facts", "memweft_pool_facts"] {

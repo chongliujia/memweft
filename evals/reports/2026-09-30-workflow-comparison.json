@@ -1,0 +1,899 @@
+{
+  "report_version": "workflow-comparison-report-v1",
+  "suite_version": "workflow-comparison-v1",
+  "started_at": "2026-09-30T09:33:39.837214+00:00",
+  "model": "kimi-k2.6",
+  "summary": {
+    "completed_calls": 60,
+    "by_mode": {
+      "full_history": {
+        "passed": 18,
+        "total": 20,
+        "protocol_valid": 20,
+        "usage": {
+          "prompt_tokens": 21551,
+          "completion_tokens": 497,
+          "total_tokens": 22048
+        },
+        "context_and_model_median_ms": 1659.495145958595,
+        "estimated_cny_without_cache_discount": 0.153501
+      },
+      "current_state_summary": {
+        "passed": 19,
+        "total": 20,
+        "protocol_valid": 20,
+        "usage": {
+          "prompt_tokens": 15761,
+          "completion_tokens": 497,
+          "total_tokens": 16258
+        },
+        "context_and_model_median_ms": 1533.8864374272748,
+        "estimated_cny_without_cache_discount": 0.115865
+      },
+      "memweft": {
+        "passed": 16,
+        "total": 20,
+        "protocol_valid": 19,
+        "usage": {
+          "prompt_tokens": 8937,
+          "completion_tokens": 497,
+          "total_tokens": 9434
+        },
+        "context_and_model_median_ms": 1461.612062488146,
+        "estimated_cny_without_cache_discount": 0.07151
+      }
+    },
+    "estimated_cny_without_cache_discount": 0.340876,
+    "price_checked": "2026-09-30",
+    "pricing_source": "https://platform.kimi.com/docs/pricing/chat",
+    "failures": [
+      {
+        "case_id": "wf-troubleshoot-tls-window",
+        "mode": "memweft",
+        "reason": "wrong_values:action,expired_minutes"
+      },
+      {
+        "case_id": "wf-support-partial-shipment-refund",
+        "mode": "memweft",
+        "reason": "wrong_values:refund_amount,currency"
+      },
+      {
+        "case_id": "wf-requirement-offline-scope-change",
+        "mode": "memweft",
+        "reason": "wrong_values:unfinished_offline_blocks_release"
+      },
+      {
+        "case_id": "wf-requirement-audit-retention",
+        "mode": "full_history",
+        "reason": "wrong_values:retention_days"
+      },
+      {
+        "case_id": "wf-requirement-audit-retention",
+        "mode": "current_state_summary",
+        "reason": "wrong_values:retention_days"
+      },
+      {
+        "case_id": "wf-plan-uninterrupted-maintenance",
+        "mode": "memweft",
+        "reason": "wrong_values:window,start_time,end_time,unused_minutes"
+      },
+      {
+        "case_id": "wf-plan-uninterrupted-maintenance",
+        "mode": "full_history",
+        "reason": "wrong_values:end_time"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "wf-handoff-render-bundle",
+      "category": "project_handoff",
+      "description": "制作项目向投放项目移交已验收的素材，处理交付包更新。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "campaign_dependency",
+        "campaign_receiver",
+        "render_acceptance",
+        "render_delivery_bundle"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-handoff-consumer-contract",
+      "category": "project_handoff",
+      "description": "数据生产与消费两个项目交接时检查协议兼容，而非只检查文件到齐。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "adapter_owner",
+        "consumer_contract",
+        "contract_adapter",
+        "producer_contract"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-handoff-shared-lab-slot",
+      "category": "project_handoff",
+      "description": "两个研发项目交接共享实验设备，计算最早接手时间。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "sensor_project_request",
+        "spectrometer_cleanup",
+        "spectrometer_handoff_owner",
+        "spectrometer_reservation"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-handoff-field-kit-shortfall",
+      "category": "project_handoff",
+      "description": "试验项目向外勤项目调拨物资，按整箱采购规则补足缺口。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "field_kit_requirement",
+        "kit_purchase_pack",
+        "kit_purchase_receiver",
+        "trial_kit_transfer"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-troubleshoot-report-query",
+      "category": "incident_triage",
+      "description": "区分报告查询慢与数据库容量、连接故障，依据更新后的诊断定位。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "report_database_health",
+        "report_query_latency",
+        "report_query_owner",
+        "report_query_plan"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-troubleshoot-tls-window",
+      "category": "incident_triage",
+      "description": "区分证书过期与时钟偏移导致的握手问题。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": false,
+          "reason": "wrong_values:action,expired_minutes"
+        }
+      },
+      "active_main_fact_keys": [
+        "tls_certificate_owner",
+        "tls_certificate_window",
+        "tls_host_clock",
+        "tls_observation_time"
+      ],
+      "memweft_omitted_main_fact_keys": [
+        "tls_observation_time"
+      ],
+      "memweft_omission_reasons": {
+        "tls_observation_time": [
+          "max_facts"
+        ]
+      }
+    },
+    {
+      "id": "wf-troubleshoot-replayed-charge",
+      "category": "incident_triage",
+      "description": "超时重投时区分支付效果已提交与消息确认丢失，避免重复扣费。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "charge_event_receipt",
+        "charge_queue_delivery",
+        "charge_receipt_state"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-troubleshoot-cache-generation",
+      "category": "incident_triage",
+      "description": "通过源版本和缓存版本判断页面旧值来自哪里，并排除其他作用域的干扰。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "price_cache_owner",
+        "price_cache_revision",
+        "price_origin_health",
+        "price_source_revision"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-support-partial-shipment-refund",
+      "category": "support_resolution",
+      "description": "拆单发货退款仅覆盖尚未发出的物品，按期限与单价计算。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": false,
+          "reason": "wrong_values:refund_amount,currency"
+        }
+      },
+      "active_main_fact_keys": [
+        "order_dispatch_state",
+        "order_item_price",
+        "order_refund_age",
+        "order_refund_window"
+      ],
+      "memweft_omitted_main_fact_keys": [
+        "order_item_price"
+      ],
+      "memweft_omission_reasons": {
+        "order_item_price": [
+          "max_facts"
+        ]
+      }
+    },
+    {
+      "id": "wf-support-forgotten-recipient",
+      "category": "support_resolution",
+      "description": "用户撤回联系方式后保留渠道选择，但不能从历史中恢复被删除号码。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "support_notice_channel",
+        "support_notice_template"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-support-warranty-routing",
+      "category": "support_resolution",
+      "description": "设备已超过标准保修期且延保取消时，依据当前保障状态安排处理渠道。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "device_extended_cover",
+        "device_purchase_age",
+        "device_repair_queues",
+        "device_warranty_terms"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-support-future-discount",
+      "category": "support_resolution",
+      "description": "区分已结算账单与下一周期生效优惠，避免追溯补偿。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "account_billing_currency",
+        "account_discount_terms",
+        "account_disputed_invoice",
+        "account_next_discount"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-requirement-offline-scope-change",
+      "category": "requirement_change",
+      "description": "需求收缩后撤出已不要求的离线能力，保留仍受要求约束的导出功能。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": false,
+          "reason": "wrong_values:unfinished_offline_blocks_release"
+        }
+      },
+      "active_main_fact_keys": [
+        "inspection_export_requirement",
+        "inspection_feature_readiness",
+        "inspection_offline_requirement"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-requirement-client-migration",
+      "category": "requirement_change",
+      "description": "移除旧协议字段前核对所有消费者迁移状态。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "invoice_contract_consumers",
+        "invoice_legacy_field",
+        "invoice_migrated_consumers",
+        "invoice_transition_support"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-requirement-audit-retention",
+      "category": "requirement_change",
+      "description": "新增导出功能的验收受到审计留存要求变更影响。",
+      "modes": {
+        "full_history": {
+          "passed": false,
+          "reason": "wrong_values:retention_days"
+        },
+        "current_state_summary": {
+          "passed": false,
+          "reason": "wrong_values:retention_days"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "export_audit_owner",
+        "export_audit_requirement",
+        "export_audit_setting",
+        "export_functional_check"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-requirement-locale-readiness",
+      "category": "requirement_change",
+      "description": "新地区发布必须同时满足翻译与字体验收，部分条件达成不能视为全部就绪。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "kiosk_font_check",
+        "kiosk_locale_independence",
+        "kiosk_target_locales",
+        "kiosk_translation_check"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-plan-uninterrupted-maintenance",
+      "category": "planning_constraints",
+      "description": "在不可拆分维护时长和业务空窗约束下选择可容纳的时段。",
+      "modes": {
+        "full_history": {
+          "passed": false,
+          "reason": "wrong_values:end_time"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": false,
+          "reason": "wrong_values:window,start_time,end_time,unused_minutes"
+        }
+      },
+      "active_main_fact_keys": [
+        "scanner_maintenance_arrival",
+        "scanner_maintenance_duration",
+        "scanner_maintenance_window_a",
+        "scanner_maintenance_window_b"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-plan-vendor-latency-budget",
+      "category": "planning_constraints",
+      "description": "供应商选择同时满足预算与延迟硬约束，不能仅选择报价最低者。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "document_job_budget",
+        "document_vendor_economy",
+        "document_vendor_fast"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-plan-parallel-critical-path",
+      "category": "planning_constraints",
+      "description": "双团队并行准备后再联合验收，按最长前置路径计算总时长。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "launch_acceptance_work",
+        "launch_design_work",
+        "launch_integration_work",
+        "launch_parallel_capacity"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    },
+    {
+      "id": "wf-plan-arrival-with-transfer",
+      "category": "planning_constraints",
+      "description": "参加现场培训时将接驳时间算入到场约束，而非只比较到站时刻。",
+      "modes": {
+        "full_history": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "current_state_summary": {
+          "passed": true,
+          "reason": "pass"
+        },
+        "memweft": {
+          "passed": true,
+          "reason": "pass"
+        }
+      },
+      "active_main_fact_keys": [
+        "training_arrival_deadline",
+        "training_route_air",
+        "training_route_rail",
+        "training_transfer_cost"
+      ],
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {}
+    }
+  ],
+  "failure_analysis": [
+    {
+      "case_id": "wf-troubleshoot-tls-window",
+      "mode": "memweft",
+      "reason": "wrong_values:action,expired_minutes",
+      "question": "支付回调握手失败该先做什么？如果时钟偏移超过阈值选 sync_clock，否则证书已过期选 renew_certificate，否则选 investigate_chain。返回 action、expired_minutes（未过期为0）和 owner。",
+      "content": "{\"action\":\"sync_clock\",\"expired_minutes\":0,\"owner\":\"cert-desk-27\"}",
+      "actual": {
+        "action": "sync_clock",
+        "expired_minutes": 0,
+        "owner": "cert-desk-27"
+      },
+      "expected": {
+        "action": "renew_certificate",
+        "expired_minutes": 25,
+        "owner": "cert-desk-27"
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [
+        "tls_observation_time"
+      ],
+      "memweft_omission_reasons": {
+        "tls_observation_time": [
+          "max_facts"
+        ]
+      },
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-support-partial-shipment-refund",
+      "mode": "memweft",
+      "reason": "wrong_values:refund_amount,currency",
+      "question": "依据订单退款规则处理未发货部分：期限内只退客户申请且未发货的商品，超期则金额为0并转人工。返回 refund_amount（整数）、currency 和 needs_manual_review。不要把已发货商品计入退款。",
+      "content": "{\"refund_amount\":null,\"currency\":null,\"needs_manual_review\":false}",
+      "actual": {
+        "refund_amount": null,
+        "currency": null,
+        "needs_manual_review": false
+      },
+      "expected": {
+        "refund_amount": 72,
+        "currency": "EUR",
+        "needs_manual_review": false
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [
+        "order_item_price"
+      ],
+      "memweft_omission_reasons": {
+        "order_item_price": [
+          "max_facts"
+        ]
+      },
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-requirement-offline-scope-change",
+      "mode": "memweft",
+      "reason": "wrong_values:unfinished_offline_blocks_release",
+      "question": "按巡检应用当前需求决定本期范围。仅保留仍被要求的能力；已撤销的未完成功能不阻塞本期。返回 include_offline、include_pdf_export、unfinished_offline_blocks_release 三个布尔字段。",
+      "content": "{\"include_offline\":false,\"include_pdf_export\":true,\"unfinished_offline_blocks_release\":true}",
+      "actual": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": true
+      },
+      "expected": {
+        "include_offline": false,
+        "include_pdf_export": true,
+        "unfinished_offline_blocks_release": false
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {},
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-requirement-audit-retention",
+      "mode": "full_history",
+      "reason": "wrong_values:retention_days",
+      "question": "管理端批量导出能否验收？功能通过且审计留存天数达到要求才 can_accept=true。若不足，返回满足要求的最小 retention_days 和需增加的 additional_days，并返回配置 owner。",
+      "content": "{\"can_accept\":false,\"retention_days\":7,\"additional_days\":23,\"owner\":\"compliance-config-11\"}",
+      "actual": {
+        "can_accept": false,
+        "retention_days": 7,
+        "additional_days": 23,
+        "owner": "compliance-config-11"
+      },
+      "expected": {
+        "can_accept": false,
+        "retention_days": 30,
+        "additional_days": 23,
+        "owner": "compliance-config-11"
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {},
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-requirement-audit-retention",
+      "mode": "current_state_summary",
+      "reason": "wrong_values:retention_days",
+      "question": "管理端批量导出能否验收？功能通过且审计留存天数达到要求才 can_accept=true。若不足，返回满足要求的最小 retention_days 和需增加的 additional_days，并返回配置 owner。",
+      "content": "{\"can_accept\":false,\"retention_days\":7,\"additional_days\":23,\"owner\":\"compliance-config-11\"}",
+      "actual": {
+        "can_accept": false,
+        "retention_days": 7,
+        "additional_days": 23,
+        "owner": "compliance-config-11"
+      },
+      "expected": {
+        "can_accept": false,
+        "retention_days": 30,
+        "additional_days": 23,
+        "owner": "compliance-config-11"
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {},
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-plan-uninterrupted-maintenance",
+      "mode": "full_history",
+      "reason": "wrong_values:end_time",
+      "question": "为扫描服务选择能完整容纳维护的最早候选时段，并在该时段开始立即维护。返回 window、start_time、end_time（均为 HH:MM）和 unused_minutes；只能使用记录中给出的候选时段。",
+      "content": "{\"window\":\"window-b28\",\"start_time\":\"13:00\",\"end_time\":\"14:00\",\"unused_minutes\":15}",
+      "actual": {
+        "window": "window-b28",
+        "start_time": "13:00",
+        "end_time": "14:00",
+        "unused_minutes": 15
+      },
+      "expected": {
+        "window": "window-b28",
+        "start_time": "13:00",
+        "end_time": "13:45",
+        "unused_minutes": 15
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {},
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    },
+    {
+      "case_id": "wf-plan-uninterrupted-maintenance",
+      "mode": "memweft",
+      "reason": "wrong_values:window,start_time,end_time,unused_minutes",
+      "question": "为扫描服务选择能完整容纳维护的最早候选时段，并在该时段开始立即维护。返回 window、start_time、end_time（均为 HH:MM）和 unused_minutes；只能使用记录中给出的候选时段。",
+      "content": "{\"window\":\"window-a17\",\"start_time\":\"09:00\",\"end_time\":\"09:30\",\"unused_minutes\":0}",
+      "actual": {
+        "window": "window-a17",
+        "start_time": "09:00",
+        "end_time": "09:30",
+        "unused_minutes": 0
+      },
+      "expected": {
+        "window": "window-b28",
+        "start_time": "13:00",
+        "end_time": "13:45",
+        "unused_minutes": 15
+      },
+      "finish_reason": "stop",
+      "memweft_omitted_main_fact_keys": [],
+      "memweft_omission_reasons": {},
+      "interpretation": "Omission is diagnostic evidence, not proof that it caused this failure; for baseline failures it describes the paired MemWeft context only."
+    }
+  ],
+  "limitations": [
+    "新合成工作流基准，不是客户任务或长期业务收益证据；20题、每题每组仅观察一次。",
+    "三组采用相同源事件、作用域隔离和遗忘语义；完整历史保留更新前记录，但移除被遗忘键的历史值。",
+    "current_state_summary 是不看问题的确定性最新状态摘要，不调用 LLM，不代表 LLM 摘要器的效果或成本。",
+    "MemWeft 使用当前问题检索，最多8条事实、1200估算tokens；基线完整保留可见历史或最新状态，因此这是上下文策略组合的对照。",
+    "每题增加16条相同无关档案事实；事实由应用显式写入，没有自动抽取或策略学习。",
+    "时间为预先测量的上下文构建时间加本次模型HTTP时间；不包含历史写入、数据准备、限流等待，不是完整端到端时延。",
+    "每次最多192输出tokens；16000字节限制只计算messages JSON，不是完整HTTP请求体。累计已报告tokens阈值只阻止后续调用。",
+    "费用按2026-09-30公布的每百万输入¥6.50、输出¥27估算，未计缓存优惠，未经账单核对，不是货币硬上限。",
+    "失败原因与遗漏事实是观察结果，不能据此确认因果；单次观测不能证明统计显著性、模型普遍能力或生产SLO。"
+  ],
+  "verification": {
+    "all_60_unique_pairs": true,
+    "requests_match_frozen_inputs": true,
+    "grades_recomputed": true,
+    "summary_matches": true,
+    "suite_sha256": "1c97c7e387f4772d81dbc1282b3bd1401b246b4014635f92dae029d630a14d29",
+    "run_file_sha256": {
+      "suite.json": "1c97c7e387f4772d81dbc1282b3bd1401b246b4014635f92dae029d630a14d29",
+      "metadata.json": "197d65b44bb30edb9fbb0098d5466ca11f14102e7351ec7c5f4fd7b3281a6026",
+      "inputs.jsonl": "9712def2d415bffe4bd4002a2ecb2d64eb74c453e211e749491bfed8e6028c89",
+      "results.jsonl": "af5b1bf713dabf2aedde7aa0df8b0d70531c923a275b69b89f654f4a67c80ca7",
+      "summary.json": "ccddcbceaebe8a2f5697ffc17e581c638e65ecf192c5e93281628ec1f5416f6f",
+      "status.json": "58cbff2e46607d4b7f799ae274778d49f1837bdbc6ae5eb403a2cde96b4d8ced",
+      "source-provenance.json": "1df93346d95eab03cfb94169cb8a3108a142b91a6a80c5f06f4f7746ee5e9bcf"
+    },
+    "source_provenance": {
+      "verified_sources": {
+        "evals/run_workflow_comparison.py": {
+          "sha256": "c719fe5fb682708310b62439a3676b897de3826421fe327576d9110e8bef7052",
+          "location": "run/sources",
+          "recorded_before_calls": true
+        },
+        "examples/kimi_memory.py": {
+          "sha256": "37ba4a874e972338201dd6b00c63f20e7d900726dfe8c8cfa5d986d4665b3694",
+          "location": "run/sources",
+          "recorded_before_calls": true
+        },
+        "evals/output_contract.py": {
+          "sha256": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+          "location": "run/sources",
+          "recorded_before_calls": true
+        },
+        "evals/run_kimi.py": {
+          "sha256": "8baf7c4faad08fb8ef0d243fb8d6ab1f93d56feb2e365932ff706c9ff16a4aaa",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        },
+        "evals/run_local.py": {
+          "sha256": "4c2047462cc353e94669c66566c297dcc8ed8dbb652bb358da6a6e3f600bfb1e",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        },
+        "crates/memweft/src/lib.rs": {
+          "sha256": "3fb083082a6c8fee0a465dc5f1648e09d175358599240f68280884cec667ea59",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        },
+        "python/src/memweft/__init__.py": {
+          "sha256": "a5131c3f3c3fbe709164f09b9077e5d83ace725ea8d7c7683dbc8dbcc34613da",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        },
+        "python/src/memweft/api.py": {
+          "sha256": "4c1a3cc8b8f6c4c5f30c2fe2244ce985ebe46680709a2f405f09f7df35684fbb",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        },
+        "python/src/memweft/client.py": {
+          "sha256": "fbefad43e6bb3486250215345bd02882699c2498a0966926062c48242449192f",
+          "location": "run/sources",
+          "recorded_before_calls": false
+        }
+      },
+      "supplemental_snapshot": {
+        "captured_at": "2026-09-30T09:35:08.980931+00:00",
+        "note": "Supplemental source snapshot captured during run; runner, client and contract verified against pre-call metadata. Scorer and wrapper files have not changed during this run. Original metadata remains unchanged.",
+        "source_sha256": {
+          "evals/run_workflow_comparison.py": "c719fe5fb682708310b62439a3676b897de3826421fe327576d9110e8bef7052",
+          "examples/kimi_memory.py": "37ba4a874e972338201dd6b00c63f20e7d900726dfe8c8cfa5d986d4665b3694",
+          "evals/output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+          "evals/run_kimi.py": "8baf7c4faad08fb8ef0d243fb8d6ab1f93d56feb2e365932ff706c9ff16a4aaa",
+          "evals/run_local.py": "4c2047462cc353e94669c66566c297dcc8ed8dbb652bb358da6a6e3f600bfb1e",
+          "crates/memweft/src/lib.rs": "3fb083082a6c8fee0a465dc5f1648e09d175358599240f68280884cec667ea59",
+          "python/src/memweft/__init__.py": "a5131c3f3c3fbe709164f09b9077e5d83ace725ea8d7c7683dbc8dbcc34613da",
+          "python/src/memweft/api.py": "4c1a3cc8b8f6c4c5f30c2fe2244ce985ebe46680709a2f405f09f7df35684fbb",
+          "python/src/memweft/client.py": "fbefad43e6bb3486250215345bd02882699c2498a0966926062c48242449192f"
+        }
+      },
+      "native_sha256_recorded_at_run_start": "f6d5e3e4b511099f699b0f8e57ec277b76f2564889dde74ba18f98db5857df22",
+      "native_note": "Native binary digest is recorded by the runner; this offline report does not re-execute or independently verify that binary."
+    },
+    "reporter_sha256": "273602fe09eb14f724b1f39d85e30741db7fcdd0054968af6df615ca349833fc"
+  }
+}

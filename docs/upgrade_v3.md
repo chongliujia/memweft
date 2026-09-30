@@ -1,13 +1,18 @@
 # SQLite schema v3 upgrade and recovery
 
 This guide applies to the September 2026 exact-bitmap build. **v3 is the recall
-index schema version, not the SDK package version**: the development packages
-still report `0.1.0`. Keep the Git revision and native artifacts with each
+index schema version, not the SDK package version**: the current preview packages
+report `0.2.0-alpha.1` (Python `0.2.0a1`); earlier development builds used `0.1.0`.
+This preview adds required-fact retrieval without another schema migration.
+Keep the Git revision and native artifacts with each
 deployment so that the old and new builds can be identified independently.
 
 All Rust, Python, Node and CLI clients open the same SQLite schema. The first
 open with the new build automatically migrates it; there is no separate migration
-command or opt-out. Public context shapes and lexical ranking are unchanged.
+command or opt-out. The v3 migration preserves lexical ranking. The current
+preview adds requirements diagnostics to context reports; Rust callers using
+explicit `ContextOptions` struct literals must supply `required_fact_keys` or
+use `..Default::default()`.
 
 | Existing database | First open with this build | Old build after migration |
 |---|---|---|

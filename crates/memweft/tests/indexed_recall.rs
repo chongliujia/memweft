@@ -56,6 +56,73 @@ fn check(user: &UserMemory, query: Option<&str>, k: usize) {
 }
 
 #[test]
+fn unranked_fact_limit_warns_even_when_diagnostics_are_truncated() {
+    let m = Memory::in_memory().unwrap();
+    let user = m.user("alice").unwrap();
+    for i in 0..80 {
+        user.remember(&format!("a_archive_{i:03}"), json!("archived")).unwrap();
+    }
+    user.remember("z_port", json!("部署端口 17443")).unwrap();
+    let session = user.session("s").unwrap();
+    // Saving the latest question does not implicitly opt into lexical ranking.
+    session.add_message("user", "当前部署端口", Some("question"), None).unwrap();
+    for query in [None, Some(""), Some("  -- !!! ")] {
+        let context = session.context(ContextOptions {
+            query: query.map(str::to_owned), max_facts: 1,
+            ..Default::default()
+        }).unwrap();
+        assert_eq!(context.memories[0].fact_key, "a_archive_000");
+        assert_eq!(context.report["recall"]["candidates_truncated"], true);
+        assert_eq!(context.report["warnings"][0]["code"], "unranked_fact_limit");
+        assert_eq!(context.report["warnings"][0]["max_facts"], 1);
+        assert_eq!(context.report["warnings"].as_array().unwrap().len(), 1);
+        assert!(!context.text.contains("unranked_fact_limit"));
+        assert_eq!(context.report["omissions"].as_array().unwrap().len(), 64);
+    }
+    let ranked = session.context(ContextOptions {
+        query: Some("当前部署端口".into()), max_facts: 1,
+        ..Default::default()
+    }).unwrap();
+    assert_eq!(ranked.memories[0].fact_key, "z_port");
+    assert_eq!(ranked.report["warnings"], json!([]));
+}
+
+#[test]
+fn unranked_fact_warning_only_describes_visible_fact_limit_cuts() {
+    let m = Memory::in_memory().unwrap();
+    let user = m.user("alice").unwrap();
+    user.remember("visible", json!("one")).unwrap();
+    let other = m.user("bob").unwrap();
+    for i in 0..80 {
+        other.remember(&format!("foreign_{i}"), json!("unrelated")).unwrap();
+    }
+    let session = user.session("s").unwrap();
+    // Invisible facts must not trigger a warning or reveal another user's size.
+    let complete = session.context(ContextOptions {
+        max_facts: 1, ..Default::default()
+    }).unwrap();
+    assert_eq!(complete.report["warnings"], json!([]));
+
+    let budget_cut = session.context(ContextOptions {
+        max_facts: 1, max_tokens: 0, ..Default::default()
+    }).unwrap();
+    assert!(budget_cut.memories.is_empty());
+    assert_eq!(budget_cut.report["omissions"][0]["reason"], "budget");
+    assert_eq!(budget_cut.report["warnings"], json!([]));
+
+    let disabled_facts = session.context(ContextOptions {
+        max_facts: 0, ..Default::default()
+    }).unwrap();
+    assert_eq!(disabled_facts.report["warnings"][0]["code"], "unranked_fact_limit");
+    assert_eq!(disabled_facts.report["warnings"][0]["max_facts"], 0);
+
+    let empty = m.user("empty").unwrap().session("s").unwrap().context(ContextOptions {
+        max_facts: 0, ..Default::default()
+    }).unwrap();
+    assert_eq!(empty.report["warnings"], json!([]));
+}
+
+#[test]
 fn differential_ranking_across_scopes_pool_orders_queries_and_limits() {
     let m = Memory::in_memory().unwrap();
     let writer = scoped(&m, &["private", "team", "org"], "private_first", "a");

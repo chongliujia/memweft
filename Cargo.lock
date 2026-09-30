@@ -1309,7 +1309,7 @@ dependencies = [
 
 [[package]]
 name = "memweft"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "chrono",
  "memweft-learning",
@@ -1322,7 +1322,7 @@ dependencies = [
 
 [[package]]
 name = "memweft-ffi"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "chrono",
  "memweft",
@@ -1338,7 +1338,7 @@ dependencies = [
 
 [[package]]
 name = "memweft-learning"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "memweft-store",
  "memweft-types",
@@ -1349,7 +1349,7 @@ dependencies = [
 
 [[package]]
 name = "memweft-node"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "memweft",
  "napi",
@@ -1361,7 +1361,7 @@ dependencies = [
 
 [[package]]
 name = "memweft-store"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "chrono",
  "criterion",
@@ -1380,7 +1380,7 @@ dependencies = [
 
 [[package]]
 name = "memweft-types"
-version = "0.1.0"
+version = "0.2.0-alpha.1"
 dependencies = [
  "chrono",
  "serde",

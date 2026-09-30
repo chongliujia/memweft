@@ -5,27 +5,47 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  # Fixture text and subprocess output must not depend on Windows' locale.
+  PYTHONUTF8: '1'
 jobs:
   python-wheel:
+    name: Python ${{ matrix.python }} / ${{ matrix.os }} / ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
+        # Native targets only: Linux/Windows x64 and macOS arm64.
+        os: [ubuntu-24.04, macos-15, windows-2025]
         python: ['3.10', '3.11', '3.12']
+        include:
+          - os: ubuntu-24.04
+            arch: x64
+          - os: macos-15
+            arch: arm64
+          - os: windows-2025
+            arch: x64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install maturin -r python/requirements-test.txt
+          architecture: ${{ matrix.arch }}
+      # Hosted images provide GCC, Xcode Clang, or MSVC for the vendored SQLite C build.
+      - run: python -m pip install "maturin>=1.9.3,<2.0" -r python/requirements-test.txt
+      - name: Record clean source before the package build
+        run: python scripts/ci_build_record.py begin --output dist/build-source.json --expected-arch ${{ matrix.arch }}
       - name: Build Python wheel for the selected interpreter
         working-directory: python
         run: maturin build --release --locked --interpreter python --out ../dist
+      - name: Bind wheel bytes to the recorded build
+        run: python scripts/ci_build_record.py finish --source dist/build-source.json --wheel-dir dist --output dist/build-record.json
       - name: Install wheel in a fresh environment and exercise its native API
-        run: python scripts/verify_packages.py --wheel-dir dist --manifest dist/package-target.json
+        run: python scripts/verify_packages.py --wheel-dir dist --build-record dist/build-record.json --manifest dist/package-target.json
       - name: Install wheel for integration tests
         shell: python
         run: |
@@ -33,35 +53,60 @@ jobs:
           wheel, = glob.glob('dist/*.whl')
           subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel])
       - run: python -m unittest discover -s python/tests -v
+      - name: Portable workflow guards and CI evidence regression tests
+        if: runner.os != 'Linux' || matrix.python != '3.12'
+        shell: python
+        run: |
+          import subprocess, sys
+          for pattern in ('test_kimi*.py', 'test_workflow*.py', 'test_guarded_workflow_agent.py', 'test_github_ci_evidence.py', 'test_report_workflow*.py'):
+              subprocess.check_call([sys.executable, '-m', 'unittest', 'discover', '-s', 'evals', '-p', pattern, '-v'])
       - name: Offline Agent evaluation and authorization regression tests
         # Evaluation benchmark helpers currently import the Unix resource module.
         if: runner.os == 'Linux' && matrix.python == '3.12'
         run: python -m unittest discover -s evals -p 'test_*.py' -v
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
-          name: memweft-python-${{ matrix.os }}-py${{ matrix.python }}
+          name: memweft-python-${{ matrix.os }}-${{ matrix.arch }}-py${{ matrix.python }}-attempt${{ github.run_attempt }}
+          if-no-files-found: error
           path: |
             dist/*.whl
             dist/package-target.json
+            dist/build-record.json
 
   rust-node:
+    name: Rust and Node 20 / ${{ matrix.os }} / ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        include:
+          - os: ubuntu-24.04
+            arch: x64
+          - os: macos-15
+            arch: arm64
+          - os: windows-2025
+            arch: x64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+          architecture: ${{ matrix.arch }}
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
+          architecture: ${{ matrix.arch }}
           cache: npm
           cache-dependency-path: typescript/package-lock.json
+      - run: python -m unittest discover -s scripts -p 'test_ci_build_record.py' -v
+      - run: python -m unittest discover -s scripts/tests -p 'test_*.py' -v
+      - name: Record clean source before native builds
+        run: python scripts/ci_build_record.py begin --output dist/build-source.json --expected-arch ${{ matrix.arch }}
       - run: cargo test --locked
       - run: npm ci
         working-directory: typescript
@@ -74,14 +119,18 @@ jobs:
       - run: python -c "from pathlib import Path; Path('dist').mkdir(exist_ok=True)"
       - run: npm pack --pack-destination ../dist
         working-directory: typescript
-      - name: Install npm tarball outside the checkout and exercise its native API
-        run: python scripts/verify_packages.py --npm-dir dist --manifest dist/package-target.json
       - run: cargo build --release --locked -p memweft --bin memweft
-      - uses: actions/upload-artifact@v4
+      - name: Bind npm and CLI bytes to the recorded build
+        run: python scripts/ci_build_record.py finish --source dist/build-source.json --npm-dir dist --cli-dir target/release --output dist/build-record.json
+      - name: Install npm tarball outside the checkout and exercise its native API
+        run: python scripts/verify_packages.py --npm-dir dist --build-record dist/build-record.json --manifest dist/package-target.json
+      - uses: actions/upload-artifact@v6
         with:
-          name: memweft-native-${{ matrix.os }}
+          name: memweft-native-${{ matrix.os }}-${{ matrix.arch }}-node20-attempt${{ github.run_attempt }}
+          if-no-files-found: error
           path: |
             dist/*.tgz
             dist/package-target.json
+            dist/build-record.json
             target/release/memweft
             target/release/memweft.exe

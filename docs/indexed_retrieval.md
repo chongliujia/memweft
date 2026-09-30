@@ -123,7 +123,7 @@ UTF-8-byte estimate, not a model-tokenizer guarantee.
 
 For executable backup, first-open checks and restoration steps, use the
 [schema v3 upgrade and recovery guide](upgrade_v3.md). Schema v3 is independent
-of the development SDK package version, which is still `0.1.0`.
+of the SDK package version (`0.2.0-alpha.1`, or `0.2.0a1` for Python).
 
 On first open, the new SDK creates index schema version 3 and backfills existing
 private facts and live shared records in one immediate transaction. Existing

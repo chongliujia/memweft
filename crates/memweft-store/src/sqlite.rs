@@ -513,6 +513,10 @@ impl Store for SqliteStore {
     fn recall_candidates(&self, scope: &Scope, pools: &[String], query: Option<&str>, limit: usize) -> StoreResult<Option<crate::RecallCandidates>> {
         crate::indexed_recall::query(self, scope, pools, query, limit).map(Some)
     }
+    fn recall_candidates_with_required(&self, scope: &Scope, pools: &[String], query: Option<&str>, limit: usize,
+        required_keys: &[String], reject_conflicts: bool) -> StoreResult<Option<crate::RecallCandidates>> {
+        crate::indexed_recall::query_with_required(self, scope, pools, query, limit, required_keys, reject_conflicts).map(Some)
+    }
     fn pool_facts(&self, scope: &Scope, pool: &str) -> StoreResult<Vec<crate::PoolFact>> {
         crate::pools::list(self, scope, pool)
     }

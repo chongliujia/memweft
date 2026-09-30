@@ -20,6 +20,37 @@ class HighLevelTests(unittest.TestCase):
             context = user.session("s").context(query="部署端口", max_facts=1)
             self.assertEqual(context.memories[0]["fact_key"], "z_port")
             self.assertEqual(context.explain()["recall"]["method"], "lexical_overlap_v1")
+            self.assertEqual(context.explain()["warnings"], [])
+
+    def test_missing_query_fact_limit_diagnostic(self):
+        with Memory(in_memory=True) as m:
+            user = m.user("recall")
+            user.remember("archived", key="a_archive")
+            user.remember("部署端口 17443", key="z_port")
+            session = user.session("s")
+            session.add_message("user", "部署端口", event_id="question")
+            context = session.context(max_facts=1)
+            self.assertEqual(context.memories[0]["fact_key"], "a_archive")
+            warning = context.explain()["warnings"][0]
+            self.assertEqual(warning["code"], "unranked_fact_limit")
+            self.assertEqual(warning["max_facts"], 1)
+            self.assertEqual(context.explain()["omissions"][0]["reason"], "max_facts")
+
+    def test_required_fact_keys_prioritize_and_report_completeness(self):
+        with Memory(in_memory=True) as m:
+            user = m.user("requirements")
+            user.remember("needle", key="a_search")
+            user.remember("approval needed", key="z_policy")
+            session = user.session("s")
+            context = session.context(query="needle", required_fact_keys=["z_policy", "unknown"], max_facts=1)
+            self.assertEqual(context.memories[0]["fact_key"], "z_policy")
+            self.assertEqual(context.explain()["requirements"], {
+                "requested": ["z_policy", "unknown"], "included": ["z_policy"],
+                "missing": ["unknown"], "excluded": [], "complete": False,
+            })
+            self.assertEqual(session.context(required_fact_keys=["z_policy"], max_tokens=0).explain()["requirements"]["excluded"], ["z_policy"])
+            with self.assertRaises(ValueError):
+                session.context(required_fact_keys=["z_policy", "z_policy"])
 
     def test_shared_language_contract(self):
         import json
@@ -117,6 +148,15 @@ class HighLevelTests(unittest.TestCase):
         self.assertIsNone(store.get(("preferences",), "style"))
 
 class AsyncHighLevelTests(unittest.IsolatedAsyncioTestCase):
+    async def test_async_required_fact_keys_reach_native_context(self):
+        async with AsyncMemory(in_memory=True) as m:
+            user = m.user("requirements")
+            await user.remember("needle", key="a_search")
+            await user.remember("approval needed", key="z_policy")
+            context = await user.session("s").context(query="needle", required_fact_keys=["z_policy"], max_facts=1)
+            self.assertEqual(context.memories[0]["fact_key"], "z_policy")
+            self.assertTrue(context.explain()["requirements"]["complete"])
+
     async def test_async_task_query_reaches_rust_ranking(self):
         async with AsyncMemory(in_memory=True) as m:
             user = m.user("recall")
