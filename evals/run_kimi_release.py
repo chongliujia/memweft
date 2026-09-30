@@ -71,7 +71,7 @@ def run(output, repo, client=None, *, interval=21):
         "model": "kimi-k2.6", "thinking": "disabled", "max_calls": 10,
         "max_completion_tokens": 256, "request_interval_seconds": interval,
         "native_sha256": hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
-        "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+        "source_sha256": {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
                           for path in (Path(__file__), ROOT / "examples/kimi_release_agent.py", ROOT / "examples/kimi_memory.py")},
         "scope": "One internal project case plus four controlled lifecycle rehearsals; no customer data or publishing."})
     rows, last_request = [], None

@@ -142,7 +142,7 @@ def snapshot_sources(output):
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("xb") as stream:
             stream.write(payload)
-        hashes[str(relative)] = hashlib.sha256(payload).hexdigest()
+        hashes[relative.as_posix()] = hashlib.sha256(payload).hexdigest()
     return hashes
 
 

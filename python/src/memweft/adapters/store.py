@@ -2,7 +2,26 @@
 from __future__ import annotations
 
 from datetime import datetime
+import re
 from langgraph.store.base import BaseStore, GetOp, PutOp, SearchOp, ListNamespacesOp, Item, SearchItem
+
+
+_TIMESTAMP = re.compile(
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})"
+    r"(?:\.([0-9]{1,9}))?(Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])"
+)
+
+
+def _parse_timestamp(value: str) -> datetime:
+    """Convert Rust RFC3339 timestamps to Python's microsecond precision."""
+    match = _TIMESTAMP.fullmatch(value)
+    if match is None:
+        raise ValueError(f"Invalid RFC3339 store timestamp: {value!r}")
+    seconds, fraction, offset = match.groups()
+    # Python 3.10 needs a numeric UTC offset and 3 or 6 fractional digits.
+    fraction = "." + fraction[:6].ljust(6, "0") if fraction else ""
+    offset = "+00:00" if offset == "Z" else offset
+    return datetime.fromisoformat(seconds + fraction + offset)
 
 
 def _encode(op):
@@ -27,7 +46,7 @@ def _item(data, search=False):
         return None
     cls = SearchItem if search else Item
     return cls(value=data["value"], key=data["key"], namespace=tuple(data["namespace"]),
-               created_at=datetime.fromisoformat(data["created_at"]), updated_at=datetime.fromisoformat(data["updated_at"]))
+               created_at=_parse_timestamp(data["created_at"]), updated_at=_parse_timestamp(data["updated_at"]))
 
 
 def _decode(ops, results):

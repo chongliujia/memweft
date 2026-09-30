@@ -141,7 +141,7 @@ def snapshot_sources(output):
         target = output / "sources" / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(payload)
-        hashes[str(relative)] = hashlib.sha256(payload).hexdigest()
+        hashes[relative.as_posix()] = hashlib.sha256(payload).hexdigest()
     return hashes
 
 

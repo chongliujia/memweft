@@ -237,7 +237,7 @@ def main():
         copy = args.output / 'sources' / relative
         copy.parent.mkdir(parents=True, exist_ok=True)
         copy.write_bytes(path.read_bytes())
-        manifest['sources'][str(relative)] = sha(path)
+        manifest['sources'][relative.as_posix()] = sha(path)
     dump(args.output / 'manifest.json', manifest)
     dump(args.output / 'status.json', {'status': 'running'})
     model = Model(args, args.output)

@@ -181,7 +181,7 @@ def main():
               'seed':a.seed,'native_sha256':sha(a.native),'suite_sha256':sha(source),'sources':{},
               'limitations':'Real LangGraph and local model; synthetic business data. Replayed V6 split, not new generalization evidence.'}
     for path in [Path(__file__),ROOT/'examples/local_memory_agent.py',ROOT/'evals/evidence_learning.py',ROOT/'evals/run_local.py',ROOT/'evals/output_contract.py']:
-        (a.output/path.name).write_bytes(path.read_bytes());manifest['sources'][str(path.relative_to(ROOT))]=sha(path)
+        (a.output/path.name).write_bytes(path.read_bytes());manifest['sources'][path.relative_to(ROOT).as_posix()]=sha(path)
     dump(a.output/'manifest.json',manifest);dump(a.output/'status.json',{'status':'running'})
     model=Model(a,a.output)
     try:
