@@ -6,7 +6,45 @@ on:
 permissions:
   contents: read
 jobs:
-  native:
+  python-wheel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        python: ['3.10', '3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install maturin -r python/requirements-test.txt
+      - name: Build Python wheel for the selected interpreter
+        working-directory: python
+        run: maturin build --release --locked --interpreter python --out ../dist
+      - name: Install wheel in a fresh environment and exercise its native API
+        run: python scripts/verify_packages.py --wheel-dir dist --manifest dist/package-target.json
+      - name: Install wheel for integration tests
+        shell: python
+        run: |
+          import glob, subprocess, sys
+          wheel, = glob.glob('dist/*.whl')
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel])
+      - run: python -m unittest discover -s python/tests -v
+      - name: Offline Agent evaluation and authorization regression tests
+        # Evaluation benchmark helpers currently import the Unix resource module.
+        if: runner.os == 'Linux' && matrix.python == '3.12'
+        run: python -m unittest discover -s evals -p 'test_*.py' -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memweft-python-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            dist/*.whl
+            dist/package-target.json
+
+  rust-node:
     strategy:
       fail-fast: false
       matrix:
@@ -25,21 +63,6 @@ jobs:
           cache: npm
           cache-dependency-path: typescript/package-lock.json
       - run: cargo test --locked
-      - run: python -m pip install maturin -r python/requirements-test.txt
-      - name: Build Python wheel
-        working-directory: python
-        run: maturin build --release --locked --out ../dist
-      - name: Install wheel
-        shell: python
-        run: |
-          import glob, subprocess, sys
-          wheel = glob.glob('dist/*.whl')[0]
-          subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel])
-      - run: python -m unittest discover -s python/tests -v
-      - name: Offline Agent evaluation and authorization regression tests
-        # Evaluation benchmark helpers currently import the Unix resource module.
-        if: runner.os == 'Linux'
-        run: python -m unittest discover -s evals -p 'test_*.py' -v
       - run: npm ci
         working-directory: typescript
       - run: npm run build:native
@@ -48,13 +71,17 @@ jobs:
         working-directory: typescript
       - run: npm test
         working-directory: typescript
+      - run: python -c "from pathlib import Path; Path('dist').mkdir(exist_ok=True)"
       - run: npm pack --pack-destination ../dist
         working-directory: typescript
+      - name: Install npm tarball outside the checkout and exercise its native API
+        run: python scripts/verify_packages.py --npm-dir dist --manifest dist/package-target.json
       - run: cargo build --release --locked -p memweft --bin memweft
       - uses: actions/upload-artifact@v4
         with:
-          name: memweft-${{ matrix.os }}
+          name: memweft-native-${{ matrix.os }}
           path: |
-            dist/*
+            dist/*.tgz
+            dist/package-target.json
             target/release/memweft
             target/release/memweft.exe

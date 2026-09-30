@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=1.5,<2.0"]
+requires = ["maturin>=1.9.3,<2.0"]
 build-backend = "maturin"
 
 [project]
@@ -8,11 +8,12 @@ version = "0.1.0"
 description = "Python SDK for the MemWeft memory system"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "MemWeft" }]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Rust",
-  "License :: OSI Approved :: Apache Software License",
 ]
 
 [project.optional-dependencies]
@@ -23,3 +24,4 @@ python-source = "src"
 module-name = "memweft._core"
 bindings = "pyo3"
 manifest-path = "../crates/memweft-ffi/Cargo.toml"
+exclude = ["**/__pycache__/**", "**/*.pyc"]

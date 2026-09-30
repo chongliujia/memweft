@@ -72,7 +72,20 @@ The store supports namespace/key CRUD, JSON comparison filters, namespace listin
 
 ## Packaging
 
-`npm run build:native` creates `native/memweft.node` for the current host. After `npm run build`, `npm pack` creates a package that includes the addon and TypeScript declarations. This package is platform-specific, not a universal npm release. Choose the matching CI artifact for your operating system, CPU and libc. Publishing platform packages with automatic selection is future work.
+`npm run build:native` creates `native/memweft.node` for the current host. After
+`npm run build`, `npm pack` creates a package with the addon and TypeScript
+declarations. Download the `memweft-native-...` CI artifact built for your
+operating system, CPU and Linux libc. Its `package-target.json` identifies the
+build target and tarball hash. Install the tarball in your application:
+
+```bash
+npm install /path/to/memweft-0.1.0.tgz
+```
+
+This package is specific to the runner that built it. CI is configured to verify that the
+tarball installs and loads the native addon from a separate project, then tests
+context and persistence. No universal npm release or automatic platform
+selection exists yet. The tarballs are not published to npm.
 
 The native entry point is for Node.js, not browser/Edge runtimes. An HTTP client/server transport has not been implemented.
 

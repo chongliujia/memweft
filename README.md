@@ -20,7 +20,7 @@ MemWeft gives agents persistent facts, resumable conversations and relevant mode
 
 **Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
-**Development status (2026-09-28):** core SDK features are implemented and undergoing pre-release hardening. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. Package versions are still `0.1.0`; the current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database.
+**Development status (2026-09-30):** core SDK features are implemented and undergoing pre-release hardening. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. Package versions are still `0.1.0`; the current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database.
 
 ## What you can build
 
@@ -50,6 +50,24 @@ cd ..
 ```
 
 On Windows, activate with `.venv\Scripts\activate`. Registry publishing and automatic platform package selection remain future work.
+
+For an installable preview, the [CI workflow](.github/workflows/verify.yml)
+is configured to build Python wheels for 3.10–3.12 on Linux, macOS and Windows runners,
+plus one host-specific Node tarball per runner. Choose a wheel whose Python tag
+and platform match your interpreter, or a Node tarball built for your operating
+system, CPU and Linux libc. The artifact's `package-target.json` records the
+build host and hashes. Install the downloaded file directly:
+
+```bash
+python -m pip install /path/to/downloaded-wheel.whl
+npm install /path/to/memweft-0.1.0.tgz
+```
+
+These artifacts are verified in a fresh environment outside the checkout using
+[`scripts/verify_packages.py`](scripts/verify_packages.py). They are not yet
+published to package registries; check the matching CI run before distributing
+an artifact. The [Python](python/README.md#install-a-built-wheel) and
+[Node](typescript/README.md#packaging) guides describe each package's limits.
 
 ```python
 from memweft import Memory
@@ -282,8 +300,8 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 | Stage | Focus |
 |---|---|
 | Implemented | Scoped pools, exact bitmap recall, bounded conversation windows, private-source invalidation, evaluation gates and coordinated local maintenance |
-| Locally verified | Million-fact queries, five-minute multiwriter pressure, pinned snapshots and idle WAL recovery; [latest evidence](evals/reports/2026-09-28-bitmap-recall.md) |
-| Next: distributable preview | Successful native SDK CI on all three platforms, installable Python/Node artifacts, fresh-install smoke checks and application-specific upgrade/recovery rehearsals |
+| Locally verified | Million-fact queries, five-minute multiwriter pressure, pinned snapshots, idle WAL recovery and fresh wheel/npm installations on macOS arm64; [retrieval evidence](evals/reports/2026-09-28-bitmap-recall.md) |
+| Next: distributable preview | Confirm the new cross-platform package CI passes, select supported runner architectures, publish installable artifacts, and rehearse application-specific upgrade/recovery |
 | Next: business validation | Real long conversations, memory/learning task quality, concurrent tools, hours-long storage soak tests, write-heavy and sparse-term workloads |
 | Planned | Bounded hot-data preloading, staged background jobs, sharding; RDMA only after measuring a relevant bottleneck |
 
@@ -336,7 +354,7 @@ npm test
 cd ..
 ```
 
-Rust, Python and TypeScript share a [contract fixture](tests/contract.json). Optional database tests skip without their DSNs. The [CI workflow](.github/workflows/verify.yml) builds native artifacts and runs offline Agent evaluation tests on Linux; model-call evaluations remain explicit local runs.
+Rust, Python and TypeScript share a [contract fixture](tests/contract.json). Optional database tests skip without their DSNs. The [CI workflow](.github/workflows/verify.yml) is configured for nine Python wheels and three Node packages across its runners; each job installs its package outside the checkout, and offline Agent evaluation tests run on Linux/Python 3.12. Model-call evaluations remain explicit local runs. These new matrix results still need a remote CI run.
 
 [Report an issue](https://github.com/chongliujia/memweft/issues) · [Browse examples](examples/) · [Inspect evaluation reports](evals/reports/)
 

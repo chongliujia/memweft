@@ -62,6 +62,25 @@ This does not change stored memory, authenticate facts or authorize tools. See t
 
 ## Install (with database backends)
 
+### Install a built wheel
+
+Download the CI artifact whose wheel tag matches your Python version and
+operating system/CPU, then install its `.whl` file with that interpreter:
+
+```bash
+python -m pip install /path/to/downloaded-wheel.whl
+```
+
+The wheel includes the Rust extension. It does not require Rust on the installing
+machine; optional LangGraph dependencies are separate. Preview wheels use the
+default SQLite build, without optional MySQL/PostgreSQL features. CI is configured
+for CPython 3.10, 3.11 and 3.12 on its Linux, macOS and Windows runner
+architectures. The artifacts are not published to PyPI. Each job checks an
+isolated wheel install, native context, persistence and schema v3. Before
+upgrading existing data, follow the [v3 backup and recovery guide](../docs/upgrade_v3.md).
+
+### Build from source
+
 SQLite-only (default):
 
 ```bash
