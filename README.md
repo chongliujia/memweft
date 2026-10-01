@@ -20,7 +20,9 @@ MemWeft gives agents persistent facts, resumable conversations and relevant mode
 
 **Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
-**Development status (2026-09-30):** the SQLite SDK is a developer preview, version `0.2.0-alpha.1` (Python `0.2.0a1`). Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and long-running business validation remain open. The current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database. See the [preview release guide](docs/preview_release.md) for scope, package provenance and acceptance checks.
+**Development status (2026-10-01):** the SQLite SDK is a developer preview, version `0.2.0-alpha.1` (Python `0.2.0a1`), with downloadable CI artifacts. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and external workflow pilot acceptance remain open. The current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database. See the [preview release guide](docs/preview_release.md) for scope, package provenance and acceptance checks.
+
+For commit [`1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d`](https://github.com/chongliujia/memweft/commit/1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d), [CI run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) passed all **12 jobs on the first attempt**. This evidence applies to that exact commit; later commits need their own verification.
 
 ## What you can build
 
@@ -51,9 +53,10 @@ cd ..
 
 On Windows, activate with `.venv\Scripts\activate`. Registry publishing and automatic platform package selection remain future work.
 
-For an installable preview, the [CI workflow](.github/workflows/verify.yml)
-is configured to build Python wheels for 3.10–3.12 on Linux, macOS and Windows runners,
-plus one host-specific Node tarball per runner. Choose a wheel whose Python tag
+For an installable preview, download artifacts from the
+[verified CI run](https://github.com/chongliujia/memweft/actions/runs/36822104764):
+Python wheels for 3.10–3.12 on Linux x64, macOS arm64 and Windows x64,
+plus one host-specific Node tarball and CLI per runner. Choose a wheel whose Python tag
 and platform match your interpreter, or a Node tarball built for your operating
 system, CPU and Linux libc. The artifact's `package-target.json` records the
 host, package versions, hashes and matching build record; `build-record.json`
@@ -105,6 +108,9 @@ the count limit. An empty warning list is not a completeness guarantee.
 For known task dependencies, [required facts and workflow validation](docs/required_facts.md)
 adds explicit key retrieval in Python and Node, completeness diagnostics, and an
 application example that rejects missing inputs or proposals that violate its rules.
+The [standalone Python handoff app](examples/handoff_app/README.md) consumes an
+installed wheel for an offline project handoff demo; external workflow acceptance
+and human outcome assessment remain separate steps.
 
 <details>
 <summary><b>TypeScript / Node.js</b></summary>
@@ -313,7 +319,7 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 - **Forgetting** removes facts and dependent scoped records; messages or content already copied into external prompts require separate deletion.
 - **Durability** uses SQLite WAL with `synchronous=NORMAL`. Process-crash tests do not prove power-loss durability. The bundled engine is SQLite 3.51.3; [source and fix provenance](vendor/libsqlite3-sys/MEMWEFT-PATCH.md) are retained.
 - **Isolation needs trusted identity:** callers must bind tenant/user/agent scopes correctly. Memory pools are not a production IAM service.
-- **Platform validation:** recorded local measurements cover Linux and macOS arm64 in separate experiments. The CI matrix defines Linux, macOS and Windows builds; the latest hardening was verified locally on macOS, not by a new three-platform CI run.
+- **Platform validation:** [run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) passed nine Python 3.10–3.12 jobs and three Rust/Node 20 jobs on Ubuntu 24.04 x64, macOS 15 arm64 and Windows 2025 x64 for commit `1ee6b3b`. Each SDK package was installed and exercised outside the checkout. These runner results do not cover other architectures, Linux libc variants or later commits. Performance measurements remain separate Linux and macOS arm64 experiments.
 - **Database compatibility:** opening a legacy/v1/v2 database with this build upgrades its recall index to v3. Upgrade all processes together and retain a verified pre-upgrade backup; switching only the executable back is unsupported. [Upgrade and recovery](docs/upgrade_v3.md)
 
 ## Roadmap
@@ -322,8 +328,8 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 |---|---|
 | Implemented | Scoped pools, exact bitmap recall, bounded conversation windows, private-source invalidation, evaluation gates and coordinated local maintenance |
 | Locally verified | Million-fact queries, five-minute multiwriter pressure, pinned snapshots, idle WAL recovery and fresh wheel/npm installations on macOS arm64; [retrieval evidence](evals/reports/2026-09-28-bitmap-recall.md) |
-| Next: distributable preview | Confirm the new cross-platform package CI passes, select supported runner architectures, publish installable artifacts, and rehearse application-specific upgrade/recovery |
-| Next: business validation | Real long conversations, memory/learning task quality, concurrent tools, hours-long storage soak tests, write-heavy and sparse-term workloads |
+| Developer preview available | Nine Python wheels and three native artifact bundles are downloadable from [run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) for commit `1ee6b3b`; packages are not yet published to registries, and application-specific upgrade/recovery rehearsals remain open |
+| Next: business validation | Accept an external workflow pilot with explicit human outcome review; test real long conversations, memory/learning task quality, concurrent tools, hours-long storage soak, write-heavy and sparse-term workloads |
 | Planned | Bounded hot-data preloading, staged background jobs, sharding; RDMA only after measuring a relevant bottleneck |
 
 ## Guides
@@ -375,7 +381,7 @@ npm test
 cd ..
 ```
 
-Rust, Python and TypeScript share a [contract fixture](tests/contract.json). Optional database tests skip without their DSNs. The [CI workflow](.github/workflows/verify.yml) is configured for nine Python wheels and three Node packages across its runners; each job installs its package outside the checkout, and offline Agent evaluation tests run on Linux/Python 3.12. Model-call evaluations remain explicit local runs. These new matrix results still need a remote CI run.
+Rust, Python and TypeScript share a [contract fixture](tests/contract.json). Optional database tests skip without their DSNs. The [CI workflow](.github/workflows/verify.yml) builds nine Python wheels and three Node packages across its runners; each job installs its package outside the checkout, and offline Agent evaluation tests run on Linux/Python 3.12. All 12 jobs passed on their first attempt in [run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) for commit `1ee6b3b`. Re-run the matrix for subsequent changes. Model-call evaluations remain explicit local runs.
 
 [Report an issue](https://github.com/chongliujia/memweft/issues) · [Browse examples](examples/) · [Inspect evaluation reports](evals/reports/)
 

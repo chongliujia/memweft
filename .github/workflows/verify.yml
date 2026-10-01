@@ -58,7 +58,7 @@ jobs:
         shell: python
         run: |
           import subprocess, sys
-          for pattern in ('test_kimi*.py', 'test_release*.py', 'test_workflow*.py', 'test_guarded_workflow_agent.py', 'test_github_ci_evidence.py', 'test_report_workflow*.py'):
+          for pattern in ('test_kimi*.py', 'test_release*.py', 'test_workflow*.py', 'test_guarded_workflow_agent.py', 'test_github_ci_evidence.py', 'test_report_workflow*.py', 'test_handoff_app.py'):
               subprocess.check_call([sys.executable, '-m', 'unittest', 'discover', '-s', 'evals', '-p', pattern, '-v'])
       - name: Offline Agent evaluation and authorization regression tests
         # Evaluation benchmark helpers currently import the Unix resource module.
