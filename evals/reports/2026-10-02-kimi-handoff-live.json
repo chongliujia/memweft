@@ -1,0 +1,82 @@
+{
+  "completed_calls": 12,
+  "usage": {
+    "prompt_tokens": {
+      "total": 4818,
+      "known_subtotal": 4818,
+      "unknown_calls": 0
+    },
+    "completion_tokens": {
+      "total": 426,
+      "known_subtotal": 426,
+      "unknown_calls": 0
+    },
+    "total_tokens": {
+      "total": 5244,
+      "known_subtotal": 5244,
+      "unknown_calls": 0
+    }
+  },
+  "by_mode": {
+    "memory": {
+      "observations": 6,
+      "correct_under_frozen_rules": 6,
+      "meaning": "task progress decisions"
+    },
+    "no_memory": {
+      "observations": 6,
+      "correct_under_frozen_rules": 6,
+      "meaning": "safe requests for missing context; not task completion"
+    }
+  },
+  "failures": [],
+  "verification": {
+    "verified_at": "2026-10-01T16:05:34.271699+00:00",
+    "completed_calls": 12,
+    "distinct_response_ids": 12,
+    "frozen_requests_match": true,
+    "all_response_contracts_and_expected_decisions_match": true,
+    "no_memory_pairs_identical": true,
+    "usage": {
+      "prompt_tokens": 4818,
+      "completion_tokens": 426,
+      "total_tokens": 5244
+    },
+    "estimated_cny_without_cache_discount": 0.042819,
+    "pricing_source": "https://platform.kimi.com/",
+    "retry_count": 0,
+    "human_assessments": 0,
+    "model_actions_executed": 0,
+    "latency_ms": {
+      "median": 1462.2735,
+      "min": 978.393,
+      "max": 1765.499
+    },
+    "evidence_sha256": {
+      "metadata.json": "a7cf314a4e56572b0d845c843edbd4f68a8949d3911afd45bfad4b257e252e8f",
+      "suite.json": "7d83443280a6db161253310ef88e15b3a3b7260401ae1862bc712bdfb4aeec6b",
+      "prepared.json": "7e39b9e4c0691ca911cdcfe91a8c16096148bdfef5296300a0a2faa8e02d6c04",
+      "results.jsonl": "5cee6e1fa1cf7ca6cfbd9c16f2bdf3ef7ea1e296abd1dec4bc7412bd174eeaef",
+      "summary.json": "f0f30934a13fd2404be110aa68c4f99db89d3e1584a62662a02dc999d4d1a112",
+      "status.json": "76831c5d2bde6fbde99d2bcac51aeb6dadf521fe63b6d938fd71f826fd415df4",
+      "pricing.json": "1158c6eb0a2e12f223e5e655f467db5b38fa40db83c0cd565b4c56e6a2a1c9ab",
+      "offline-tests.log": "312b734cca7a1be65f486ab1cec042f3be00a523d228e8c926b5bf1cebee06a0",
+      "offline-tests-project-env.log": "c106d1a20f7037051f920c725958cb5ab4d9afb56223444c6327eb0b2abb61a6"
+    },
+    "testing": {
+      "new_tests_pinned_wheel": 5,
+      "full_project_environment": 216,
+      "clean_wheel_full_suite_import_errors": 4,
+      "import_error_reason": "Optional langgraph dependency is not installed in the clean wheel-only environment."
+    }
+  },
+  "source_sdk_commit": "1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d",
+  "scenario_sha256": "7d83443280a6db161253310ef88e15b3a3b7260401ae1862bc712bdfb4aeec6b",
+  "limits": [
+    "Six historical states of three prior simulated workflows, not new business tasks.",
+    "Curated factual projection and explicit decision rules; not general reasoning or autonomous execution.",
+    "Before/after memory handles are reopened in the same process; not a new cross-process trial.",
+    "Reason strings have only format/length checks; no human semantic assessment.",
+    "No-memory pairs for a task have identical prompts; observations are correlated."
+  ]
+}

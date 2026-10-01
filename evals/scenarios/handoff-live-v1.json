@@ -1,0 +1,581 @@
+{
+  "schema_version": 1,
+  "scenario_id": "handoff-live-v1",
+  "evidence_root": "data/external-simulation-2026-10-01",
+  "provenance": {
+    "mode": "historical_task_state_replay",
+    "source_mode": "assistant_simulated_external_developer",
+    "original_local_workflows": 3,
+    "state_cases": 6,
+    "additional_business_tasks": 0,
+    "external_human_participants": 0,
+    "historical_application_model_api_calls": 0,
+    "fault_and_boundary_records": "Labelled checks within the original three workflows; not additional business tasks.",
+    "claim_limit": "Tests task-state restoration and structured next-step consistency from archived facts. Does not execute work or establish external human acceptance, production reliability or complex open-ended reasoning."
+  },
+  "projection_rules": {
+    "model_payload_allowlist": [
+      "task",
+      "facts"
+    ],
+    "local_only": [
+      "id",
+      "stage",
+      "source_files",
+      "expected_memory",
+      "expected_no_memory"
+    ],
+    "omitted_content": [
+      "followup prose",
+      "recipient_next_step prose",
+      "remaining prose",
+      "overall outcome/verdict/completed summaries",
+      "expected-exit instructions",
+      "commands"
+    ],
+    "before_empty_recipient_evidence": "The producer checkpoint explicitly records independent recipient work as outstanding; empty arrays refer to that historical checkpoint, not the present archive.",
+    "record_coverage_semantics": "Declared-record coverage means named records are present; it does not mean their tasks are done.",
+    "human_review_semantics": "Automated completion never changes pending human review.",
+    "comparison": "Use the same task prompt and generic business rules in each pair; the no-memory request omits facts entirely."
+  },
+  "cases": [
+    {
+      "id": "release-before",
+      "task": "release",
+      "stage": "before",
+      "source_files": [
+        {
+          "path": "producer-baselines/release/handoff-final/snapshot.json",
+          "sha256": "7cfd49efef52c62e6704d5a8b68c721f289ebef8222c99db79e76b76ad56a9a0"
+        },
+        {
+          "path": "release/acceptance-primary/receipt.json",
+          "sha256": "9d015adab8655babca5e30cc735e999d73856e472e14091f263a01837c61e87e"
+        },
+        {
+          "path": "release/negative-checks.json",
+          "sha256": "7f202d953227e293fd6d0edc5c26623d62de22f4bafb61c65ae8b78212a33ed2"
+        }
+      ],
+      "facts": {
+        "project": "release-acceptance",
+        "scope": "Independent recipient verification of the supplied release, with normal acceptance and separate wheel-hash/Python-runtime rejection drills.",
+        "producer_primary_exit": 0,
+        "producer_drills": [
+          {
+            "label": "wheel_hash",
+            "actual_exit": 10,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "app_hash",
+            "actual_exit": 10,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "cpu_declaration",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "os_declaration",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "python_runtime",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          }
+        ],
+        "recipient_checks": [],
+        "recipient_receipts": [],
+        "task_record_updates": {
+          "keys": [],
+          "actual_exits": [],
+          "new_handoff_exit": null
+        },
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "ready_to_continue",
+        "next": "verify_delivery",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    },
+    {
+      "id": "release-after",
+      "task": "release",
+      "stage": "after",
+      "source_files": [
+        {
+          "path": "producer-baselines/release/handoff-final/snapshot.json",
+          "sha256": "7cfd49efef52c62e6704d5a8b68c721f289ebef8222c99db79e76b76ad56a9a0"
+        },
+        {
+          "path": "release/acceptance-primary/receipt.json",
+          "sha256": "9d015adab8655babca5e30cc735e999d73856e472e14091f263a01837c61e87e"
+        },
+        {
+          "path": "release/negative-checks.json",
+          "sha256": "7f202d953227e293fd6d0edc5c26623d62de22f4bafb61c65ae8b78212a33ed2"
+        },
+        {
+          "path": "release/recipient-result.json",
+          "sha256": "749f004aecd1f57b18cb69aa43cee1bad51a9fab5eba3bf2c53409e53ede0a46"
+        },
+        {
+          "path": "release/recipient-h65zl2c2/successor-independent-acceptance/receipt.json",
+          "sha256": "d7d2a57930f041ba84440b673c23ac51bef04adf1d3c9ea08290a45c9ff9a347"
+        },
+        {
+          "path": "release/recipient-h65zl2c2/successor-negative-hash/receipt.json",
+          "sha256": "d7fe37c45b286ad14f6e0d075b2443938bdff67907d82c9e33a9300bf2fb2c07"
+        },
+        {
+          "path": "release/recipient-h65zl2c2/successor-negative-platform/receipt.json",
+          "sha256": "33c357c48a17be6f2a806d0d8acefc8ceef955283ea0652bd36517c75d83f8b4"
+        }
+      ],
+      "facts": {
+        "project": "release-acceptance",
+        "scope": "Independent recipient verification of the supplied release, with normal acceptance and separate wheel-hash/Python-runtime rejection drills.",
+        "producer_primary_exit": 0,
+        "producer_drills": [
+          {
+            "label": "wheel_hash",
+            "actual_exit": 10,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "app_hash",
+            "actual_exit": 10,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "cpu_declaration",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "os_declaration",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "python_runtime",
+            "actual_exit": 20,
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          }
+        ],
+        "recipient_checks": [
+          {
+            "name": "successor-independent-acceptance",
+            "actual_exit": 0,
+            "observed_status": "mechanical_checks_passed",
+            "kind": "normal_acceptance",
+            "additional_business_tasks": 0
+          },
+          {
+            "name": "successor-negative-hash",
+            "actual_exit": 10,
+            "observed_status": "rejected",
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          },
+          {
+            "name": "successor-negative-platform",
+            "actual_exit": 20,
+            "observed_status": "rejected",
+            "kind": "fault_injection",
+            "additional_business_tasks": 0
+          }
+        ],
+        "recipient_receipts": [
+          "release/recipient-h65zl2c2/successor-independent-acceptance/receipt.json",
+          "release/recipient-h65zl2c2/successor-negative-hash/receipt.json",
+          "release/recipient-h65zl2c2/successor-negative-platform/receipt.json"
+        ],
+        "task_record_updates": {
+          "keys": [
+            "validation",
+            "followup",
+            "artifacts",
+            "task_status"
+          ],
+          "actual_exits": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "new_handoff_exit": 0
+        },
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "completed",
+        "next": "record_completion",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    },
+    {
+      "id": "recovery-before",
+      "task": "recovery",
+      "stage": "before",
+      "source_files": [
+        {
+          "path": "producer-baselines/recovery/handoff-export/snapshot.json",
+          "sha256": "82e84d355f609918169da5afe33fcf0937fcb719494d27ec708bbbd92df17688"
+        },
+        {
+          "path": "recovery/receipts/rehearsal-restore.json",
+          "sha256": "8a5e02b9c959dae429446d8ebb288cc1d7949892fb532582fa4e704874c83d54"
+        }
+      ],
+      "facts": {
+        "project": "recovery-ops-20261001",
+        "scope": "Independent recipient restore acceptance with logical identity checks, forgotten-key diagnostics and unchanged existing-target refusal evidence.",
+        "backup_policy": {
+          "revision": 2,
+          "method": "SQLite Connection.backup",
+          "restore_destination": "unused_path"
+        },
+        "canonical_backup": "recovery/backups/recovery-ready.db",
+        "producer_rehearsal": {
+          "matched_fact_count": 5,
+          "values_and_sources_match": true,
+          "absent_keys": [
+            "temporary_install_probe"
+          ],
+          "absent_keys_verified": true,
+          "sqlite_integrity": "ok",
+          "recall_schema": 3
+        },
+        "recipient_checks": {},
+        "recipient_receipts": [],
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "ready_to_continue",
+        "next": "restore_backup",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    },
+    {
+      "id": "recovery-after",
+      "task": "recovery",
+      "stage": "after",
+      "source_files": [
+        {
+          "path": "producer-baselines/recovery/handoff-export/snapshot.json",
+          "sha256": "82e84d355f609918169da5afe33fcf0937fcb719494d27ec708bbbd92df17688"
+        },
+        {
+          "path": "recovery/receipts/rehearsal-restore.json",
+          "sha256": "8a5e02b9c959dae429446d8ebb288cc1d7949892fb532582fa4e704874c83d54"
+        },
+        {
+          "path": "recovery/recipient-result.json",
+          "sha256": "e4874b647057d8af11bbf37704884589fcc9ff6b645c000e673f018304c0d5d2"
+        },
+        {
+          "path": "recovery/recipient/restore-receipt.json",
+          "sha256": "ba04ebbb4be7b7b5f8a047a35f81114b961f326021e53ea52e159346d3f37ab4"
+        },
+        {
+          "path": "recovery/recipient/recovery-acceptance-receipt.json",
+          "sha256": "553369d1f5c22b27cec709e774bb092063ad9742b1dc00e2e2622cdc193f6050"
+        },
+        {
+          "path": "recovery/recipient/status-update-receipt.json",
+          "sha256": "400bd38a360d20b17514107629ed0b69772e4d91574f06b05d18488a008fe694"
+        }
+      ],
+      "facts": {
+        "project": "recovery-ops-20261001",
+        "scope": "Independent recipient restore acceptance with logical identity checks, forgotten-key diagnostics and unchanged existing-target refusal evidence.",
+        "backup_policy": {
+          "revision": 2,
+          "method": "SQLite Connection.backup",
+          "restore_destination": "unused_path"
+        },
+        "canonical_backup": "recovery/backups/recovery-ready.db",
+        "producer_rehearsal": {
+          "matched_fact_count": 5,
+          "values_and_sources_match": true,
+          "absent_keys": [
+            "temporary_install_probe"
+          ],
+          "absent_keys_verified": true,
+          "sqlite_integrity": "ok",
+          "recall_schema": 3
+        },
+        "recipient_checks": {
+          "new_restore_exit": 0,
+          "all_required_values_and_sources_match": true,
+          "matched_fact_count": 12,
+          "revision_2_policy": true,
+          "sdk_identity_matches": true,
+          "sqlite_integrity": "ok",
+          "sqlite_foreign_key_violations": 0,
+          "recall_schema": 3,
+          "forgotten_key_absent": true,
+          "forgotten_required_exit": 2,
+          "forgotten_required_missing": [
+            "temporary_install_probe"
+          ],
+          "existing_target_refusal_exit": 2,
+          "target_unchanged_during_refusal": true,
+          "original_inputs_and_backups_unchanged": true,
+          "task_status_written_using_delivered_app": true,
+          "final_resume_exit": 0
+        },
+        "recipient_receipts": [
+          "recovery/recipient/restore-receipt.json",
+          "recovery/recipient/recovery-acceptance-receipt.json",
+          "recovery/recipient/status-update-receipt.json"
+        ],
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "completed",
+        "next": "record_completion",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    },
+    {
+      "id": "worklog-before",
+      "task": "worklog",
+      "stage": "before",
+      "source_files": [
+        {
+          "path": "producer-baselines/worklog/exports/builder-final/snapshot.json",
+          "sha256": "81009c5cb34d68795729cc9a3fa3b38308bf4f93b03bfbd8fab1c23a964573fd"
+        },
+        {
+          "path": "producer-baselines/worklog/exports/builder-worklog/snapshot.json",
+          "sha256": "108c8d7d2a14006f3d71cd7a3c3ff85e046c881854bcb9c5407b329561c0f1b2"
+        }
+      ],
+      "facts": {
+        "project": "worklog-cli",
+        "scope": "Finish the tested recovery-recipe documentation and record fresh independent validation in the actual worklog.",
+        "tasks": [
+          {
+            "id": "cross-process-acceptance",
+            "title": "Verify persistence, isolation, update and incomplete handoff boundaries",
+            "status": "done"
+          },
+          {
+            "id": "docs-recovery-recipes",
+            "title": "Add tested recovery recipes for missing and budget-excluded required tasks",
+            "status": "todo"
+          },
+          {
+            "id": "implement-cli",
+            "title": "Implement an offline multi-project worklog CLI with trusted identity mapping",
+            "status": "done"
+          },
+          {
+            "id": "offline-install",
+            "title": "Install pinned SDK wheel in isolated offline venv",
+            "status": "done"
+          }
+        ],
+        "producer_acceptance": {
+          "assertions": 41,
+          "cli_subprocesses": 35
+        },
+        "fresh_recipient_acceptance": null,
+        "tested_readme_recipes_recorded": false,
+        "recipient_recipe_observations": [],
+        "declared_record_coverage": {
+          "requested": [
+            "offline-install",
+            "implement-cli",
+            "cross-process-acceptance",
+            "docs-recovery-recipes"
+          ],
+          "included": [
+            "offline-install",
+            "implement-cli",
+            "cross-process-acceptance",
+            "docs-recovery-recipes"
+          ],
+          "missing": [],
+          "excluded": [],
+          "complete": true
+        },
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "ready_to_continue",
+        "next": "finish_docs",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    },
+    {
+      "id": "worklog-after",
+      "task": "worklog",
+      "stage": "after",
+      "source_files": [
+        {
+          "path": "producer-baselines/worklog/exports/builder-final/snapshot.json",
+          "sha256": "81009c5cb34d68795729cc9a3fa3b38308bf4f93b03bfbd8fab1c23a964573fd"
+        },
+        {
+          "path": "producer-baselines/worklog/exports/builder-worklog/snapshot.json",
+          "sha256": "108c8d7d2a14006f3d71cd7a3c3ff85e046c881854bcb9c5407b329561c0f1b2"
+        },
+        {
+          "path": "worklog/recipient-result.json",
+          "sha256": "342c9147be1bd72d0d5843813f824c1617691cb5527e9ad89b336a1a4feaf6ca"
+        },
+        {
+          "path": "worklog/exports/recipient-20261001T084037Z-final-worklog/snapshot.json",
+          "sha256": "9f202772d2a646260641a9019ad059b750ee6d453b67ea5460ea8992e2abaa45"
+        },
+        {
+          "path": "worklog/recipient-cold-20261001T084037Z/recipe-verification.json",
+          "sha256": "99ecf6eee04e40d021d531e2ea7f0df6061bd6e0f9fac24d99ff1c66da953900"
+        }
+      ],
+      "facts": {
+        "project": "worklog-cli",
+        "scope": "Finish the tested recovery-recipe documentation and record fresh independent validation in the actual worklog.",
+        "tasks": [
+          {
+            "id": "cold-resume-validation",
+            "title": "Validate offline worklog after cold handoff recovery",
+            "status": "done"
+          },
+          {
+            "id": "cross-process-acceptance",
+            "title": "Verify persistence, isolation, update and incomplete handoff boundaries",
+            "status": "done"
+          },
+          {
+            "id": "docs-recovery-recipes",
+            "title": "Add tested recovery recipes for missing and budget-excluded required tasks",
+            "status": "done"
+          },
+          {
+            "id": "implement-cli",
+            "title": "Implement an offline multi-project worklog CLI with trusted identity mapping",
+            "status": "done"
+          },
+          {
+            "id": "offline-install",
+            "title": "Install pinned SDK wheel in isolated offline venv",
+            "status": "done"
+          }
+        ],
+        "producer_acceptance": {
+          "assertions": 41,
+          "cli_subprocesses": 35
+        },
+        "fresh_recipient_acceptance": {
+          "assertions": 41,
+          "cli_subprocesses": 35
+        },
+        "tested_readme_recipes_recorded": true,
+        "recipient_recipe_observations": [
+          {
+            "label": "missing",
+            "actual_exit": 2,
+            "missing": [
+              "never-created-required-task"
+            ],
+            "excluded": [],
+            "kind": "boundary_exercise",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "zero-budget",
+            "actual_exit": 2,
+            "missing": [],
+            "excluded": [
+              "cold-resume-validation"
+            ],
+            "kind": "boundary_exercise",
+            "additional_business_tasks": 0
+          },
+          {
+            "label": "recovered",
+            "actual_exit": 0,
+            "missing": [],
+            "excluded": [],
+            "kind": "boundary_exercise",
+            "additional_business_tasks": 0
+          }
+        ],
+        "declared_record_coverage": {
+          "requested": [
+            "offline-install",
+            "implement-cli",
+            "cross-process-acceptance",
+            "docs-recovery-recipes",
+            "cold-resume-validation"
+          ],
+          "included": [
+            "offline-install",
+            "implement-cli",
+            "cross-process-acceptance",
+            "docs-recovery-recipes",
+            "cold-resume-validation"
+          ],
+          "missing": [],
+          "excluded": [],
+          "complete": true
+        },
+        "human_review": "pending"
+      },
+      "expected_memory": {
+        "state": "completed",
+        "next": "record_completion",
+        "human_review": "pending"
+      },
+      "expected_no_memory": {
+        "state": "needs_context",
+        "next": "request_context",
+        "human_review": "pending"
+      }
+    }
+  ]
+}
