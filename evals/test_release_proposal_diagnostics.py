@@ -217,10 +217,14 @@ class ProposalDiagnosticIntegrationTests(unittest.TestCase):
         answer = answer_for(content=raw)
         with self.assertRaises(release.ProposalValidationError) as caught:
             release.parse_proposal(answer)
-        self.assertIn("json_too_deep", [item["code"] for item in caught.exception.errors])
+        # Decoder depth limits vary across Python versions. Either decoding
+        # fails safely, or the decoded array is rejected as a non-object plan.
+        allowed_errors = ([{"code": "json_too_deep"}], [{"code": "wrong_fields"}])
+        self.assertIn(caught.exception.errors, allowed_errors)
         result = self.plan(answer)
         self.assertEqual(result["validation_error"]["code"], "invalid_or_incomplete_model_plan")
-        self.assertIn("json_too_deep", [item["code"] for item in result["validation_error"]["errors"]])
+        self.assertIn(result["validation_error"]["errors"], allowed_errors)
+        code = result["validation_error"]["errors"][0]["code"]
         self.assertEqual(result["answer"]["content"], raw)
         self.assertIsNone(result["proposal"])
         with self.assertRaises(ValueError):
@@ -230,6 +234,34 @@ class ProposalDiagnosticIntegrationTests(unittest.TestCase):
         record = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(record["answer"]["content"], raw)
         self.assertEqual(record["validation_error"], result["validation_error"])
+        self.assertEqual(record["status"], "rejected")
+        summary = summarize_attempts(runs)
+        self.assertEqual(summary["rejected"], 1)
+        self.assertEqual(summary["rejection_reasons"], {code: 1})
+        self.assertEqual(summary["rejection_categories"], {"invalid_or_incomplete_model_plan": 1})
+
+    def test_decoder_recursion_error_is_normalized_and_journaled(self):
+        answer = answer_for()
+        with patch.object(release.json, "loads", side_effect=RecursionError) as decoder:
+            with self.assertRaises(release.ProposalValidationError) as caught:
+                release.parse_proposal(answer)
+            result = self.plan(answer)
+            self.assertEqual(decoder.call_count, 2)
+        # release and the journal share the stdlib json module. Restore the
+        # decoder before reading or validating the persisted journal record.
+        expected_error = {"code": "invalid_or_incomplete_model_plan",
+                          "errors": [{"code": "json_too_deep"}]}
+        self.assertEqual(caught.exception.errors, expected_error["errors"])
+        self.assertEqual(result["validation_error"], expected_error)
+        self.assertEqual(result["answer"], answer)
+        self.assertIsNone(result["proposal"])
+        with self.assertRaises(ValueError):
+            release.render_plan(result)
+        runs = self.root / "decoder-recursion-runs"
+        path = write_attempt(runs / "rejected", result)
+        record = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(record["answer"], answer)
+        self.assertEqual(record["validation_error"], expected_error)
         self.assertEqual(record["status"], "rejected")
         summary = summarize_attempts(runs)
         self.assertEqual(summary["rejected"], 1)
