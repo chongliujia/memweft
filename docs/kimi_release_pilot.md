@@ -102,7 +102,9 @@ python examples/kimi_release_agent.py evidence --github-ci --github-repo OWNER/R
 
 发布目标、交付方式从同一上下文快照的两个必需事实键取得，模型必须逐项一致；遗忘、
 缺失或无记忆模式对应 `null`。即使 `ready=false`，下一步也必须满足上述工作流顺序。
-被拒绝的原始提案会保留，应用不会自动改写成正确答案。
+提示词建议 `reason` 使用 20–40 字符的中文短句，避免内部字段名；硬性上限为 80 字符。长度按解析后的
+Unicode 字符数（Python `len`）计算，汉字、英文字母、标点和空格均计入上限。
+超限时继续拒绝提案，保留原始回答，不截断、不自动修复，也不自动重试。
 
 ## 小范围日常试用与记录
 
@@ -111,6 +113,11 @@ python examples/kimi_release_agent.py evidence --github-ci --github-repo OWNER/R
 准备快照、正常回答、应用拒绝、模型请求错误分别记录。缺少发布决策时，CLI 直接返回
 `clarify_decisions`，不消耗模型调用。记录包含证据身份、上下文、原始回答、拒绝原因、
 token 用量和时延；请求头、密钥和环境变量不会写入记录。现有目录不会被覆盖。
+
+解析或输出限制错误保留顶层分类 `validation_error.code=invalid_or_incomplete_model_plan`，
+具体原因写入 `errors`，并在 CLI JSON、试用记录及汇总中显示。例如 `reason` 长度为
+85 字符时，细节为 `{"code":"reason_too_long","field":"reason","expected":80,"actual":85}`。
+这样既保留原有分类，也能区分具体拒绝原因。
 
 ```bash
 python examples/kimi_release_agent.py summary --runs-dir data/release-pilot
@@ -125,6 +132,7 @@ python examples/kimi_release_agent.py assess 'data/release-pilot/<attempt-id>' c
 
 建议先观察恢复决策、修改目标、遗忘交付方式、选择旧包和补齐信息后再试这五类状态，
 记录实际使用中发生的案例。自动化回归属于受控验证，不能冒充外部用户试用结果。
+离线重放历史回答只能验证校验与诊断是否正确，不能证明调整提示词后模型的新回答已经改善。
 
 发布范围未知时，模型应请求补齐决策；开发者预览优先验证跨平台 CI，不要求生产业务试点。
 小范围生产目标优先安排业务试点；真实业务试点尚未接入证据服务，保持 `not_verified`。
