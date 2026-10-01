@@ -17,6 +17,34 @@ with Memory("data/memweft.db") as memory:
 ```
 
 The high-level API supports SQLite and an optional evaluated-learning workflow.
+
+### Read structured facts
+
+`user.memories()` returns fact records, not just the values passed to `remember`.
+For an explicitly keyed fact, `fact_key` identifies the entry and `value` contains
+the saved string or JSON value. Validate that value against your application's
+schema before using it:
+
+```python
+with Memory("data/worklog.db") as memory:
+    user = memory.user("developer", tenant_id="worklog:demo", agent_id="worklog")
+    user.remember({"title": "Verify installation", "status": "todo"}, key="task.setup")
+    for record in user.memories():
+        if record.get("fact_key") == "task.setup":
+            task = record["value"]
+            if (not isinstance(task, dict) or not isinstance(task.get("title"), str)
+                    or task.get("status") not in ("todo", "done")):
+                raise ValueError("Unexpected task value")
+            print(task["title"], task["status"])
+```
+
+The outer record's `status` describes the memory's lifecycle; an application task's
+status belongs inside `value`. Likewise, `context.explain()["requirements"]["complete"]`
+means the declared records were included, not that those tasks are done or that a
+person approved them. Keep these decisions separate in downstream applications.
+
+### SQLite maintenance
+
 File stores can opt into periodic background WAL maintenance with
 `Memory(path, sqlite_options={"background_checkpoint_ms": 1000})`; `AsyncMemory`
 accepts the same option. The valid interval is 100–60,000 ms. Defaults remain

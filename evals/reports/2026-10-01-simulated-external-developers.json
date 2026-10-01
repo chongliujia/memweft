@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "completed_at": "2026-10-01T10:00:08.578765+00:00",
+  "classification": "assistant_simulated_external_developers_with_actual_local_work",
+  "tested_sdk_commit": "1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d",
+  "tested_handoff_app_commit": "f1cad898c8c38a4e38adf1ee96d67f7b0fd12134",
+  "platform": "macOS arm64 / CPython 3.11.5",
+  "counts": {
+    "top_level_practical_tasks": 3,
+    "completed_tasks": 3,
+    "fresh_context_builders": 3,
+    "fresh_context_continuers": 3,
+    "successful_cold_continuations": 3,
+    "external_human_participants": 0,
+    "new_human_assessments": 0,
+    "trial_application_model_api_calls": 0
+  },
+  "counting_rule": "Subtasks, worklog entries, failure drills and repeated automated checks are not additional independent tasks or external users.",
+  "tasks": [
+    {
+      "id": "release",
+      "deliverable": "release/verify_delivery.py",
+      "producer_result": "release/result.json",
+      "recipient_result": "release/recipient-result.json",
+      "outcome": "completed",
+      "initial_install": "first_attempt_passed",
+      "producer_fault_cases": 5,
+      "cold_closeout_exit_codes": [
+        0,
+        10,
+        20
+      ],
+      "implementation_changed_by_recipient": false,
+      "timing": {
+        "onboarding_discovery_docs_through_install": 52.22,
+        "initial_install_stage_wall": 3.168,
+        "actual_work_tool_runbook_fixtures_and_handoff_wall": 510.241,
+        "first_verifier_install_stage": 2.37508,
+        "first_verifier_total": 3.325399,
+        "meaning": "Wall-clock stages include assistant authoring/reading; active individual command durations are in commands.jsonl."
+      }
+    },
+    {
+      "id": "recovery",
+      "deliverable": "recovery/backup_restore.py",
+      "producer_result": "recovery/result.json",
+      "recipient_result": "recovery/recipient-result.json",
+      "outcome": "completed",
+      "initial_install": "first_attempt_passed",
+      "producer_fault_cases": 5,
+      "restored_required_facts_and_sources": 12,
+      "historical_backup_retains_later_forgotten_data": true,
+      "implementation_changed_by_recipient": false,
+      "timing": {
+        "install_wall_seconds": 34.246286,
+        "install_command_seconds": 2.5090965409763157,
+        "implementation_wall_seconds": 405.203514
+      }
+    },
+    {
+      "id": "worklog",
+      "deliverable": "worklog/worklog.py",
+      "producer_result": "worklog/result.json",
+      "recipient_result": "worklog/recipient-result.json",
+      "outcome": "completed",
+      "initial_install": "first_attempt_passed",
+      "automated_checks_per_execution": 41,
+      "cli_processes_per_execution": 35,
+      "executions": 2,
+      "cold_recovery_recipe_exits": [
+        2,
+        2,
+        0
+      ],
+      "current_completed_work_items": 5,
+      "implementation_changed_by_recipient": false,
+      "readme_extended_by_recipient": true,
+      "timing": {
+        "install_seconds": 2.461,
+        "implementation_seconds": 433.488,
+        "handoff_preparation_seconds": 143.498
+      }
+    }
+  ],
+  "nonblocking_cold_handoff_ambiguities": [
+    {
+      "task": "recovery",
+      "issue": "Where to write completion status after restoring was unspecified.",
+      "resolution": "Recorded completion in recipient-owned restored database, preserving source and backups."
+    },
+    {
+      "task": "worklog",
+      "issue": "Instruction called both work items new, though the documentation item already existed.",
+      "resolution": "Inspected actual CLI state; updated existing item and created only missing item."
+    }
+  ],
+  "documentation_fix": {
+    "file": "python/README.md",
+    "change": "Document fact_key/value records and separate memory lifecycle, task completion and declared-fact completeness.",
+    "verification": "Executed the exact code block against the pinned installed wheel; exit 0 and expected output.",
+    "evidence": "documentation-check/result.json"
+  },
+  "observed_sdk_functional_blockers": 0,
+  "evidence_hashes": {
+    "protocol.json": "2b61d7de95be534e26cfec7861385adb7ece599130cf63122f7f08b6ae8004ae",
+    "acceptance-criteria.json": "a03b26506ea2693bdeff1caa3f9728da334253fec1268f484d2159949acc82cf",
+    "release/result.json": "97883455f1c2beb502d0955388acaef83eb6e9d9538391c075cb11acd0a7af64",
+    "release/recipient-result.json": "749f004aecd1f57b18cb69aa43cee1bad51a9fab5eba3bf2c53409e53ede0a46",
+    "recovery/result.json": "a52b489f7de6fd280b22536167b3626717168461966cf6fcd24c564fd6a6b362",
+    "recovery/recipient-result.json": "e4874b647057d8af11bbf37704884589fcc9ff6b645c000e673f018304c0d5d2",
+    "worklog/result.json": "692b1bbdd5e42c43d8d68370279cf2d6f18865d37e2c628d9fbb397bfe90c4b3",
+    "worklog/recipient-result.json": "342c9147be1bd72d0d5843813f824c1617691cb5527e9ad89b336a1a4feaf6ca",
+    "documentation-check/result.json": "abb268b6c7ef92482043bc0abd8d1b106aeb4c02d41846b2a227bdca00e758a6"
+  },
+  "limits": [
+    "Assistant simulation; no external human acceptance or production-readiness claim.",
+    "One actual host/platform; fixed locally supplied ZIP and docs, no network discovery/download/registry trial.",
+    "Fresh contexts and separate venv/databases share a host; allowed reads were set by task instructions, not a physical access barrier.",
+    "Time windows differ and include orchestration/authoring gaps; do not compare them as human onboarding times.",
+    "Trial applications made no model API calls; assistant orchestration cost is not measured.",
+    "Hash consistency is not signed publisher authenticity."
+  ]
+}
