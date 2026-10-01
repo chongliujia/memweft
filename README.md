@@ -94,8 +94,10 @@ Model calls are opt-in and separate from the memory SDK. The
 estimates and the query-free recall limitation.
 The [release-planning pilot](docs/kimi_release_pilot.md) uses this repository's
 actual package evidence and persistent decisions to draft the next release task.
-It can now explicitly collect commit-bound GitHub Actions evidence without a
-model call. The [frozen 20-task comparison](docs/workflow_comparison.md) compares
+It can explicitly collect commit-bound GitHub Actions evidence without a
+model call, check a selected artifact directory, validate plans against saved
+decisions, and record attempts separately from human outcome reviews.
+The [frozen 20-task comparison](docs/workflow_comparison.md) compares
 full history, a deterministic state summary and MemWeft retrieval on equal source
 events. For recall, pass the current task as `query`; `context.explain().warnings`
 reports `unranked_fact_limit` when missing query terms leave facts excluded by
