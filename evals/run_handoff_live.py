@@ -115,6 +115,8 @@ def prepare(evidence_root, output, suite_path=SUITE):
     dump(output / "metadata.json", {"model": MODEL, "sdk_version": version("memweft"),
          "native_sha256": sha(Path(native.__file__)), "suite_sha256": sha(suite_path),
          "runner_sha256": sha(Path(__file__)), "client_sha256": sha(ROOT / "examples/kimi_memory.py"),
+         "source_sha256": {relative: sha(ROOT / relative)
+                           for relative in ("examples/kimi_memory.py", "examples/handoff_app/kimi_client.py")},
          "started_at": datetime.now(timezone.utc).isoformat(), "max_calls": 12, "max_output_tokens": 256,
          "thinking": "disabled", "retries": 0, "human_assessments": 0,
          "classification": "historical actual-work observations replayed; no new external customer trial",

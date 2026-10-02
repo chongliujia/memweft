@@ -36,7 +36,8 @@ class WorkflowReportTests(unittest.TestCase):
             "memory_max_facts": 8, "memory_estimated_token_budget": 1200, "retries": 0,
             "native_sha256": "recorded-native-digest", "source_sha256": {},
         }
-        for relative in ("evals/run_workflow_comparison.py", "examples/kimi_memory.py", "evals/output_contract.py"):
+        for relative in ("evals/run_workflow_comparison.py", "examples/kimi_memory.py",
+                         "examples/handoff_app/kimi_client.py", "evals/output_contract.py"):
             source = ROOT / relative
             target = self.run / "sources" / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -163,6 +164,23 @@ class WorkflowReportTests(unittest.TestCase):
             build_report(self.run)
         (self.run / "suite.json").write_bytes(raw)
         (self.run / "sources/evals/output_contract.py").write_text("altered")
+        with self.assertRaisesRegex(ValueError, "Source SHA mismatch"):
+            build_report(self.run)
+
+    def test_shared_client_is_required_when_frozen_wrapper_imports_it(self):
+        self.metadata["source_sha256"].pop("examples/handoff_app/kimi_client.py")
+        dump(self.run / "metadata.json", self.metadata)
+        with self.assertRaisesRegex(ValueError, "shared client source provenance is missing"):
+            build_report(self.run)
+        # Historical monolithic client snapshots do not gain a retroactive dependency.
+        wrapper = self.run / "sources/examples/kimi_memory.py"
+        wrapper.write_text("class KimiClient: pass\n", encoding="utf-8")
+        self.metadata["source_sha256"]["examples/kimi_memory.py"] = sha256(wrapper)
+        dump(self.run / "metadata.json", self.metadata)
+        self.assertEqual(build_report(self.run)["summary"]["completed_calls"], 60)
+
+    def test_shared_client_snapshot_tampering_is_rejected(self):
+        (self.run / "sources/examples/handoff_app/kimi_client.py").write_text("altered client")
         with self.assertRaisesRegex(ValueError, "Source SHA mismatch"):
             build_report(self.run)
 

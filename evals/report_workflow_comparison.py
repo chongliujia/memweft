@@ -6,6 +6,7 @@ This is an offline verifier. It never loads the native SDK or calls a model.
 from __future__ import annotations
 
 import argparse
+import ast
 from contextlib import ExitStack
 import hashlib
 import json
@@ -183,6 +184,15 @@ def verify_sources(run, metadata):
         require(path.is_file() and sha256(path) == digest, f"Source SHA mismatch or missing source: {relative}")
         verified[relative] = {"sha256": digest, "location": "run/sources" if path == archived else "current_checkout",
                               "recorded_before_calls": relative in original}
+    wrapper_name = "examples/kimi_memory.py"
+    if wrapper_name in verified:
+        archived = safe_relative(run / "sources", wrapper_name)
+        wrapper_path = archived if archived.is_file() else safe_relative(ROOT, wrapper_name)
+        wrapper = ast.parse(wrapper_path.read_text(encoding="utf-8"))
+        if any(isinstance(node, ast.ImportFrom) and node.module == "handoff_app.kimi_client"
+               for node in ast.walk(wrapper)):
+            require("examples/handoff_app/kimi_client.py" in original,
+                    "Required shared client source provenance is missing before calls")
     contract_hash = hashes.get("evals/output_contract.py")
     require(contract_hash == sha256(Path(__file__).with_name("output_contract.py")),
             "Report verifier's output contract differs from the run; use the matching checkout")

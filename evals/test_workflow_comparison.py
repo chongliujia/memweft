@@ -74,7 +74,8 @@ class WorkflowComparisonTests(unittest.TestCase):
                 self.assertEqual((args.output / "suite.json").read_bytes(), payload)
                 metadata = json.loads((args.output / "metadata.json").read_text())
                 self.assertEqual(metadata["suite_sha256"], hashlib.sha256(payload).hexdigest())
-                for required in ("evals/run_kimi.py", "evals/run_local.py", "python/src/memweft/__init__.py"):
+                for required in ("evals/run_kimi.py", "evals/run_local.py", "python/src/memweft/__init__.py",
+                                 "examples/handoff_app/kimi_client.py"):
                     self.assertIn(required, metadata["source_sha256"])
                 for relative, digest in metadata["source_sha256"].items():
                     self.assertEqual(hashlib.sha256((args.output / "sources" / relative).read_bytes()).hexdigest(), digest)

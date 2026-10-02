@@ -60,3 +60,87 @@ Windows 使用 `.venv\Scripts\python.exe`；示例 shell 命令使用 Unix 路�
 记录固定 SDK wheel 的提交和哈希、应用源码哈希、接入起止时间、遇到的阻碍、各次输出及实际结果。
 只有使用者阅读具体交接并给出评价后，才能写入人工验收；自动测试和助手复核都不代替人类。
 本应用不自动创建人工评估，也不把完整性检查等同于生产业务试点通过。
+
+## 配置项目并继续真实任务
+
+把整个 `handoff_app` 目录复制到仓库外；新增模块和 `handoff.py` 一起交付。
+原有 `--db --project` 离线命令继续可用。配置模式默认读取当前目录的 `handoff.json`，
+也可在子命令前用 `--config /path/to/handoff.json` 选择项目。
+
+先检查环境，再初始化一次。`doctor` 在 SDK 缺失时也能运行，检查 Python、原生 SDK 的临时数据库
+读写、数据库父目录及可选 Kimi 凭据；不会访问模型或打开项目数据库。它不认证安装包发布者。
+
+```bash
+.venv/bin/python handoff.py doctor
+.venv/bin/python handoff.py --project demo init --require goal
+.venv/bin/python handoff.py remember goal '完成项目文档链接检查工具' --source '维护者确定的任务'
+```
+
+配置绑定 `project`、`user`、`database`、`workspace`、`runs_dir` 和 `required_facts`。
+路径相对于配置文件所在目录，不受执行命令的工作目录影响；默认数据库为 `data/handoff.db`，
+工作目录为 `.`，记录目录为 `runs/`。可移动整个项目目录。配置不含凭据，也不允许命令临时
+覆盖数据库或身份。`init` 拒绝覆盖已有配置；需要调整时显式编辑配置。
+
+将你信任的验收逻辑保存为 `verify.py`，再登记任务。验收脚本应在失败时返回非零退出码，
+并且不能修改待验收交付文件。例如，脚本可以用 `subprocess` 调用工具并检查真实输入和异常输入。
+登记时冻结验收脚本哈希，交付文件可以在之后创建：
+
+```bash
+.venv/bin/python handoff.py task add links '实现文档链接检查工具' --verify verify.py --artifact solution.py
+.venv/bin/python handoff.py resume '接着完成工具' --task links
+```
+
+`resume` 从 SDK 重新读取配置必需记录和当前任务，默认生成新的 `runs/resume-*/`。
+`--require` 只能追加必需记录；`--max-facts` 和 `--max-tokens` 同时覆盖事实与任务记录。
+任务数量较多时用 `--task ID` 聚焦，或增加上下文预算。缺失与预算排除分别显示，退出码为 2。
+任务 ID 已存在时 `task add` 拒绝创建第二份；`task list` 显示当前版本和验收证据是否仍匹配。
+
+### 可选 Kimi 建议
+
+```bash
+.venv/bin/python handoff.py doctor --model kimi
+# 使用 MOONSHOT_API_KEY 环境变量，或以下隐藏输入；不保存密钥。
+.venv/bin/python handoff.py resume '下一步应该做什么？' --task links --model kimi --prompt-key
+```
+
+复用 Kimi K2.6 客户端，关闭思考，每次最多 256 输出 tokens，失败不自动重试。
+只发送选中的事实（包括来源和记录时间）、任务 ID/标题/状态/版本/验收状态、由应用生成的带版本完成命令、项目标识和问题；
+不发送数据库路径、完整配置、文件内容或验收日志。事实中主动记录的内容会发送给模型。
+必需信息不完整、没有任务、任务证据已变或选中任务全部完成时在本地返回，不产生模型请求。
+`doctor --model kimi` 只检查环境变量是否存在；使用隐藏输入的用户可以在 `resume` 时提供凭据。
+
+模型只能为一个当前待办任务返回 `{task_id, next_step, reason}` 建议。结构错误、过长、截断、
+引用已完成任务或运行期间状态改变均不能成为有效提案。自然语言建议仍需使用者判断，结构校验
+不证明建议正确。建议不执行命令，也不修改任务完成状态。
+
+每次保存 `snapshot.json`、`model-response.json`、`planning.json`、`attempt.json` 和 `handoff.md`：输入快照、原始响应、
+校验结果、用量及模型时延都可复核。`model-response.json` 是尚未复核当前状态的原始候选；只有最终 `planning.json`/`attempt.json` 记录有效或撤销的结果。请求失败后的未知用量不会记为零。只有明确提供单价后才能
+估算费用；这些记录本身不是账单。全部完成时的零请求是应用状态检查，不是新增的模型测试。
+
+### 验证、写回和再次接手
+
+按建议完成实际工作后，在新进程运行：
+
+```bash
+.venv/bin/python handoff.py task complete links --revision 1
+.venv/bin/python handoff.py resume '还有什么需要做？' --task links --model kimi
+```
+
+`complete` 仅运行登记时绑定的本地 Python 验收脚本，使用当前解释器与项目工作目录。
+这是你主动登记并信任的代码，运行权限等同于当前进程；它应自行管理启动的子进程。
+超时默认 60 秒，可用 `--timeout` 调整。脚本返回 0、交付文件哈希稳定、配置和项目记录未变，
+应用才先保存验收证据，再写回 `done` 和新版本。验收失败保留日志，任务继续待办，退出码为 2。
+输出明确标注同一数据库与 scope 的写回位置；该状态不是人工批准。
+
+重复完成已完成任务不会重跑脚本；过期 `--revision` 被拒绝。重新恢复时会检查冻结验收脚本、
+交付文件和验收回执的哈希。交付文件改变后须先检查原因，再明确重新打开任务：
+
+```bash
+.venv/bin/python handoff.py task reopen links --revision 2 --reason '需求变更，重新验收'
+.venv/bin/python handoff.py task complete links --revision 3
+```
+
+本应用面向一位维护者的小项目，每个 scope 最多 50 项任务。配置模式的 CLI 使用数据库旁的
+互斥文件协调写操作；这不提供 SDK 私有事实的原子 CAS，也不保护绕过本应用的直接写入。
+崩溃可能留下 `.handoff-lock`；先确认相关进程已结束，再移除该锁文件。验收结果由本地文件
+支持，未签名；验收脚本的覆盖度决定完成判断的可信范围。没有长期并发服务可靠性承诺。

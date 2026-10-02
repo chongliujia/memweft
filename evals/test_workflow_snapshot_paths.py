@@ -22,6 +22,7 @@ class SnapshotPathTests(unittest.TestCase):
                 with patch.object(Path, "relative_to", windows_relative):
                     hashes = snapshot(output)
                 self.assertIn("evals/run_local.py", hashes)
+                self.assertIn("examples/handoff_app/kimi_client.py", hashes)
                 self.assertIn("python/src/memweft/__init__.py", hashes)
                 for relative, digest in hashes.items():
                     self.assertNotIn("\\", relative)

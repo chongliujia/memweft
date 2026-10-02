@@ -79,6 +79,8 @@ class KimiTests(unittest.TestCase):
                  patch("run_kimi.time.sleep") as sleep, patch("builtins.print"):
                 summary = run(args, client)
             self.assertEqual(client.complete.call_count, 26)
+            metadata = json.loads((args.output / "metadata.json").read_text())
+            self.assertIn("examples/handoff_app/kimi_client.py", metadata["source_sha256"])
             self.assertEqual(summary["calls"], 26)
             self.assertEqual(sleep.call_count, 25)
             self.assertTrue(all(call.args == (16,) for call in sleep.call_args_list))

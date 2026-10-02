@@ -322,6 +322,8 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 - **Platform validation:** [run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) passed nine Python 3.10–3.12 jobs and three Rust/Node 20 jobs on Ubuntu 24.04 x64, macOS 15 arm64 and Windows 2025 x64 for commit `1ee6b3b`. Each SDK package was installed and exercised outside the checkout. These runner results do not cover other architectures, Linux libc variants or later commits. Performance measurements remain separate Linux and macOS arm64 experiments.
 - **Database compatibility:** opening a legacy/v1/v2 database with this build upgrades its recall index to v3. Upgrade all processes together and retain a verified pre-upgrade backup; switching only the executable back is unsupported. [Upgrade and recovery](docs/upgrade_v3.md)
 
+The [standalone handoff app](examples/handoff_app/README.md#配置项目并继续真实任务) now supports portable project configuration, environment diagnostics, current-task Kimi proposals and verified completion writeback; [three new utility tasks were exercised](evals/reports/2026-10-02-project-continuation.md) with real Kimi calls.
+
 ## Roadmap
 
 | Stage | Focus |

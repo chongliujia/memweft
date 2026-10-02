@@ -64,6 +64,8 @@ class HandoffLiveTests(unittest.TestCase):
             output = root / "out"
             rows = prepare(root, output, suite)
             self.assertEqual(len(rows), 12)
+            metadata = json.loads((output / "metadata.json").read_text())
+            self.assertIn("examples/handoff_app/kimi_client.py", metadata["source_sha256"])
             for case in cases:
                 context = json.loads((output / "contexts" / (case["id"] + ".json")).read_text())
                 self.assertEqual(context["memories"][0]["value"], case["facts"])

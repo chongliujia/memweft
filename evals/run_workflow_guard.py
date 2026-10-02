@@ -131,7 +131,7 @@ def validate_suite(suite):
 
 
 def snapshot_sources(output):
-    paths = [Path(__file__).resolve(), ROOT / "examples/kimi_memory.py",
+    paths = [Path(__file__).resolve(), ROOT / "examples/kimi_memory.py", ROOT / "examples/handoff_app/kimi_client.py",
              ROOT / "examples/guarded_workflow_agent.py", ROOT / "examples/workflow_guard.py", ROOT / "evals/run_local.py"]
     paths += sorted((ROOT / "python/src/memweft").glob("*.py"))
     paths += sorted((ROOT / "crates").glob("*/src/**/*.rs"))

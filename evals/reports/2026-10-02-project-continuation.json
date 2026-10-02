@@ -1,0 +1,184 @@
+{
+  "date": "2026-10-02",
+  "new_tasks": 3,
+  "completed_tasks": [
+    {
+      "id": "doc-links",
+      "status": "done",
+      "revision": 2,
+      "solution_sha256": "ad8c8c1702ce2c522b10c739c2dd7b54343aa2488093a89dc2c2680d26f7738f",
+      "evidence": "runs/verify-doc-links-20261002T031225-2391a6e130e0/result.json",
+      "after_resume": "completed",
+      "after_model_calls": 0,
+      "repeat_completion": "already_completed"
+    },
+    {
+      "id": "api-ledger",
+      "status": "done",
+      "revision": 2,
+      "solution_sha256": "a53f7a493041157637ec88ebf0ca35c5c7d5d68fb3989798ba2b187809d43c48",
+      "evidence": "runs/verify-api-ledger-20261002T031225-34dca875123e/result.json",
+      "after_resume": "completed",
+      "after_model_calls": 0,
+      "repeat_completion": "already_completed"
+    },
+    {
+      "id": "handoff-audit",
+      "status": "done",
+      "revision": 2,
+      "solution_sha256": "8e3b5b4aa4261b251b8039ed5eb65989e7470df9e8585c99c3984aed29a7e3cc",
+      "evidence": "runs/verify-handoff-audit-20261002T031226-46b2df5b7d7e/result.json",
+      "after_resume": "completed",
+      "after_model_calls": 0,
+      "repeat_completion": "already_completed"
+    }
+  ],
+  "human_reviews": 0,
+  "external_humans": 0,
+  "frozen_files_verified": 60,
+  "api_calls": 7,
+  "unique_response_ids": 7,
+  "request_errors": 0,
+  "structural_rejections": 0,
+  "semantic_issue_observed": 1,
+  "correction_retests": 1,
+  "correction_retest_observation": "Full current-revision completion command; no undeclared screenshot requirement in this one response.",
+  "usage": {
+    "prompt_tokens": 2933,
+    "completion_tokens": 379,
+    "total_tokens": 3312
+  },
+  "latency_ms": {
+    "median": 1948.922,
+    "min": 1751.556,
+    "max": 2765.046
+  },
+  "estimated_cny_without_cache_discount": 0.0292975,
+  "pricing_reference": "pricing.json",
+  "requests": [
+    {
+      "task": "doc-links",
+      "stage": "kimi-before",
+      "response_id": "chatcmpl-6abf1deef4ebd047c162d2c1",
+      "usage": {
+        "prompt_tokens": 332,
+        "completion_tokens": 54,
+        "total_tokens": 386,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 2765.046,
+      "attempt_sha256": "64778ca1824781224d7918ea7faa469a93e2bc8af43cf8a47bc3eddc89bc5946"
+    },
+    {
+      "task": "doc-links",
+      "stage": "kimi-checkpoint",
+      "response_id": "chatcmpl-6abf1fb3edfcd1ab31b9b061",
+      "usage": {
+        "prompt_tokens": 434,
+        "completion_tokens": 51,
+        "total_tokens": 485,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1904.776,
+      "attempt_sha256": "550a6eb70b9b5ea786fab51160aedf03f67ad001dfd85405d52dda60ff5f3b80"
+    },
+    {
+      "task": "api-ledger",
+      "stage": "kimi-before",
+      "response_id": "chatcmpl-6abf1e020feb1fff3fe4358d",
+      "usage": {
+        "prompt_tokens": 342,
+        "completion_tokens": 48,
+        "total_tokens": 390,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1777.811,
+      "attempt_sha256": "ad1eca11a9a28a79eb6546d4bcdb951b55228ed3ef7b9e572ebf824bfaa85962"
+    },
+    {
+      "task": "api-ledger",
+      "stage": "kimi-checkpoint",
+      "response_id": "chatcmpl-6abf1fc88db2c53a7772c150",
+      "usage": {
+        "prompt_tokens": 446,
+        "completion_tokens": 51,
+        "total_tokens": 497,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1948.922,
+      "attempt_sha256": "6ef5e6da41a4ada2a95699805a72cff2d6b57cb7e6407f3b8c886c14611a29cc"
+    },
+    {
+      "task": "handoff-audit",
+      "stage": "kimi-before",
+      "response_id": "chatcmpl-6abf1e17f7a57a24b754c968",
+      "usage": {
+        "prompt_tokens": 350,
+        "completion_tokens": 48,
+        "total_tokens": 398,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 1751.556,
+      "attempt_sha256": "9d73ee9fe3f5a686f8f835c96500d71694b7087239b6fc92859ad0ca93ad17f4"
+    },
+    {
+      "task": "handoff-audit",
+      "stage": "kimi-checkpoint",
+      "response_id": "chatcmpl-6abf1fddf86868c775a18cb8",
+      "usage": {
+        "prompt_tokens": 459,
+        "completion_tokens": 67,
+        "total_tokens": 526,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 2688.757,
+      "attempt_sha256": "93caf5c930b0498047a32ea6c54082c41f42541fa524832d55c4674c0a01a1c8"
+    },
+    {
+      "task": "handoff-audit",
+      "stage": "kimi-refined",
+      "response_id": "chatcmpl-6abf2102c3010733c44f45be",
+      "usage": {
+        "prompt_tokens": 570,
+        "completion_tokens": 60,
+        "total_tokens": 630,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1
+        }
+      },
+      "latency_ms": 2304.642,
+      "attempt_sha256": "23594ccd5fe45c46ce9531c63ff532c778d0b5affb39fc3110a84f79a7183595"
+    }
+  ],
+  "scope": "Assistant-built new utilities, real historical data as input, seven actual Kimi proposals; mechanical completion checks and assistant review do not constitute human acceptance.",
+  "evidence_root": "data/continuation-pilot-2026-10-02",
+  "offline_tests": {
+    "project_environment": 244,
+    "clean_wheel_handoff": 39,
+    "new_continuation": 14,
+    "new_planner": 10
+  },
+  "evidence_sha256": {
+    "verification.json": "1f97a5d1195857d9ec1b8c0253ea9208dc373807379ba5b1f1050610d550325e",
+    "frozen-manifest.json": "1fe78b47b43f48ff832acbc736c9aa3b4463638b346568fbc05a691ea3dff9a3",
+    "installation.json": "2d3006672d97454f30f5f20cdb098d0437d845b33cc70dcd7d07b12a5e62d53b",
+    "offline-full.log": "01c3239aa4b688be93ce64077151287a725fa76e2317e70f3756ba7c5a7070c4",
+    "offline-wheel-handoff.log": "2463a4a144499a1e7bb608aa0c61cfc4e8b6fa535afc4d40c1ec2d17790c481e",
+    "pricing.json": "1158c6eb0a2e12f223e5e655f467db5b38fa40db83c0cd565b4c56e6a2a1c9ab",
+    "semantic-review-before-fix.json": "b272c5cab894c2ee7853afba8be169802bde8348f2b1f0b9609a1db4b9ecb036",
+    "completion-commands.json": "0f565e025b6c8ed32c7dd8282189ff909ac9ea2eb251743724cafc94217b01ab"
+  },
+  "archive": "dist/memweft-continuation-2026-10-02.zip"
+}

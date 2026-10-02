@@ -40,7 +40,7 @@ class WorkflowGuardReportTests(unittest.TestCase):
                         "output_cny_per_million": 27, "cache_discount": False,
                         "source": "https://platform.kimi.com/docs/pricing/chat"}}
         for relative in ("evals/run_workflow_guard.py", "examples/workflow_guard.py", "examples/guarded_workflow_agent.py",
-                         "examples/kimi_memory.py", "evals/run_local.py"):
+                         "examples/kimi_memory.py", "examples/handoff_app/kimi_client.py", "evals/run_local.py"):
             path = self.run / "sources" / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / relative, path)
@@ -213,6 +213,23 @@ class WorkflowGuardReportTests(unittest.TestCase):
             build_report(self.run)
         (self.run / "suite.json").write_bytes(saved)
         (self.run / "sources/examples/workflow_guard.py").write_text("altered rules")
+        with self.assertRaisesRegex(ValueError, "Source snapshot SHA mismatch"):
+            build_report(self.run)
+
+    def test_shared_client_is_required_when_frozen_wrapper_imports_it(self):
+        self.metadata["source_sha256"].pop("examples/handoff_app/kimi_client.py")
+        dump(self.run / "metadata.json", self.metadata)
+        with self.assertRaisesRegex(ValueError, "shared client source provenance is missing"):
+            build_report(self.run)
+        # Old monolithic client snapshots remain valid without a new dependency.
+        wrapper = self.run / "sources/examples/kimi_memory.py"
+        wrapper.write_text("class KimiClient: pass\n", encoding="utf-8")
+        self.metadata["source_sha256"]["examples/kimi_memory.py"] = digest(wrapper)
+        dump(self.run / "metadata.json", self.metadata)
+        self.assertEqual(build_report(self.run)["summary"]["completed_calls"], 32)
+
+    def test_shared_client_snapshot_tampering_is_rejected(self):
+        (self.run / "sources/examples/handoff_app/kimi_client.py").write_text("altered client")
         with self.assertRaisesRegex(ValueError, "Source snapshot SHA mismatch"):
             build_report(self.run)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from contextlib import ExitStack
 import hashlib
 import json
@@ -200,6 +201,11 @@ def verify_sources(run, metadata):
         path = (root / relative).resolve()
         require(path.is_relative_to(root) and path.is_file() and digest(path) == expected,
                 f"Source snapshot SHA mismatch or missing: {relative}")
+    wrapper = ast.parse((root / "examples/kimi_memory.py").read_text(encoding="utf-8"))
+    if any(isinstance(node, ast.ImportFrom) and node.module == "handoff_app.kimi_client"
+           for node in ast.walk(wrapper)):
+        require("examples/handoff_app/kimi_client.py" in hashes,
+                "Required shared client source provenance is missing")
     require(digest(Path(workflow_guard.__file__)) == hashes["examples/workflow_guard.py"],
             "Loaded workflow rules differ from frozen rules; use matching source")
     return hashes

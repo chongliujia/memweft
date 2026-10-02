@@ -89,6 +89,8 @@ def run(args, client=None):
         "suite": suite["version"], "suite_sha256": hashlib.sha256(SUITE.read_bytes()).hexdigest(),
         "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "client_sha256": hashlib.sha256((ROOT / "examples/kimi_memory.py").read_bytes()).hexdigest(),
+        "source_sha256": {relative: hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
+                          for relative in ("examples/kimi_memory.py", "examples/handoff_app/kimi_client.py")},
         "native_sha256": hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
         "started_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "max_calls": len(suite["cases"]) * 2, "max_output_tokens_per_call": 128,

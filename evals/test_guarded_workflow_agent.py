@@ -77,6 +77,7 @@ class GuardedWorkflowTests(unittest.TestCase):
                 self.assertEqual(len((args.output / "inputs.jsonl").read_text().splitlines()), 16)
                 metadata = json.loads((args.output / "metadata.json").read_text())
                 self.assertIn("examples/workflow_guard.py", metadata["source_sha256"])
+                self.assertIn("examples/handoff_app/kimi_client.py", metadata["source_sha256"])
                 self.assertTrue((args.output / "sources/examples/workflow_guard.py").is_file())
                 return {"content": "{}", "finish_reason": "stop", "latency_ms": 1,
                         "usage": {"prompt_tokens": 100, "completion_tokens": 10, "total_tokens": 110}}

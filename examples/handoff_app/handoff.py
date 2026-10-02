@@ -1,4 +1,4 @@
-"""Standalone, offline project handoff application using only the public SDK."""
+"""Standalone project handoff and verified continuation using the public SDK."""
 from __future__ import annotations
 
 import argparse
@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 import re
 
-from memweft import Memory
 
 PREFIX = "handoff."
 
@@ -87,10 +86,33 @@ def render(snapshot):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--db", type=Path, default=Path("data/handoff.db"))
-    parser.add_argument("--project", type=identifier, required=True)
-    parser.add_argument("--user", type=identifier, default="maintainer")
+    parser.add_argument("--config", type=Path, help="Project configuration; defaults to ./handoff.json if present")
+    parser.add_argument("--db", type=Path)
+    parser.add_argument("--project", type=identifier)
+    parser.add_argument("--user", type=identifier)
     commands = parser.add_subparsers(dest="command", required=True)
+    init = commands.add_parser("init", help="Create a portable project configuration")
+    init.add_argument("--workspace", default=".")
+    init.add_argument("--runs-dir", default="runs")
+    init.add_argument("--require", type=identifier, action="append", default=[])
+    doctor = commands.add_parser("doctor", help="Check interpreter, installed SDK and credentials without an API call")
+    doctor.add_argument("--model", choices=("none", "kimi"), default="none")
+    task = commands.add_parser("task", help="Register work and verify completion")
+    actions = task.add_subparsers(dest="task_command", required=True)
+    add = actions.add_parser("add")
+    add.add_argument("id", type=identifier)
+    add.add_argument("title")
+    add.add_argument("--verify", required=True, help="Trusted Python acceptance script relative to workspace")
+    add.add_argument("--artifact", action="append", required=True, help="Delivery file relative to workspace")
+    actions.add_parser("list")
+    complete = actions.add_parser("complete")
+    complete.add_argument("id", type=identifier)
+    complete.add_argument("--revision", type=nonnegative, required=True)
+    complete.add_argument("--timeout", type=nonnegative, default=60)
+    reopen = actions.add_parser("reopen")
+    reopen.add_argument("id", type=identifier)
+    reopen.add_argument("--revision", type=nonnegative, required=True)
+    reopen.add_argument("--reason", required=True)
     remember = commands.add_parser("remember", help="Save or replace an explicit project fact")
     remember.add_argument("key", type=identifier)
     remember.add_argument("value")
@@ -99,12 +121,30 @@ def main(argv=None):
     forget.add_argument("key", type=identifier)
     commands.add_parser("list", help="List saved facts in this project/user scope")
     resume = commands.add_parser("resume", help="Restore a task in a new process and export a handoff")
-    resume.add_argument("question")
+    resume.add_argument("question", nargs="?", default="继续当前项目任务")
     resume.add_argument("--require", type=identifier, action="append", default=[])
     resume.add_argument("--max-facts", type=nonnegative, default=12)
     resume.add_argument("--max-tokens", type=nonnegative, default=1200)
-    resume.add_argument("--out", type=Path, required=True, help="New output directory; never overwritten")
+    resume.add_argument("--out", type=Path, help="New output directory; configured projects default to runs/")
+    resume.add_argument("--model", choices=("none", "kimi"), default="none")
+    resume.add_argument("--prompt-key", action="store_true")
+    resume.add_argument("--task", type=identifier)
     args = parser.parse_args(argv)
+    configured = args.config is not None or Path("handoff.json").exists() or args.command in ("init", "doctor", "task")
+    if configured:
+        from continuation import run
+        result, code = run(args, parser)
+        print(json.dumps(result, ensure_ascii=True, indent=2))
+        return code
+    if not args.project:
+        parser.error("Use --project for legacy mode, or init a configured project")
+    if args.command == "resume" and (args.model != "none" or args.prompt_key or args.task):
+        parser.error("Kimi and task continuation require a project config; run init first")
+    if args.command == "resume" and not args.out:
+        parser.error("Legacy resume requires --out; configured projects generate it automatically")
+    args.db = args.db or Path("data/handoff.db")
+    args.user = args.user or "maintainer"
+    from memweft import Memory
     # Reject existing outputs before opening the database, including broken links.
     if args.command == "resume" and (args.out.exists() or args.out.is_symlink()):
         parser.error("Output already exists; choose a new --out directory")
@@ -150,5 +190,7 @@ def main(argv=None):
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
+    except ImportError:
+        raise SystemExit("MemWeft SDK is unavailable; run doctor and install the matching wheel.") from None
     except (OSError, ValueError, RuntimeError) as error:
         raise SystemExit(str(error)) from None

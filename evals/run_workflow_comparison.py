@@ -130,7 +130,7 @@ def summarize(rows):
 def snapshot_sources(output):
     # Archive the scoring dependencies and Python wrapper as well as the runner.
     # These are selected source snapshots, not proof of the native build's origin.
-    paths = [Path(__file__).resolve(), ROOT / "examples/kimi_memory.py",
+    paths = [Path(__file__).resolve(), ROOT / "examples/kimi_memory.py", ROOT / "examples/handoff_app/kimi_client.py",
              ROOT / "evals/output_contract.py", ROOT / "evals/run_kimi.py",
              ROOT / "evals/run_local.py", ROOT / "crates/memweft/src/lib.rs"]
     paths.extend(sorted((ROOT / "python/src/memweft").glob("*.py")))
