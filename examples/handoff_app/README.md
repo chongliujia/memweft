@@ -1,10 +1,14 @@
 # 独立 Python 项目交接应用
 
-一个只依赖 MemWeft **公开 Python SDK** 的离线下游应用。保存明确的项目事实及其来源，
-关闭进程后恢复任务，并将缺失或因预算排除的必需记录明确显示出来。没有模型调用、API key、
-仓库模块导入或后台任务；它直接展示已保存记录，不自动推断事实或替使用者判断任务成功。
+一个依赖 MemWeft **公开 Python SDK** 的独立下游应用，默认离线使用。保存明确的项目事实及其来源，
+关闭进程后恢复任务，并显示缺失或因预算排除的必需记录。配置项目后可显式启用 Kimi 续接建议，
+并通过已登记的验收脚本写回任务完成状态。模型建议和机器验收分别记录，人工复核保持待进行。
 
 ## 在仓库外运行
+
+仓库中的 `examples/handoff_app/` 与交付包中的 `app/` 是同一应用目录；请复制整个目录。
+下文的 `handoff.py` 命令从应用目录运行。若从交付包根目录执行，脚本路径应为 `app/handoff.py`，
+并留意 `init` 默认在当前工作目录创建 `handoff.json`。
 
 选择支持你的 Python/操作系统/CPU 的固定提交 wheel。已核验的参考来源是
 [提交 1ee6b3b 的 CI](https://github.com/chongliujia/memweft/actions/runs/36822104764)，
@@ -23,6 +27,32 @@ python3.11 -m venv .venv
 
 不设置 `PYTHONPATH`，不需要 Rust 或从源码安装 MemWeft。应用及数据库位置由调用者选择。
 Windows 使用 `.venv\Scripts\python.exe`；示例 shell 命令使用 Unix 路径格式。
+
+### 在自己的工具中读取 SDK 记录
+
+`user.memories()` 返回事实记录：显式指定的 key 在 `fact_key`，保存的数据在 `value`。
+应用自己的来源说明可以随业务值一起保存；它不是 SDK 自动核验的来源。以下示例使用独立数据库，
+可在已安装 wheel 的环境运行，不需要查询包元数据或阅读 SDK 实现：
+
+```python
+from memweft import Memory
+
+with Memory("decisions-demo.db") as memory:
+    user = memory.user("maintainer", tenant_id="decision-log:demo", agent_id="decision-log")
+    user.remember({"value": "Use SQLite", "source": "Demo decision"}, key="storage")
+    for fact in user.memories():
+        if fact.get("fact_key") == "storage":
+            value = fact["value"]
+            if not isinstance(value, dict) or not all(
+                isinstance(value.get(key), str) for key in ("value", "source")
+            ):
+                raise ValueError("Unexpected decision shape")
+            print(value["value"], value["source"])
+```
+
+再次调用同一 scope、同一 key 的 `remember` 会替换整个 `value`；更新时要同时传入需要保留的
+业务值和来源。`user.forget("storage")` 返回是否删除了记录，关闭并重新打开数据库后仍然生效。
+scope 用于本地数据分区；调用者仍需负责身份绑定和授权。
 
 ## 保存、恢复、修改和遗忘
 
@@ -63,16 +93,18 @@ Windows 使用 `.venv\Scripts\python.exe`；示例 shell 命令使用 Unix 路�
 
 ## 配置项目并继续真实任务
 
-把整个 `handoff_app` 目录复制到仓库外；新增模块和 `handoff.py` 一起交付。
+把整个应用目录复制到仓库外；新增模块和 `handoff.py` 一起交付。
 原有 `--db --project` 离线命令继续可用。配置模式默认读取当前目录的 `handoff.json`，
 也可在子命令前用 `--config /path/to/handoff.json` 选择项目。
 
-先检查环境，再初始化一次。`doctor` 在 SDK 缺失时也能运行，检查 Python、原生 SDK 的临时数据库
+首次接入按“环境检查 → 初始化 → 按配置检查”的顺序进行：创建配置前先运行不带 `--config` 的
+`doctor`；显式指定的配置文件必须已经存在，否则会提示先运行 `init`。`doctor` 在 SDK 缺失时也能运行，检查 Python、原生 SDK 的临时数据库
 读写、数据库父目录及可选 Kimi 凭据；不会访问模型或打开项目数据库。它不认证安装包发布者。
 
 ```bash
 .venv/bin/python handoff.py doctor
 .venv/bin/python handoff.py --project demo init --require goal
+.venv/bin/python handoff.py --config handoff.json doctor
 .venv/bin/python handoff.py remember goal '完成项目文档链接检查工具' --source '维护者确定的任务'
 ```
 

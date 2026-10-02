@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "study_type": "fresh-context assistant simulation of an external developer",
+  "external_humans": 0,
+  "human_reviews": 0,
+  "human_review_status": "pending",
+  "new_business_tasks": 1,
+  "participants": {
+    "producer": "fresh agent; fork_turns=none",
+    "successor": "different fresh agent; fork_turns=none",
+    "isolation_limit": "Instructions restrict reading; no independent OS account sandbox. Coordinator prepared task, verifier and orchestration."
+  },
+  "original_package": {
+    "package": "dist/memweft-continuation-2026-10-02.zip",
+    "package_sha256": "64e833719497b023f6e8e0283aac0c2d4a88e950543d0cbc44d3b812eb811db1",
+    "application_commit": "4f6f691c43df51027aab73d7ccaaa9e41e913a4f",
+    "sdk_commit": "1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d"
+  },
+  "wheel": {
+    "package": "memweft",
+    "version": "0.2.0a1",
+    "offline": true,
+    "source_commit": "1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d",
+    "wheel_sha256": "7dc4cb853752dc50d5f0a8e9f6c21385e5efb8c1e2c9a832403a91c5df0070e6"
+  },
+  "environment": {
+    "python": "3.11.13",
+    "os": "Darwin",
+    "architecture": "arm64",
+    "interpreter": "app/.venv/bin/python",
+    "no_repository_pythonpath_set": true,
+    "rust_required": false
+  },
+  "onboarding": {
+    "started_at": "2026-10-02T05:30:46.645Z",
+    "finished_at": "2026-10-02T05:32:45.934214+00:00",
+    "elapsed_seconds": 119.289,
+    "success": true,
+    "unexpected_failed_commands": 1,
+    "recovery": "doctor without config, init, configured doctor"
+  },
+  "producer": {
+    "base_checks": 25,
+    "task_complete": false,
+    "code_sha256": "0e993c7543d188b97646e9cfc2634768d47ae9e6d5bce0671993a4c855118218"
+  },
+  "successor": {
+    "elapsed_seconds": 372.301,
+    "handoff_sufficient": true,
+    "blocking_gaps": [],
+    "unexpected_failed_commands": 1,
+    "full_verifications": [
+      {
+        "receipt": "task/artifacts/verification-20261002T055038-full-m46_ekkc/receipt.json",
+        "passed": true,
+        "checks": 33,
+        "cli_commands": 28,
+        "expected_nonzero_probes": [
+          {
+            "case": "missing-get",
+            "exit_code": 3
+          },
+          {
+            "case": "invalid-blank-value",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-key",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-user",
+            "exit_code": 2
+          },
+          {
+            "case": "missing-argument",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-db-path",
+            "exit_code": 1
+          },
+          {
+            "case": "reopen-after-forget",
+            "exit_code": 3
+          }
+        ]
+      },
+      {
+        "receipt": "task/artifacts/verification-20261002T055121-full-gmf7nsx8/receipt.json",
+        "passed": true,
+        "checks": 33,
+        "cli_commands": 28,
+        "expected_nonzero_probes": [
+          {
+            "case": "missing-get",
+            "exit_code": 3
+          },
+          {
+            "case": "invalid-blank-value",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-key",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-user",
+            "exit_code": 2
+          },
+          {
+            "case": "missing-argument",
+            "exit_code": 2
+          },
+          {
+            "case": "invalid-db-path",
+            "exit_code": 1
+          },
+          {
+            "case": "reopen-after-forget",
+            "exit_code": 3
+          }
+        ]
+      }
+    ],
+    "code_sha256": "9ea7fea6e44d2dcbb38a8aa52fe769c19fec2b272c0156af6a13227c6be37a6e",
+    "real_decisions": 3,
+    "real_ledger_logically_unchanged": true,
+    "status": "done",
+    "revision": 2,
+    "verification": "passed",
+    "final_resume_planning": "not_requested",
+    "final_resume_model_calls": 0,
+    "repeated_completion": "already_completed",
+    "acceptance_not_repeated": true,
+    "model_proposals_seen": false
+  },
+  "api": {
+    "requests": [
+      {
+        "stage": "original",
+        "status": "invalid_response",
+        "validation_error": "invalid_next_step",
+        "response_id": "chatcmpl-6abf442f5649890ed0fc4868",
+        "usage": {
+          "prompt_tokens": 1331,
+          "completion_tokens": 84,
+          "total_tokens": 1415,
+          "completion_tokens_details": {
+            "reasoning_tokens": 1
+          }
+        },
+        "latency_ms": 2440.297,
+        "lengths": {
+          "task_id": 15,
+          "next_step": 194,
+          "reason": 121
+        },
+        "finish_reason": "stop",
+        "request_options": {
+          "model": "kimi-k2.6",
+          "stream": false,
+          "thinking": {
+            "type": "disabled"
+          },
+          "max_completion_tokens": 256,
+          "response_format": {
+            "type": "json_object"
+          }
+        }
+      },
+      {
+        "stage": "corrected",
+        "status": "proposed",
+        "validation_error": null,
+        "response_id": "chatcmpl-6abf4635f86868c775a1a0f1",
+        "usage": {
+          "prompt_tokens": 1331,
+          "completion_tokens": 106,
+          "total_tokens": 1437,
+          "completion_tokens_details": {
+            "reasoning_tokens": 1
+          }
+        },
+        "latency_ms": 2557.135,
+        "lengths": {
+          "task_id": 15,
+          "next_step": 292,
+          "reason": 153
+        },
+        "finish_reason": "stop",
+        "request_options": {
+          "model": "kimi-k2.6",
+          "stream": false,
+          "thinking": {
+            "type": "disabled"
+          },
+          "max_completion_tokens": 256,
+          "response_format": {
+            "type": "json_object"
+          }
+        }
+      }
+    ],
+    "api_calls": 2,
+    "structural_rejections": 1,
+    "post_fix_proposals": 1,
+    "human_reviews": 0,
+    "usage": {
+      "prompt_tokens": 2662,
+      "completion_tokens": 190,
+      "total_tokens": 2852
+    },
+    "estimated_cny_without_cache_discount": 0.022433,
+    "pricing_reference": "pricing.json",
+    "user_projection_equal": true,
+    "successor_used_model_proposal": false,
+    "interpretation": "Two actual calls on frozen pending producer state; original rejected and corrected application accepted. Neither proposal used to guide the fresh successor. One observation after correction, not a reliability rate."
+  },
+  "verification": {
+    "handoff_offline_tests": 41,
+    "planner_tests_included": 12,
+    "test_evidence_class": "agent report of prior tool output, no separate raw log",
+    "documentation_sequence_commands": 4,
+    "sdk_example_processes": 3
+  },
+  "changes": [
+    "Clarify initialization order, app directory and working directory.",
+    "Ship structured public SDK record example with the handoff app.",
+    "Bound planner text at 320/160 characters for English instructions; retain token limit and strict schema."
+  ],
+  "limitations": [
+    "One small sequential tool and one prepared environment.",
+    "Successor finished a deliberately limited capability; not an unbounded project recovery.",
+    "No human usability evaluation or longitudinal deployment.",
+    "No new cross-platform trial in this run.",
+    "Task CLI synthetic probes are not extra business tasks.",
+    "API correction is one observation, not a reliability estimate.",
+    "Historical command paths require adjustment when replayed elsewhere."
+  ],
+  "evidence_root": "data/cold-consumer-2026-10-02",
+  "archive": "dist/memweft-cold-consumer-2026-10-02.zip",
+  "source_sha256": {
+    "examples/handoff_app/planner.py": "b738f7abab9285908d5c0c682a69e4d866cefdeb129b2ee0fb5c50ce196d5652",
+    "examples/handoff_app/README.md": "c8ba91eb6a213f94a33698d3c9a4b0486237672b4e039488c328823197f9bd1a",
+    "evals/test_handoff_planner.py": "c0cdf827d01a50a91d34c2a2457352174c064ae080a6b085e85612dfa78578cb"
+  },
+  "evidence_sha256": {
+    "audit.json": "8b0883553d64ead54f1974da73c3ae92284155ed87ad4b31c22eda04269daf14",
+    "design.json": "0898c09b38ee2f50bd6c0919b007e0d744e334f0ef1cf55acf50faec50ded4cc",
+    "planner-test-record.json": "818234b2b0e79b03dae79158a99b0afb9ba46fc23660d58ad71fc22106d6c321",
+    "documentation-check.json": "f12c1f68d2cc1b145d6ea61ea4b3c8335eff0a589ea04fe44ca71af763b62572",
+    "sdk-documentation-check.json": "d4f44d7e9c275a1b18e2163b4a3fd1ec262de4e748f3b15493a18121bd0f46e5",
+    "completed/successor-experience.json": "1f0f7fb43602a2739a838c69b8f7f6b7eaf0e4b35eea11c8494c9e785d783505",
+    "completed/successor-commands.jsonl": "216ac5ba746e0c912234407c8ad05ea5d5785d9e03d1b5e4623fbe8923fd821e",
+    "completed/task/artifacts/successor-repeat-completion-check.json": "87cb0cb0ff9277b3fde6621c85ec5619f2d0f09be250de158a10430fd681559a",
+    "completed/runs/successor-final-handoff/snapshot.json": "5333f3a07a067fa82ca53da838b7174c92305d390290a616c0350b2d2b65320c",
+    "kimi-original/planning.json": "35d9acadf0b9aab8c422e75b97f109a4740408a2eb633964bcde6fa89b52ddcf",
+    "kimi-corrected/planning.json": "53d74bfb6d7bb8dee7baa751c1c2d69185b4ee78cb8e81f887fae1bca2fed673",
+    "pricing.json": "1158c6eb0a2e12f223e5e655f467db5b38fa40db83c0cd565b4c56e6a2a1c9ab"
+  }
+}

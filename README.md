@@ -109,7 +109,7 @@ For known task dependencies, [required facts and workflow validation](docs/requi
 adds explicit key retrieval in Python and Node, completeness diagnostics, and an
 application example that rejects missing inputs or proposals that violate its rules.
 The [standalone Python handoff app](examples/handoff_app/README.md) consumes an
-installed wheel for an offline project handoff demo; external workflow acceptance
+installed wheel for local project handoffs, optional Kimi proposals and verified task completion; external workflow acceptance
 and human outcome assessment remain separate steps.
 
 <details>
@@ -323,6 +323,7 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 - **Database compatibility:** opening a legacy/v1/v2 database with this build upgrades its recall index to v3. Upgrade all processes together and retain a verified pre-upgrade backup; switching only the executable back is unsupported. [Upgrade and recovery](docs/upgrade_v3.md)
 
 The [standalone handoff app](examples/handoff_app/README.md#配置项目并继续真实任务) now supports portable project configuration, environment diagnostics, current-task Kimi proposals and verified completion writeback; [three new utility tasks were exercised](evals/reports/2026-10-02-project-continuation.md) with real Kimi calls.
+A [fresh-context developer simulation](evals/reports/2026-10-02-cold-consumer.md) separately tested installation and an interrupted SDK decision-ledger task with a new successor. It exposed setup documentation gaps and an English proposal length limit; external human participation remains zero.
 
 ## Roadmap
 

@@ -135,7 +135,7 @@ class HandoffPlannerTests(unittest.TestCase):
     def test_invalid_model_outputs_preserve_raw_usage_and_never_pass(self):
         valid = answer()
         samples = [answer(task_id="install"), answer(task_id="absent"), answer(extra="field"),
-                   answer(next_step=" "), answer(reason="x" * 81), answer(next_step="x" * 121),
+                   answer(next_step=" "), answer(reason="x" * 161), answer(next_step="x" * 321),
                    answer(task_id=1), answer(reason={}), {**valid, "finish_reason": "length"},
                    {**valid, "finish_reason": None}, {**valid, "content": "```json\n{}\n```"},
                    {**valid, "content": "[]"}, {**valid, "content": "null"},
@@ -151,6 +151,56 @@ class HandoffPlannerTests(unittest.TestCase):
                 self.assertIs(result["response"], response)
                 self.assertEqual(result["model_calls"], 1)
                 client.complete.assert_called_once()
+
+    def test_real_english_cold_consumer_reply_is_usable_without_truncation_or_retry(self):
+        # Exact text from the 2026-10-02 cold-consumer response, replayed offline.
+        # It used 194/121 characters and failed the previous 120/80 ceilings.
+        response = {
+            "content": (
+                '{"task_id":"decision-ledger","next_step":"Implement durable scoped forget in '
+                'task/decision_log.py per frozen spec, then run task/verify.py --phase full and preserve '
+                'output. After that, execute: task complete decision-ledger --revision 1",'
+                '"reason":"Base passed but full verifier not yet run; forget returns exit 2 and '
+                'scoped durable delete is missing per remaining_work."}'
+            ),
+            "finish_reason": "stop",
+            "usage": {"prompt_tokens": 1331, "completion_tokens": 84, "total_tokens": 1415,
+                      "completion_tokens_details": {"reasoning_tokens": 1}},
+        }
+        item = snapshot()
+        item["tasks"] = [{"id": "decision-ledger", "title": "Implement durable scoped forget",
+                          "status": "pending", "revision": 1, "verification": {"status": "not_run"}}]
+        original = copy.deepcopy(item)
+        client = Mock()
+        client.complete.return_value = response
+        result = planner.plan(item, client=client)
+        self.assertEqual(result["status"], "proposed")
+        self.assertEqual(result["proposal"], json.loads(response["content"]))
+        self.assertIs(result["response"], response)
+        self.assertEqual(result["response"]["usage"]["total_tokens"], 1415)
+        self.assertEqual(result["human_review"], "pending")
+        self.assertEqual(item, original)
+        client.complete.assert_called_once_with(result["messages"], max_tokens=256)
+
+    def test_proposal_character_limits_accept_the_boundary_and_reject_one_more(self):
+        for field, limit in (("next_step", 320), ("reason", 160)):
+            for character in ("x", "中"):
+                for extra in (0, 1):
+                    with self.subTest(field=field, character=character, extra=extra):
+                        response = answer(**{field: character * (limit + extra)})
+                        client = Mock()
+                        client.complete.return_value = response
+                        result = planner.plan(snapshot(), client=client)
+                        if extra:
+                            self.assertEqual(result["status"], "invalid_response")
+                            self.assertEqual(result["validation_error"], "invalid_" + field)
+                            self.assertIsNone(result["proposal"])
+                        else:
+                            self.assertEqual(result["status"], "proposed")
+                            self.assertEqual(result["proposal"][field], character * limit)
+                        self.assertIs(result["response"], response)
+                        self.assertEqual(result["model_calls"], 1)
+                        client.complete.assert_called_once_with(result["messages"], max_tokens=256)
 
     def test_request_error_is_one_attempt_with_unknown_usage_and_no_secret(self):
         client = Mock()
