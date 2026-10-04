@@ -1,0 +1,1536 @@
+{
+  "version": "lifecycle-tasks-v1",
+  "provenance": "30 constructed configuration tasks, 5 templates x 6 deterministic event schedules; no human participants or independent real-world tasks",
+  "cases": [
+    {
+      "id": "python_onboarding--update",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "update",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      }
+    },
+    {
+      "id": "python_onboarding--forget",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "forget",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "defer",
+        "python": null,
+        "sdk_ref": null
+      }
+    },
+    {
+      "id": "python_onboarding--delete_recreate",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "delete_recreate",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      }
+    },
+    {
+      "id": "python_onboarding--concurrent_update",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "concurrent_update",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      }
+    },
+    {
+      "id": "python_onboarding--rollback",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "rollback",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      }
+    },
+    {
+      "id": "python_onboarding--unrelated_update",
+      "domain": "python_onboarding",
+      "split": "development",
+      "event": "unrelated_update",
+      "task": "配置独立 Python 应用的运行版本和 SDK 引用",
+      "artifact": "onboarding.json",
+      "old": {
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      },
+      "new": {
+        "python": "3.12",
+        "sdk_ref": "release-b"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "python": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sdk_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "python",
+          "sdk_ref"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "python": "3.11",
+        "sdk_ref": "release-a"
+      }
+    },
+    {
+      "id": "deployment--update",
+      "domain": "deployment",
+      "split": "development",
+      "event": "update",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "region": "zone-b",
+        "replicas": 3
+      }
+    },
+    {
+      "id": "deployment--forget",
+      "domain": "deployment",
+      "split": "development",
+      "event": "forget",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "defer",
+        "region": null,
+        "replicas": null
+      }
+    },
+    {
+      "id": "deployment--delete_recreate",
+      "domain": "deployment",
+      "split": "development",
+      "event": "delete_recreate",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "region": "zone-b",
+        "replicas": 3
+      }
+    },
+    {
+      "id": "deployment--concurrent_update",
+      "domain": "deployment",
+      "split": "development",
+      "event": "concurrent_update",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "region": "zone-b",
+        "replicas": 3
+      }
+    },
+    {
+      "id": "deployment--rollback",
+      "domain": "deployment",
+      "split": "development",
+      "event": "rollback",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "region": "zone-b",
+        "replicas": 3
+      }
+    },
+    {
+      "id": "deployment--unrelated_update",
+      "domain": "deployment",
+      "split": "development",
+      "event": "unrelated_update",
+      "task": "生成服务的部署配置",
+      "artifact": "deployment.json",
+      "old": {
+        "region": "zone-a",
+        "replicas": 2
+      },
+      "new": {
+        "region": "zone-b",
+        "replicas": 3
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "replicas": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "region",
+          "replicas"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "region": "zone-a",
+        "replicas": 2
+      }
+    },
+    {
+      "id": "backup_export--update",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "update",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "format": "jsonl",
+        "retention_days": 14
+      }
+    },
+    {
+      "id": "backup_export--forget",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "forget",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "defer",
+        "format": null,
+        "retention_days": null
+      }
+    },
+    {
+      "id": "backup_export--delete_recreate",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "delete_recreate",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "format": "jsonl",
+        "retention_days": 14
+      }
+    },
+    {
+      "id": "backup_export--concurrent_update",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "concurrent_update",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "format": "jsonl",
+        "retention_days": 14
+      }
+    },
+    {
+      "id": "backup_export--rollback",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "rollback",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "format": "jsonl",
+        "retention_days": 14
+      }
+    },
+    {
+      "id": "backup_export--unrelated_update",
+      "domain": "backup_export",
+      "split": "heldout",
+      "event": "unrelated_update",
+      "task": "生成项目备份导出配置",
+      "artifact": "backup.json",
+      "old": {
+        "format": "json",
+        "retention_days": 7
+      },
+      "new": {
+        "format": "jsonl",
+        "retention_days": 14
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "retention_days": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "format",
+          "retention_days"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "format": "json",
+        "retention_days": 7
+      }
+    },
+    {
+      "id": "developer_handoff--update",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "update",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      }
+    },
+    {
+      "id": "developer_handoff--forget",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "forget",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "defer",
+        "branch": null,
+        "test_command": null
+      }
+    },
+    {
+      "id": "developer_handoff--delete_recreate",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "delete_recreate",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      }
+    },
+    {
+      "id": "developer_handoff--concurrent_update",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "concurrent_update",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      }
+    },
+    {
+      "id": "developer_handoff--rollback",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "rollback",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      }
+    },
+    {
+      "id": "developer_handoff--unrelated_update",
+      "domain": "developer_handoff",
+      "split": "heldout",
+      "event": "unrelated_update",
+      "task": "准备下次开发会话的交接配置",
+      "artifact": "handoff.json",
+      "old": {
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      },
+      "new": {
+        "branch": "main",
+        "test_command": "python -m unittest discover -s tests"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "test_command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "branch",
+          "test_command"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "branch": "release/old",
+        "test_command": "python -m unittest"
+      }
+    },
+    {
+      "id": "ci_runtime--update",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "update",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "node": "22",
+        "package_manager": "pnpm"
+      }
+    },
+    {
+      "id": "ci_runtime--forget",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "forget",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "defer",
+        "node": null,
+        "package_manager": null
+      }
+    },
+    {
+      "id": "ci_runtime--delete_recreate",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "delete_recreate",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "node": "22",
+        "package_manager": "pnpm"
+      }
+    },
+    {
+      "id": "ci_runtime--concurrent_update",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "concurrent_update",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "node": "22",
+        "package_manager": "pnpm"
+      }
+    },
+    {
+      "id": "ci_runtime--rollback",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "rollback",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "node": "22",
+        "package_manager": "pnpm"
+      }
+    },
+    {
+      "id": "ci_runtime--unrelated_update",
+      "domain": "ci_runtime",
+      "split": "heldout",
+      "event": "unrelated_update",
+      "task": "更新持续集成运行环境配置",
+      "artifact": "ci.json",
+      "old": {
+        "node": "20",
+        "package_manager": "npm"
+      },
+      "new": {
+        "node": "22",
+        "package_manager": "pnpm"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "write",
+              "defer"
+            ]
+          },
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_manager": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "node",
+          "package_manager"
+        ],
+        "additionalProperties": false
+      },
+      "expected": {
+        "action": "write",
+        "node": "20",
+        "package_manager": "npm"
+      }
+    }
+  ]
+}
