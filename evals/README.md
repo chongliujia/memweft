@@ -1191,3 +1191,30 @@ python evals/plot_readme_metrics.py
 Matplotlib is only needed to regenerate these figures, not to use MemWeft.
 The local render used Matplotlib 3.10.8. Keep workload conditions, slow paths and
 WAL-space limitations alongside any headline latency numbers.
+
+## Frozen lifecycle task pilot
+
+The 30-case, three-arm pilot compares plain persisted strategies, lazy checks of
+direct/inherited source versions, and the actual SDK lifecycle. It uses shared
+source events, real file-backed stores, scripted interleavings, and a common
+configuration-artifact executor. The independent oracle and the executor are
+scored separately from stale memory exposure. These are constructed tasks, not
+an external developer study.
+
+See [the protocol](../docs/lifecycle_task_protocol.md),
+[external baseline review](../docs/lifecycle_baseline_review.md), and
+[the report](reports/2026-10-04-lifecycle-tasks.md).
+
+```sh
+PYTHONPATH=python/src .venv/bin/python evals/run_lifecycle_tasks.py prepare --output data/new-pilot
+PYTHONPATH=python/src .venv/bin/python evals/run_lifecycle_tasks.py run --output data/new-pilot --prompt-key
+PYTHONPATH=python/src .venv/bin/python evals/report_lifecycle_tasks.py --input data/new-pilot --stem evals/reports/new-pilot
+```
+
+Preparation freezes source/native/input hashes before any network call. The live
+run permits 90 attempts, 256 output tokens per call, no automatic retries, and
+stops subsequent calls at 150,000 reported tokens or an error. It uses the
+existing Kimi K2.6 client. `--prompt-key` reads a key without echo or saving;
+otherwise use `MOONSHOT_API_KEY`. Keep original run directories.
+The reporter requires all 90 results and replays the saved proposals; incomplete
+runs remain explicitly incomplete and cannot produce a complete report.
