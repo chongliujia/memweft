@@ -37,6 +37,11 @@ it did not modify the shared Python environment. The fresh isolated recipe above
 avoids importing unrelated global packages. Keep an existing experiment environment
 unchanged while its run is in progress; use another directory and
 `--external-python /absolute/path/to/venv/bin/python` for another installation.
+The recipe was also checked in a second venv with system packages disabled:
+58 resolved packages installed successfully and the two actual Mem0 integration
+tests passed, using the same existing local model files. That check does not
+replace the original experiment's recorded environment or prove portability to
+other Python versions or operating systems.
 
 Prepare all 60 inputs offline into a **new** output directory, then run that same
 frozen directory with the paid Kimi API:
@@ -1300,3 +1305,8 @@ existing Kimi K2.6 client. `--prompt-key` reads a key without echo or saving;
 otherwise use `MOONSHOT_API_KEY`. Keep original run directories.
 The reporter requires all 90 results and replays the saved proposals; incomplete
 runs remain explicitly incomplete and cannot produce a complete report.
+
+The clean macOS arm64 / Python 3.11 verification resolved and installed 58 packages;
+its full version list is [`requirements-external-baseline-macos-arm64-py311.txt`](requirements-external-baseline-macos-arm64-py311.txt).
+This is a platform-specific resolution, not a hash-locked cross-platform package guarantee.
+The main experiment retains its original recorded environment.

@@ -20,7 +20,7 @@ def replace_rows(path, values):
     path.write_text(''.join(json.dumps(v, ensure_ascii=False) + '\n' for v in values))
 
 
-def fixture_logs(output, rate_limited=False):
+def fixture_logs(output, rate_limited=False, diagnostic_case=False):
     """Write known action outcomes as test fixtures, never as live experiment data."""
     suite, inputs = cases(), []
     dump(output / 'suite.json', {'cases': suite})
@@ -65,6 +65,10 @@ def fixture_logs(output, rate_limited=False):
             [{'tool': 'write', 'path': name, 'value': case['expected']['files'][name]}
              for name in row['files']['writable'] if name in case['expected']['files']] + [{'tool': 'run'}],
         ]
+        diagnostic = diagnostic_case and index == 0
+        if diagnostic:
+            actions[0].append({'tool': 'unsupported'})
+            actions.extend([[], []])
         messages, executions = list(row['messages']), []
         for number, action in enumerate(actions):
             turn = {**identity, 'round': number}
@@ -73,7 +77,8 @@ def fixture_logs(output, rate_limited=False):
                 append(output / 'attempts.jsonl', {**turn, 'attempt': 0, 'started_at': 'synthetic'})
                 append(output / 'rate_limits.jsonl', {**turn, 'attempt': 0, 'error': 'Kimi HTTP 429: synthetic'})
             append(output / 'attempts.jsonl', {**turn, 'attempt': retry, 'started_at': 'synthetic'})
-            content = json.dumps({'actions': action, 'done': number == 1})
+            content = '{broken' if diagnostic and number == 2 else json.dumps(
+                {'actions': action, 'done': not diagnostic and number == len(actions) - 1})
             request = {'model': 'kimi-k2.6', 'messages': messages, 'stream': False,
                        'thinking': {'type': 'disabled'}, 'max_completion_tokens': 1024,
                        'response_format': {'type': 'json_object'}}
@@ -87,9 +92,10 @@ def fixture_logs(output, rate_limited=False):
             messages.extend([{'role': 'assistant', 'content': content}, {'role': 'user',
                 'content': json.dumps({'tool_results': execution['results'], 'rounds_remaining': 3 - number},
                                       ensure_ascii=False, sort_keys=True)}])
-        append(output / 'results.jsonl', {**identity, 'rounds': 2, **final_grade(project, case, executions)})
-    dump(output / 'status.json', {'status': 'completed', 'calls': 120,
-                                 'requests': 120 + int(rate_limited), 'tokens': 2400})
+        append(output / 'results.jsonl', {**identity, 'rounds': len(actions), **final_grade(project, case, executions)})
+    calls = len(rows(output / 'responses.jsonl'))
+    dump(output / 'status.json', {'status': 'completed', 'calls': calls,
+                                 'requests': calls + int(rate_limited), 'tokens': calls * 20})
 
 
 class MultistepReportTests(unittest.TestCase):
@@ -120,6 +126,44 @@ class MultistepReportTests(unittest.TestCase):
         target.write_text(target.read_text() + '\n# changed\n')
         with self.assertRaisesRegex(ValueError, 'snapshot changed'):
             report.audit(self.root)
+
+    def test_windows_separator_manifest_audits_without_rewriting_evidence(self):
+        freeze_path = self.root / 'freeze.json'
+        freeze = json.loads(freeze_path.read_text())
+        freeze['source_sha256'] = {key.replace('/', '\\'): value
+                                   for key, value in freeze['source_sha256'].items()}
+        dump(freeze_path, freeze)
+        before_manifest = freeze_path.read_bytes()
+        before_sources = report._inventory(self.root / 'sources')
+        self.assertEqual(report.audit(self.root)['completed_tasks'], 60)
+        self.assertEqual(freeze_path.read_bytes(), before_manifest)
+        self.assertEqual(report._inventory(self.root / 'sources'), before_sources)
+
+    def test_snapshot_rejects_unsafe_platform_paths(self):
+        freeze_path = self.root / 'freeze.json'
+        original = json.loads(freeze_path.read_text())
+        unsafe = (r'C:\outside.py', r'C:relative.py', '/tmp/outside.py', r'\rooted.py',
+                  r'\\server\share\outside.py', r'evals\..\outside.py', 'evals/../outside.py',
+                  'evals/file.py:stream', 'evals/file.py.', 'evals/file.py ')
+        for name in unsafe:
+            with self.subTest(name=name):
+                freeze = {**original, 'source_sha256': {**original['source_sha256'], name: 'a' * 64}}
+                dump(freeze_path, freeze)
+                with self.assertRaisesRegex(ValueError, 'Unsafe snapshot path'):
+                    report._snapshot(self.root)
+
+    def test_snapshot_rejects_normalized_path_aliases(self):
+        freeze_path = self.root / 'freeze.json'
+        original = json.loads(freeze_path.read_text())
+        normalized = {key.replace('\\', '/'): value for key, value in original['source_sha256'].items()}
+        name = 'evals/multistep_fixture.py'
+        for alias in (name.replace('/', '\\'), 'evals/./multistep_fixture.py',
+                      'evals//multistep_fixture.py', 'EVALS/multistep_fixture.py'):
+            with self.subTest(alias=alias):
+                freeze = {**original, 'source_sha256': {**normalized, alias: normalized[name]}}
+                dump(freeze_path, freeze)
+                with self.assertRaisesRegex(ValueError, 'Duplicate normalized snapshot path'):
+                    report._snapshot(self.root)
 
     def test_missing_or_duplicate_accounting_rejected(self):
         path = self.root / 'attempts.jsonl'
@@ -210,6 +254,20 @@ class MultistepReportTests(unittest.TestCase):
             self.assertEqual(evidence['summary']['rate_limits'], 1)
             self.assertEqual(evidence['evidence_sha256']['rate_limits.jsonl'], original_hash)
             self.assertTrue(evidence['publication_redactions']['all_rate_limit_events_retained'])
+
+    def test_action_errors_and_round_limit_are_distinct_from_task_success(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            fixture_logs(output, diagnostic_case=True)
+            summary = report.audit(output)
+            plain = summary['by_arm']['plain']
+            self.assertEqual(plain['tool_action_errors'], 2)
+            self.assertEqual(plain['protocol_errors'], 1)
+            self.assertEqual(plain['round_limit_without_done'], 1)
+            self.assertEqual(plain['success'], 15)
+            self.assertEqual(summary['by_arm']['full']['tool_action_errors'], 0)
+            self.assertEqual(summary['by_arm']['full']['round_limit_without_done'], 0)
+            self.assertIn('synthetic error', summary['metric_definitions']['tool_action_errors'])
 
 
 if __name__ == '__main__':

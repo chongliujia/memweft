@@ -1,7 +1,7 @@
 # External lifecycle baseline review — 2026-10-04
 
-This is a capability review, not an executed external benchmark or a novelty
-claim. The v1 pilot contains only our explicit plain/versions adapters and the
+The initial v1 section is a capability review, not an executed external benchmark
+or a novelty claim. The executed v2 structured fixture is reported separately below. The v1 pilot contains only our explicit plain/versions adapters and the
 actual MemWeft lifecycle. A product name must not be attached to those adapters.
 
 | Candidate | Verified primary-source capability | What must be established before comparison |
@@ -99,6 +99,11 @@ local embedding file hashes. Its dedicated environment reused preinstalled
 embedding libraries through `--system-site-packages`, with compatible overrides
 installed only inside the venv; this is disclosed rather than presented as a
 fully hermetic environment.
+The documented requirements were subsequently resolved and installed in a second
+clean Python 3.11/macOS arm64 venv, with system site packages disabled; the same
+two integration tests passed. `resolved-macos-arm64-py311.txt`, `clean-install.log`
+and `clean-test.log` under the local evidence directory preserve this installation
+check. It did not modify or replace the environment used to prepare the experiment.
 
 Graphiti 0.30.2 was reviewed first using its
 [official quickstart](https://help.getzep.com/graphiti/getting-started/quick-start),

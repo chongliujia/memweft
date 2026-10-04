@@ -12,7 +12,7 @@ import argparse
 from collections import defaultdict
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 import statistics
 import tempfile
@@ -83,7 +83,19 @@ def _inventory(root):
 
 def _snapshot(output):
     freeze = _read(output / 'freeze.json')
-    sources = freeze['source_sha256']
+    # Older prepares serialized Path with the host separator. Normalize only
+    # this in-memory lookup; the frozen manifest and snapshot bytes stay intact.
+    sources, aliases = {}, set()
+    for relative, digest in freeze['source_sha256'].items():
+        path = PurePosixPath(relative.replace('\\', '/'))
+        if (path.is_absolute() or PureWindowsPath(relative).drive or not path.parts
+                or '..' in path.parts or any(':' in part or part.endswith((' ', '.')) for part in path.parts)):
+            raise ValueError('Unsafe snapshot path')
+        normalized = path.as_posix()
+        if normalized.casefold() in aliases:
+            raise ValueError('Duplicate normalized snapshot path')
+        aliases.add(normalized.casefold())
+        sources[normalized] = digest
     required = {'evals/run_multistep_memory.py', 'evals/multistep_fixture.py',
                 'evals/multistep_kimi.py', 'evals/external_lifecycle_baseline.py',
                 'evals/output_contract.py', 'docs/multistep_memory_protocol.md'}
@@ -91,8 +103,6 @@ def _snapshot(output):
         raise ValueError('Missing frozen source snapshots')
     for relative, digest in sources.items():
         path = Path(relative)
-        if path.is_absolute() or '..' in path.parts:
-            raise ValueError('Unsafe snapshot path')
         if sha(output / 'sources' / path) != digest:
             raise ValueError('Frozen source snapshot changed: ' + relative)
     for name, suffix in (('suite', '.json'), ('inputs', '.jsonl')):
@@ -246,6 +256,10 @@ def audit(output):
                'rate_limits': len(rate_limits), 'by_arm': {}, 'case_results': results,
                'usage': {k: sum(r['response']['usage'][k] for r in responses) for k in USAGE},
                'paired_success': {}, 'artifact_sha256': artifacts,
+               'metric_definitions': {
+                   'tool_action_errors': 'Count of execution.results entries containing error, including the synthetic error entry for a rejected envelope; can overlap protocol_errors.',
+                   'round_limit_without_done': 'Tasks with four recorded turns and done=false in the final execution, independent of task success.',
+               },
                'audit': {'replayed_tasks': 60, 'replayed_turns': len(turns),
                          'request_accounting_complete': True, 'equal_current_sources': True,
                          'versions_full_initial_messages_identical': True,
@@ -263,6 +277,8 @@ def audit(output):
             'source_reads': sum(a.get('tool') == 'read_source' for t in tt for a in t['execution']['results']),
             'tool_operations': sum(len(t['execution']['results']) for t in tt),
             'model_calls': len(calls), 'protocol_errors': sum(t['execution']['protocol_error'] for t in tt),
+            'tool_action_errors': sum('error' in action for t in tt for action in t['execution']['results']),
+            'round_limit_without_done': sum(r['rounds'] == 4 and not turn_map[(r['case_id'], arm, 3)]['execution']['done'] for r in rr),
             'usage': {k: sum(r['usage'][k] for r in calls) for k in USAGE},
             'http_median_ms': statistics.median(r['latency_ms'] for r in calls),
             'events': {event: {'tasks': 3, 'success': sum(r['task_success'] for r in rr if r['event'] == event)} for event in sorted(events)},
