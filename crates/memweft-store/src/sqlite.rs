@@ -11,6 +11,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use crate::{
     EpisodeFilter, Event, EventKind, FactFilter, InsightFilter, StmState, Store, StoreError,
@@ -18,6 +19,18 @@ use crate::{
 };
 
 const SCHEMA_VERSION: i64 = 1;
+
+fn pool_workers() -> Arc<scheduled_thread_pool::ScheduledThreadPool> {
+    // r2d2's default scheduler drains delayed work on drop. Its idle reaper
+    // can keep three threads alive for another 30 seconds per closed store.
+    // These are pool housekeeping jobs, not application writes. Discard queued
+    // jobs when the last pool owner is gone; already-running jobs still finish.
+    Arc::new(scheduled_thread_pool::ScheduledThreadPool::builder()
+        .num_threads(3)
+        .thread_name_pattern("memweft-pool-{}")
+        .on_drop_behavior(scheduled_thread_pool::OnPoolDropBehavior::DiscardPendingScheduled)
+        .build())
+}
 
 /// Storage-level options, independent of Agent memory-pool bindings.
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -103,7 +116,7 @@ impl SqliteStore {
                 if background { conn.pragma_update(None, "wal_autocheckpoint", 0)?; }
                 Ok(())
             });
-        let pool = Pool::new(manager)
+        let pool = Pool::builder().thread_pool(pool_workers()).build(manager)
             .map_err(|err| StoreError::Storage(err.to_string()))?;
         
         Ok(Self {
@@ -119,7 +132,7 @@ impl SqliteStore {
         // Shared-cache memory databases return SQLITE_LOCKED (not SQLITE_BUSY),
         // so busy_timeout cannot serialize concurrent writers. One connection
         // keeps in-memory semantics deterministic; file stores retain their pool.
-        let pool = Pool::builder().max_size(1).build(manager)
+        let pool = Pool::builder().max_size(1).thread_pool(pool_workers()).build(manager)
             .map_err(|err| StoreError::Storage(err.to_string()))?;
             
         let mut conn = pool.get().map_err(|err| StoreError::Storage(err.to_string()))?;
@@ -1656,6 +1669,32 @@ fn parse_enum<T>(value: &str, parser: fn(&str) -> Option<T>) -> rusqlite::Result
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn closed_pool_discards_delayed_housekeeping() {
+        use std::sync::mpsc;
+        use std::time::Duration;
+        let workers = super::pool_workers();
+        let (sender, receiver) = mpsc::channel();
+        workers.execute_after(Duration::from_secs(3600), move || {
+            let _ = sender.send(());
+        });
+        drop(workers);
+        // The queued closure must be dropped rather than run or retained until
+        // its deadline. This fails with the scheduler's default drain policy.
+        assert_eq!(receiver.recv_timeout(Duration::from_secs(5)),
+                   Err(mpsc::RecvTimeoutError::Disconnected));
+    }
+
+    #[test]
+    fn rapid_store_reopen_releases_pool_resources() {
+        // Reproduce the hundreds of short-lived pools used by the eval runner.
+        // No pacing or process isolation may hide retired worker accumulation.
+        for _ in 0..1000 {
+            let store = super::SqliteStore::new_in_memory().unwrap();
+            drop(store);
+        }
+    }
+
     use super::*;
     use crate::{Store, TimeRangeFilter};
     use memweft_types::{
