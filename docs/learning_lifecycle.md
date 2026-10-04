@@ -111,7 +111,9 @@ later opens reuse the version. Unknown future source-index versions are rejected
 Back up persistent databases and upgrade writers together before admitting work.
 The index triggers require `memweft_learning_sources_v1`, registered on every new
 SDK connection. Older SDK/raw connections without it cannot insert or update
-learning documents successfully; failed statements do not partially erase edges.
+documents successfully, including non-learning documents: SQLite resolves the
+function before evaluating the trigger's namespace condition. Failed statements
+do not partially erase edges. Use SDK operations for application document writes.
 Do not downgrade only the executable on an upgraded database. Restore the matched
 pre-upgrade backup/build if rollback is required. Backfill needs write-lock time
 and additional disk/WAL space; final file sizes do not measure peak migration space.

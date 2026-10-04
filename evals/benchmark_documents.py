@@ -35,8 +35,15 @@ def measure(action, repeats):
 
 
 def seed(path, count):
-    # Documents have no recall-index triggers. Use SQL only for fixture loading;
-    # every measured operation below runs through the real native Python SDK.
+    # Use SQL only for message fixture loading; measured operations use the SDK.
+    # SQLite resolves functions in conditional document triggers even when their
+    # learning-namespace WHEN condition is false. Register a fail-closed stub for
+    # this non-learning loader, never a replacement dependency extractor.
+    def message_dependencies(encoded):
+        document = json.loads(encoded)
+        if document["namespace"][0] != "messages":
+            raise ValueError("fixture loader may only insert message documents")
+        return "[]"
     origin = datetime(2026, 1, 1, tzinfo=timezone.utc)
     def rows():
         for i in range(count):
@@ -49,6 +56,8 @@ def seed(path, count):
                 yield ("default", "u", "default", json.dumps(namespace, separators=(",", ":")),
                        key, 1, json.dumps(document))
     with sqlite3.connect(path) as conn:
+        conn.create_function("memweft_learning_sources_v1", 1, message_dependencies,
+                             deterministic=True)
         conn.executemany("INSERT INTO memweft_documents VALUES (?,?,?,?,?,?,?)", rows())
 
 

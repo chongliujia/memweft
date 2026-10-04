@@ -11,7 +11,7 @@ The October 4 source-index build also adds **learning dependency index v1**,
 including when recall is already v3. Its separate backfill preserves learning
 documents and installs transactional dependency triggers. All writers must have
 the new source-extraction function; v3 recall compatibility alone is insufficient
-for learning-document writes. Apply the backup/maintenance process below and read
+for document writes, including ordinary messages. Apply the backup/maintenance process below and read
 the [learning-index migration notes](learning_lifecycle.md#migration-and-operation).
 
 All Rust, Python, Node and CLI clients open the same SQLite schema. The first
