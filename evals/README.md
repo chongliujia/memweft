@@ -1,5 +1,87 @@
 # Local model scenario evaluation
 
+## Frozen multistep file tasks with an external structured baseline
+
+The [v2 protocol](../docs/multistep_memory_protocol.md) evaluates three constructed
+executable workflows across five source lifecycle events and four arms: ordinary
+memory, lazy revision checks, MemWeft lifecycle, and **Mem0 OSS 2.2.1 structured
+CRUD**. The model reads project files, chooses whether to query the current source,
+writes JSON files, and runs a trusted program. A separate final checker grades the
+actual artifacts. These 15 situations are derived from three templates; they are
+not 15 independent human tasks or an external developer study.
+
+Build/install the current MemWeft Python extension in the main `.venv` first. On a
+fresh checkout, use a separate Python 3.11 environment for the external backend:
+
+```bash
+python3.11 -m venv data/external-lifecycle-env/venv
+data/external-lifecycle-env/venv/bin/python -m pip install \
+  -r evals/requirements-external-baseline.txt
+export MEMWEFT_BASELINE_EMBEDDING_PATH=/absolute/path/to/all-MiniLM-L12-v2
+```
+
+The model directory must already contain the complete local
+`sentence-transformers/all-MiniLM-L12-v2` model, including `pytorch_model.bin`,
+tokenizer/configuration files and `1_Pooling/config.json`. Preparation runs with
+Hugging Face offline mode enabled; it does not download a model or need an
+embedding API key. The manifest records the files' SHA-256 values. The default
+fallback is `~/.cache/torch/sentence_transformers/sentence-transformers_all-MiniLM-L12-v2`.
+Use the environment variable to select an explicit local model directory.
+
+The requirements file pins the measured main dependencies, including the
+NumPy/Hub versions required by this older encoder stack. It is not a complete
+transitive or cross-platform lockfile. The original macOS arm64/Python 3.11.5 run
+reused preinstalled embedding libraries through a dedicated venv with
+`--system-site-packages` and installed compatibility overrides only in that venv;
+it did not modify the shared Python environment. The fresh isolated recipe above
+avoids importing unrelated global packages. Keep an existing experiment environment
+unchanged while its run is in progress; use another directory and
+`--external-python /absolute/path/to/venv/bin/python` for another installation.
+
+Prepare all 60 inputs offline into a **new** output directory, then run that same
+frozen directory with the paid Kimi API:
+
+```bash
+PYTHONPATH=python/src .venv/bin/python evals/run_multistep_memory.py prepare \
+  --output data/evals/multistep-new \
+  --external-python data/external-lifecycle-env/venv/bin/python
+PYTHONPATH=python/src .venv/bin/python evals/run_multistep_memory.py run \
+  --output data/evals/multistep-new --prompt-key
+```
+
+`--prompt-key` reads the key through a hidden terminal prompt. Alternatively,
+provide `MOONSHOT_API_KEY` through your secret manager and omit the flag; never put
+the key in a command-line argument or fixture. Preparation freezes the code,
+native library, public files, source snapshots, initial prompts and dependency
+manifests before any API call. Changing frozen inputs or code makes `run` refuse
+the experiment. An already attempted directory cannot be rerun silently.
+
+There are at most four model rounds per task and three tool actions per round:
+at most 240 responses, each capped at 1,024 output tokens. The runner stops further
+calls at the reported 500,000-token threshold. Only HTTP 429 is retried, with two
+recorded retries at 60-second intervals; other API failures stop and preserve
+partial evidence. See the protocol for pacing, request limits and budget caveats.
+Inspect or regenerate the machine-readable summary with:
+
+```bash
+PYTHONPATH=python/src .venv/bin/python evals/run_multistep_memory.py summary \
+  --output data/evals/multistep-new
+```
+
+This writes `summary.json`; raw attempts, responses, tool executions, per-case
+outcomes and project artifacts remain in the run directory. The summary separately
+reports stale memory exposure, wrong writes, source queries, task success, usage
+and latency. A missing or failed task must not be counted as successful.
+
+The external arm uses Mem0's actual `add(infer=False)`, `update`, `get_all`, `get`,
+`delete` and `history` with local Qdrant persistence and real CPU embeddings.
+`get_all` performs exact metadata filtering, followed by ID-based `get`; no
+semantic search or LLM extraction is scored. JSON serialization, kind/key
+addressing, source revision labels and strategy selection are application
+adaptation. Native atomic derived-policy invalidation and rollback are outside
+this common CRUD contract. The [baseline review](../docs/lifecycle_baseline_review.md)
+records the executed compatibility fixture and these interpretation limits.
+
 ## Low-cost Kimi smoke test
 
 After installing the Python SDK, run the existing 13 `common-v3` memory cases

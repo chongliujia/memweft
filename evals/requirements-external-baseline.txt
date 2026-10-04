@@ -1,0 +1,25 @@
+# Structured Mem0 comparison: measured main dependencies, Python 3.11/macOS arm64.
+# Use a dedicated venv. This is not a complete transitive/platform lockfile.
+# No hosted Mem0, graph, spaCy or fastembed extras are required for exact CRUD.
+mem0ai==2.2.1
+qdrant-client==1.19.1
+openai==1.102.0
+httpx==0.28.1
+pydantic==2.11.7
+posthog==7.62.1
+protobuf==6.33.6
+pytz==2026.5
+SQLAlchemy==2.1.3
+
+# Actual offline MiniLM encoder; keep the old encoder's compatible NumPy/Hub.
+sentence-transformers==2.2.2
+transformers==4.32.1
+tokenizers==0.13.2
+torch==2.1.0
+torchvision==0.16.0
+numpy==1.26.4
+huggingface-hub==0.16.4
+scipy==1.11.1
+scikit-learn==1.1.3
+nltk==3.8.1
+sentencepiece==0.1.99
