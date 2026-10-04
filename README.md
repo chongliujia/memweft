@@ -324,6 +324,7 @@ Use an existing LangGraph checkpointer for graph execution state. The deprecated
 
 The [standalone handoff app](examples/handoff_app/README.md#配置项目并继续真实任务) now supports portable project configuration, environment diagnostics, current-task Kimi proposals and verified completion writeback; [three new utility tasks were exercised](evals/reports/2026-10-02-project-continuation.md) with real Kimi calls.
 A [fresh-context developer simulation](evals/reports/2026-10-02-cold-consumer.md) separately tested installation and an interrupted SDK decision-ledger task with a new successor. It exposed setup documentation gaps and an English proposal length limit; external human participation remains zero.
+The [two-day external trial guide](examples/handoff_app/TRIAL.md) and [participant feedback form](examples/handoff_app/FEEDBACK.md) are ready for real developer tasks; preparing these materials does not count as a completed human trial.
 
 ## Roadmap
 

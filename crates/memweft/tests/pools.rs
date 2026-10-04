@@ -1,3 +1,5 @@
+mod common;
+
 use memweft::{ContextOptions, Memory, UserMemory, UserScope};
 use memweft_store::{Mutation, PoolRevision, SqliteStore, Store};
 use memweft_types::Scope;
@@ -241,7 +243,7 @@ fn revisions_survive_restart_and_delete_recreate_and_cas_has_one_winner() {
         assert!(a.remember_in(None, "k", json!(5), Some(2)).is_err());
         assert!(a.remember_in(None, "k", json!(5), Some(0)).is_err());
     }
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
 
 #[test]

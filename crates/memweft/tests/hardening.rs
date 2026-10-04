@@ -1,3 +1,5 @@
+mod common;
+
 use memweft::learning::{AcceptancePolicy, CaseResult, Evaluation, Proposal, Target};
 use memweft::{ContextOptions, Memory, UserMemory, UserScope};
 use memweft_store::{Mutation, SqliteStore, Store};
@@ -139,7 +141,7 @@ fn private_updates_invalidate_inherited_sources_pending_jobs_and_saved_versions(
                 .is_none()
         );
     }
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
 
 #[test]

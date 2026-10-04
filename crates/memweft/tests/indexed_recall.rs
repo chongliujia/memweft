@@ -1,3 +1,5 @@
+mod common;
+
 use memweft::{ContextOptions, Memory, UserMemory, UserScope};
 use memweft_store::{SqliteStore, Store, lexical_terms};
 use memweft_types::{Fact, FactStatus, Scope, ScopeLevel, Validity};
@@ -346,7 +348,7 @@ fn index_tracks_shared_cas_delete_recreate_and_reopen() {
             .unwrap();
         check(&foreign, Some("replacement"), 10);
     }
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
 
 #[test]
@@ -386,7 +388,7 @@ fn concurrent_shared_updates_and_queries_use_one_consistent_snapshot() {
     drop(reader);
     drop(user);
     drop(m);
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
 
 #[test]

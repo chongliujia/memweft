@@ -1,3 +1,5 @@
+mod common;
+
 use memweft::learning::{AcceptancePolicy, CaseResult, Evaluation, Proposal, Status, Target};
 use memweft::{ContextOptions, Memory, UserScope};
 use memweft_store::{Mutation, SqliteStore, Store};
@@ -109,7 +111,7 @@ fn persistence_isolation_upsert_and_forget() {
                 .is_empty()
         );
     }
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
 
 #[test]
@@ -712,5 +714,5 @@ fn persisted_jobs_resume_without_regenerating_candidates() {
                 .is_err()
         );
     }
-    std::fs::remove_file(path).unwrap();
+    common::remove_database(path).unwrap();
 }
