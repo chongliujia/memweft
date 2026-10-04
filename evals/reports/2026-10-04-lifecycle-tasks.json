@@ -1,0 +1,1547 @@
+{
+  "freeze": {
+    "frozen_at": "2026-10-04T12:29:21.865430+00:00",
+    "base_commit": "47f71ef43afba17d41962a4b17c3d31b86a41b5a",
+    "source_sha256": {
+      "evals/run_lifecycle_tasks.py": "9f216757de923064538103567c103e28ff60cf9f1a291c97fdef1902bf2cc229",
+      "evals/scenarios/lifecycle-tasks-v1.json": "2615e6eb5a1c8a124a211d1b187e7f2aecce0b0d695fcbe01a4c2e75aea23305",
+      "docs/lifecycle_task_protocol.md": "008987ec164ef276180d02d10bffc5260241821ebb45aaaadad0185117acc979",
+      "evals/test_lifecycle_tasks.py": "c67895ba0033590461a8d76be071bf06001d3181990f0aabbcaebe4df1031d32",
+      "evals/output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+      "examples/handoff_app/kimi_client.py": "8704c96a46cdd501aa6049aa63b1fd93d3e360b4e7e8abf1f4c0713715a60d2d",
+      "python/src/memweft/__init__.py": "a5131c3f3c3fbe709164f09b9077e5d83ace725ea8d7c7683dbc8dbcc34613da",
+      "python/src/memweft/api.py": "90ff44586ae261b2f7c0a79ed6d6853e197821dce5c18ccb8cb567e7306a7a99",
+      "python/src/memweft/client.py": "fbefad43e6bb3486250215345bd02882699c2498a0966926062c48242449192f"
+    },
+    "native_sha256": "ba8f419eff3b072dc19236a25344320e8169c2a0f44e442f5d954ec6bacbcd9a",
+    "inputs_sha256": "b9e5f30172b6750f5988cfd125abe0d4a0fe2e74f2b9e2462547b0c2ac64d8af",
+    "suite_sha256": "2615e6eb5a1c8a124a211d1b187e7f2aecce0b0d695fcbe01a4c2e75aea23305",
+    "model": "kimi-k2.6",
+    "max_calls": 90,
+    "max_completion_tokens": 256,
+    "reported_token_stop_threshold": 150000,
+    "interval_seconds": 21,
+    "retries": 0,
+    "thinking": "disabled",
+    "provenance": "30 constructed configuration tasks, 5 templates x 6 deterministic event schedules; no human participants or independent real-world tasks"
+  },
+  "summary": {
+    "model": "kimi-k2.6",
+    "completed_calls": 90,
+    "by_arm": {
+      "plain": {
+        "prepared": 30,
+        "stale_returned": 25,
+        "cases_with_resident_stale_versions": 25,
+        "blocked_lifecycle_operations": 0,
+        "control_strategy_retained": 5,
+        "read_median_ms": 0.09381247218698263,
+        "calls": 30,
+        "task_success": 30,
+        "stale_proposal": 0,
+        "wrong_proposal": 0,
+        "execution_blocked": 0,
+        "protocol_error": 0,
+        "usage": {
+          "prompt_tokens": 8228,
+          "completion_tokens": 572,
+          "total_tokens": 8800
+        },
+        "model_median_ms": 907.3344999999999,
+        "operation_median_ms": {
+          "adopt_fresh": 0.2948329783976078,
+          "adopt_pending": 0.388541491702199,
+          "adopt_v1": 0.25564595125615597,
+          "adopt_v2": 0.24397950619459152,
+          "forget_policy": 0.3597295144572854,
+          "rollback_old": 0.21337508223950863,
+          "seed_policy": 0.44864602386951447,
+          "start_fresh": 0.3626248799264431,
+          "start_pending": 0.23606186732649803,
+          "start_v1": 0.2677704906091094,
+          "start_v2": 0.23133354261517525,
+          "update_archive": 0.42424979619681835,
+          "update_policy": 0.40362507570534945
+        }
+      },
+      "versions": {
+        "prepared": 30,
+        "stale_returned": 0,
+        "cases_with_resident_stale_versions": 25,
+        "blocked_lifecycle_operations": 10,
+        "control_strategy_retained": 5,
+        "read_median_ms": 0.14170852955430746,
+        "calls": 30,
+        "task_success": 30,
+        "stale_proposal": 0,
+        "wrong_proposal": 0,
+        "execution_blocked": 0,
+        "protocol_error": 0,
+        "usage": {
+          "prompt_tokens": 7824,
+          "completion_tokens": 572,
+          "total_tokens": 8396
+        },
+        "model_median_ms": 929.4965,
+        "operation_median_ms": {
+          "adopt_fresh": 0.401125056669116,
+          "adopt_pending": 0.3114159917458892,
+          "adopt_v1": 0.32187497708946466,
+          "adopt_v2": 0.3290835302323103,
+          "forget_policy": 0.37329201586544514,
+          "rollback_old": 0.14699995517730713,
+          "seed_policy": 0.4584795096889138,
+          "start_fresh": 0.3869999200105667,
+          "start_pending": 0.2752284053713083,
+          "start_v1": 0.3031045198440552,
+          "start_v2": 0.26193750090897083,
+          "update_archive": 0.3937920555472374,
+          "update_policy": 0.4187709419056773
+        }
+      },
+      "full": {
+        "prepared": 30,
+        "stale_returned": 0,
+        "cases_with_resident_stale_versions": 0,
+        "blocked_lifecycle_operations": 10,
+        "control_strategy_retained": 5,
+        "read_median_ms": 0.050708651542663574,
+        "calls": 30,
+        "task_success": 30,
+        "stale_proposal": 0,
+        "wrong_proposal": 0,
+        "execution_blocked": 0,
+        "protocol_error": 0,
+        "usage": {
+          "prompt_tokens": 7824,
+          "completion_tokens": 572,
+          "total_tokens": 8396
+        },
+        "model_median_ms": 874.9110000000001,
+        "operation_median_ms": {
+          "adopt_fresh": 0.37329201586544514,
+          "adopt_pending": 0.2905415603891015,
+          "adopt_v1": 0.36162498872727156,
+          "adopt_v2": 0.3816040698438883,
+          "forget_policy": 0.6393541116267443,
+          "rollback_old": 0.039250124245882034,
+          "seed_policy": 0.45016699004918337,
+          "start_fresh": 0.28108409605920315,
+          "start_pending": 0.18435402307659388,
+          "start_v1": 0.2497294917702675,
+          "start_v2": 0.20977039821445942,
+          "update_archive": 0.3802089486271143,
+          "update_policy": 0.6627500988543034
+        }
+      }
+    },
+    "by_split": {
+      "development": {
+        "plain": {
+          "calls": 12,
+          "success": 12
+        },
+        "versions": {
+          "calls": 12,
+          "success": 12
+        },
+        "full": {
+          "calls": 12,
+          "success": 12
+        }
+      },
+      "heldout": {
+        "plain": {
+          "calls": 18,
+          "success": 18
+        },
+        "versions": {
+          "calls": 18,
+          "success": 18
+        },
+        "full": {
+          "calls": 18,
+          "success": 18
+        }
+      }
+    },
+    "paired_task_discordances": {
+      "plain_vs_versions": {
+        "paired": 30,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "plain_vs_full": {
+        "paired": 30,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "versions_vs_full": {
+        "paired": 30,
+        "a_only": 0,
+        "b_only": 0
+      }
+    },
+    "by_domain": {
+      "backup_export": {
+        "plain": {
+          "calls": 6,
+          "success": 6
+        },
+        "versions": {
+          "calls": 6,
+          "success": 6
+        },
+        "full": {
+          "calls": 6,
+          "success": 6
+        }
+      },
+      "ci_runtime": {
+        "plain": {
+          "calls": 6,
+          "success": 6
+        },
+        "versions": {
+          "calls": 6,
+          "success": 6
+        },
+        "full": {
+          "calls": 6,
+          "success": 6
+        }
+      },
+      "deployment": {
+        "plain": {
+          "calls": 6,
+          "success": 6
+        },
+        "versions": {
+          "calls": 6,
+          "success": 6
+        },
+        "full": {
+          "calls": 6,
+          "success": 6
+        }
+      },
+      "developer_handoff": {
+        "plain": {
+          "calls": 6,
+          "success": 6
+        },
+        "versions": {
+          "calls": 6,
+          "success": 6
+        },
+        "full": {
+          "calls": 6,
+          "success": 6
+        }
+      },
+      "python_onboarding": {
+        "plain": {
+          "calls": 6,
+          "success": 6
+        },
+        "versions": {
+          "calls": 6,
+          "success": 6
+        },
+        "full": {
+          "calls": 6,
+          "success": 6
+        }
+      }
+    },
+    "case_results": [
+      {
+        "case_id": "developer_handoff--unrelated_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--unrelated_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--unrelated_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--concurrent_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--concurrent_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--concurrent_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--forget",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--forget",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--forget",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--delete_recreate",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--delete_recreate",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--delete_recreate",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--unrelated_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--unrelated_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--unrelated_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--forget",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--forget",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--forget",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--unrelated_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--unrelated_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--unrelated_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--rollback",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--rollback",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--rollback",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--forget",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--forget",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--forget",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--delete_recreate",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--delete_recreate",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--delete_recreate",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--delete_recreate",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--delete_recreate",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--delete_recreate",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--rollback",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--rollback",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--rollback",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--concurrent_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--concurrent_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--concurrent_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--rollback",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--rollback",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--rollback",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--unrelated_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--unrelated_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--unrelated_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--forget",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--forget",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--forget",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--delete_recreate",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--delete_recreate",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--delete_recreate",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--concurrent_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--concurrent_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--concurrent_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--rollback",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--rollback",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--rollback",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--concurrent_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--concurrent_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "developer_handoff--concurrent_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--rollback",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--rollback",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--rollback",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--delete_recreate",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--delete_recreate",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--delete_recreate",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "backup_export--update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--concurrent_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--concurrent_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "deployment--concurrent_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "ci_runtime--update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--forget",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--forget",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--forget",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--unrelated_update",
+        "arm": "full",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--unrelated_update",
+        "arm": "plain",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      },
+      {
+        "case_id": "python_onboarding--unrelated_update",
+        "arm": "versions",
+        "task_success": true,
+        "stale_proposal": false,
+        "wrong_proposal": false,
+        "execution_blocked": false,
+        "protocol_error": null
+      }
+    ],
+    "errors": []
+  },
+  "audit": {
+    "audited_traces": 90,
+    "artifact_verifier_replayed": true,
+    "equal_current_sources": true,
+    "versions_full_inputs_identical": true
+  },
+  "pricing": {
+    "checked": "2026-10-04",
+    "source": "https://platform.kimi.com/docs/pricing/chat",
+    "cny_per_million_uncached_input": 6.5,
+    "cny_per_million_output": 27,
+    "estimated_cny_without_cache_discount": 0.201526,
+    "not_billing_statement": true
+  },
+  "attempts": [
+    {
+      "case_id": "developer_handoff--unrelated_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:29:45.659019+00:00"
+    },
+    {
+      "case_id": "developer_handoff--unrelated_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:30:06.662717+00:00"
+    },
+    {
+      "case_id": "developer_handoff--unrelated_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:30:27.666624+00:00"
+    },
+    {
+      "case_id": "ci_runtime--concurrent_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:30:48.677505+00:00"
+    },
+    {
+      "case_id": "ci_runtime--concurrent_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:31:09.680691+00:00"
+    },
+    {
+      "case_id": "ci_runtime--concurrent_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:31:30.686453+00:00"
+    },
+    {
+      "case_id": "deployment--forget",
+      "arm": "full",
+      "started_at": "2026-10-04T12:31:51.687346+00:00"
+    },
+    {
+      "case_id": "deployment--forget",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:32:12.691998+00:00"
+    },
+    {
+      "case_id": "deployment--forget",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:32:33.695701+00:00"
+    },
+    {
+      "case_id": "python_onboarding--update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:32:54.696554+00:00"
+    },
+    {
+      "case_id": "python_onboarding--update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:33:15.701301+00:00"
+    },
+    {
+      "case_id": "python_onboarding--update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:33:36.705090+00:00"
+    },
+    {
+      "case_id": "ci_runtime--delete_recreate",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:33:57.709024+00:00"
+    },
+    {
+      "case_id": "ci_runtime--delete_recreate",
+      "arm": "full",
+      "started_at": "2026-10-04T12:34:18.710610+00:00"
+    },
+    {
+      "case_id": "ci_runtime--delete_recreate",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:34:39.713845+00:00"
+    },
+    {
+      "case_id": "ci_runtime--unrelated_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:35:00.711976+00:00"
+    },
+    {
+      "case_id": "ci_runtime--unrelated_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:35:21.711753+00:00"
+    },
+    {
+      "case_id": "ci_runtime--unrelated_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:35:42.713897+00:00"
+    },
+    {
+      "case_id": "backup_export--forget",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:36:03.714399+00:00"
+    },
+    {
+      "case_id": "backup_export--forget",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:36:24.715089+00:00"
+    },
+    {
+      "case_id": "backup_export--forget",
+      "arm": "full",
+      "started_at": "2026-10-04T12:36:45.716643+00:00"
+    },
+    {
+      "case_id": "backup_export--unrelated_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:37:06.719903+00:00"
+    },
+    {
+      "case_id": "backup_export--unrelated_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:37:27.724747+00:00"
+    },
+    {
+      "case_id": "backup_export--unrelated_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:37:48.728521+00:00"
+    },
+    {
+      "case_id": "deployment--rollback",
+      "arm": "full",
+      "started_at": "2026-10-04T12:38:09.733001+00:00"
+    },
+    {
+      "case_id": "deployment--rollback",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:38:30.733397+00:00"
+    },
+    {
+      "case_id": "deployment--rollback",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:38:51.738515+00:00"
+    },
+    {
+      "case_id": "developer_handoff--forget",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:39:12.738352+00:00"
+    },
+    {
+      "case_id": "developer_handoff--forget",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:39:33.738087+00:00"
+    },
+    {
+      "case_id": "developer_handoff--forget",
+      "arm": "full",
+      "started_at": "2026-10-04T12:39:54.741433+00:00"
+    },
+    {
+      "case_id": "developer_handoff--update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:40:15.741258+00:00"
+    },
+    {
+      "case_id": "developer_handoff--update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:40:36.743657+00:00"
+    },
+    {
+      "case_id": "developer_handoff--update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:40:57.743684+00:00"
+    },
+    {
+      "case_id": "python_onboarding--delete_recreate",
+      "arm": "full",
+      "started_at": "2026-10-04T12:41:18.746218+00:00"
+    },
+    {
+      "case_id": "python_onboarding--delete_recreate",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:41:39.747659+00:00"
+    },
+    {
+      "case_id": "python_onboarding--delete_recreate",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:42:00.747217+00:00"
+    },
+    {
+      "case_id": "backup_export--delete_recreate",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:42:21.748583+00:00"
+    },
+    {
+      "case_id": "backup_export--delete_recreate",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:42:42.751813+00:00"
+    },
+    {
+      "case_id": "backup_export--delete_recreate",
+      "arm": "full",
+      "started_at": "2026-10-04T12:43:03.757202+00:00"
+    },
+    {
+      "case_id": "ci_runtime--rollback",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:43:24.762005+00:00"
+    },
+    {
+      "case_id": "ci_runtime--rollback",
+      "arm": "full",
+      "started_at": "2026-10-04T12:43:45.764489+00:00"
+    },
+    {
+      "case_id": "ci_runtime--rollback",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:44:06.765821+00:00"
+    },
+    {
+      "case_id": "python_onboarding--concurrent_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:44:27.767194+00:00"
+    },
+    {
+      "case_id": "python_onboarding--concurrent_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:44:48.771762+00:00"
+    },
+    {
+      "case_id": "python_onboarding--concurrent_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:45:09.776510+00:00"
+    },
+    {
+      "case_id": "developer_handoff--rollback",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:45:30.777620+00:00"
+    },
+    {
+      "case_id": "developer_handoff--rollback",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:45:51.782080+00:00"
+    },
+    {
+      "case_id": "developer_handoff--rollback",
+      "arm": "full",
+      "started_at": "2026-10-04T12:46:12.786593+00:00"
+    },
+    {
+      "case_id": "deployment--unrelated_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:46:33.789106+00:00"
+    },
+    {
+      "case_id": "deployment--unrelated_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:46:54.793457+00:00"
+    },
+    {
+      "case_id": "deployment--unrelated_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:47:15.795881+00:00"
+    },
+    {
+      "case_id": "ci_runtime--forget",
+      "arm": "full",
+      "started_at": "2026-10-04T12:47:36.800158+00:00"
+    },
+    {
+      "case_id": "ci_runtime--forget",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:47:57.802717+00:00"
+    },
+    {
+      "case_id": "ci_runtime--forget",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:48:18.803524+00:00"
+    },
+    {
+      "case_id": "developer_handoff--delete_recreate",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:48:39.807677+00:00"
+    },
+    {
+      "case_id": "developer_handoff--delete_recreate",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:49:00.810150+00:00"
+    },
+    {
+      "case_id": "developer_handoff--delete_recreate",
+      "arm": "full",
+      "started_at": "2026-10-04T12:49:21.809514+00:00"
+    },
+    {
+      "case_id": "backup_export--concurrent_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:49:42.813768+00:00"
+    },
+    {
+      "case_id": "backup_export--concurrent_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:50:03.815329+00:00"
+    },
+    {
+      "case_id": "backup_export--concurrent_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:50:24.815909+00:00"
+    },
+    {
+      "case_id": "python_onboarding--rollback",
+      "arm": "full",
+      "started_at": "2026-10-04T12:50:45.816114+00:00"
+    },
+    {
+      "case_id": "python_onboarding--rollback",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:51:06.544328+00:00"
+    },
+    {
+      "case_id": "python_onboarding--rollback",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:51:27.544106+00:00"
+    },
+    {
+      "case_id": "developer_handoff--concurrent_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:51:48.547530+00:00"
+    },
+    {
+      "case_id": "developer_handoff--concurrent_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:52:09.552227+00:00"
+    },
+    {
+      "case_id": "developer_handoff--concurrent_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:52:30.551665+00:00"
+    },
+    {
+      "case_id": "deployment--update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:52:51.556409+00:00"
+    },
+    {
+      "case_id": "deployment--update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:53:12.559631+00:00"
+    },
+    {
+      "case_id": "deployment--update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:53:33.563806+00:00"
+    },
+    {
+      "case_id": "backup_export--rollback",
+      "arm": "full",
+      "started_at": "2026-10-04T12:53:54.564803+00:00"
+    },
+    {
+      "case_id": "backup_export--rollback",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:54:15.568952+00:00"
+    },
+    {
+      "case_id": "backup_export--rollback",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:54:36.573676+00:00"
+    },
+    {
+      "case_id": "deployment--delete_recreate",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:54:57.578184+00:00"
+    },
+    {
+      "case_id": "deployment--delete_recreate",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:55:18.580641+00:00"
+    },
+    {
+      "case_id": "deployment--delete_recreate",
+      "arm": "full",
+      "started_at": "2026-10-04T12:55:39.579892+00:00"
+    },
+    {
+      "case_id": "backup_export--update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:56:00.581067+00:00"
+    },
+    {
+      "case_id": "backup_export--update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:56:21.584684+00:00"
+    },
+    {
+      "case_id": "backup_export--update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:56:42.588314+00:00"
+    },
+    {
+      "case_id": "deployment--concurrent_update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:57:03.591581+00:00"
+    },
+    {
+      "case_id": "deployment--concurrent_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:57:24.594984+00:00"
+    },
+    {
+      "case_id": "deployment--concurrent_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:57:45.597141+00:00"
+    },
+    {
+      "case_id": "ci_runtime--update",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:58:06.597981+00:00"
+    },
+    {
+      "case_id": "ci_runtime--update",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:58:27.597657+00:00"
+    },
+    {
+      "case_id": "ci_runtime--update",
+      "arm": "full",
+      "started_at": "2026-10-04T12:58:48.597993+00:00"
+    },
+    {
+      "case_id": "python_onboarding--forget",
+      "arm": "versions",
+      "started_at": "2026-10-04T12:59:09.601688+00:00"
+    },
+    {
+      "case_id": "python_onboarding--forget",
+      "arm": "full",
+      "started_at": "2026-10-04T12:59:30.605431+00:00"
+    },
+    {
+      "case_id": "python_onboarding--forget",
+      "arm": "plain",
+      "started_at": "2026-10-04T12:59:51.608634+00:00"
+    },
+    {
+      "case_id": "python_onboarding--unrelated_update",
+      "arm": "full",
+      "started_at": "2026-10-04T13:00:12.612953+00:00"
+    },
+    {
+      "case_id": "python_onboarding--unrelated_update",
+      "arm": "plain",
+      "started_at": "2026-10-04T13:00:33.617445+00:00"
+    },
+    {
+      "case_id": "python_onboarding--unrelated_update",
+      "arm": "versions",
+      "started_at": "2026-10-04T13:00:54.621656+00:00"
+    }
+  ],
+  "trace_sha256": "5c494b49cd94268805cb6cb4bf6b5caf558754fb30a450c8e3fa47ce56c6c447",
+  "reporter_sha256": "e3028033025a27451c2bbb76db883eb1ed821bca050dc1a7437df81573892b2f",
+  "limits": [
+    "constructed configuration tasks",
+    "5 templates, not 30 independent domains",
+    "one model, one sample per case/arm",
+    "no external participants or system baseline",
+    "complete current facts; no retrieval/extraction challenge",
+    "scripted interleavings, not concurrent race or throughput test"
+  ]
+}

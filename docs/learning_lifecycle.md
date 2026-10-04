@@ -144,3 +144,21 @@ they are not evidence that the existing consistency policy improves task accurac
 Real developer handoffs, long-running contention and high dependency fanout remain
 separate validation work. No new user-study, model-quality or novelty claim is
 established by this optimization.
+
+## Follow-up pilot and pool shutdown
+
+The [frozen lifecycle task pilot](lifecycle_task_protocol.md) adds a strong lazy
+version-checking baseline that validates inherited dependencies at read, adoption
+and rollback. Its results are reported separately from the source-index storage
+benchmark. The baseline adapter supports the scripted event order, not arbitrary
+concurrent writers. See [the task report](../evals/reports/2026-10-04-lifecycle-tasks.md)
+and [external capability review](lifecycle_baseline_review.md).
+
+The expanded CI workload exposed retired r2d2 housekeeping workers waiting for
+delayed tasks after a store closed. SQLite pool schedulers now discard queued
+housekeeping when the last pool owner is released. Already-running tasks finish;
+application writes retain their pool ownership. This does not make `close` an
+in-flight request cancellation or promise a thread-join deadline. A 1,000-store
+reopen regression and a delayed-job release check cover the change. The pilot's
+frozen native build predates this resource fix; its recorded source/native hashes
+and model inputs remain unchanged.

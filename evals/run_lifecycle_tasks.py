@@ -365,6 +365,13 @@ def summarize(output):
     return summary
 
 
+def accounted_usage(response):
+    usage = response.get('usage', {})
+    keys = ('prompt_tokens', 'completion_tokens', 'total_tokens')
+    return (isinstance(usage, dict) and all(type(usage.get(k)) is int and usage[k] >= 0 for k in keys)
+            and usage['total_tokens'] == usage['prompt_tokens'] + usage['completion_tokens'])
+
+
 def run(output, client, *, resume=False):
     manifest = verify_freeze(output)
     suite = json.loads((output / 'suite.json').read_text(encoding='utf-8'))
@@ -378,9 +385,14 @@ def run(output, client, *, resume=False):
     rows_path = output / 'results.jsonl'
     responses_path = output / 'responses.jsonl'
     responses = [json.loads(line) for line in responses_path.read_text(encoding='utf-8').splitlines()] if responses_path.exists() else []
-    if len(responses) != len(attempts) or any(type(r['response'].get('usage', {}).get('total_tokens')) is not int for r in responses):
+    response_keys = {(r['case_id'], r['arm']) for r in responses}
+    if (len(responses) != len(attempts) or len(attempted) != len(attempts)
+            or len(response_keys) != len(responses) or response_keys != attempted
+            or any(not accounted_usage(r['response']) for r in responses)):
         raise ValueError('Cannot resume with an unaccounted attempt; retain evidence and start a separately documented run')
     used = sum(r['response']['usage']['total_tokens'] for r in responses)
+    completed = len(rows_path.read_text(encoding='utf-8').splitlines()) if rows_path.exists() else 0
+    dump(output / 'status.json', {'status': 'running', 'attempts': len(attempted), 'completed_calls': completed})
     last = None
     for row in inputs:
         key = (row['case_id'], row['arm'])
@@ -398,14 +410,16 @@ def run(output, client, *, resume=False):
             response = client.complete(row['messages'], max_tokens=manifest['max_completion_tokens'])
             append(output / 'responses.jsonl', {'case_id': key[0], 'arm': key[1], 'response': response})
             usage = response.get('usage', {})
-            if any(type(usage.get(k)) is not int or usage[k] < 0 for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')):
-                raise ValueError('Missing token accounting; response saved, run stopped')
+            if not accounted_usage(response):
+                raise ValueError('Missing token accounting or invalid usage; response saved, run stopped')
             if response.get('model') != MODEL:
                 raise ValueError('Unexpected response model; response saved, run stopped')
             grade = execute_and_grade(cases[key[0]], row, response, output / 'artifacts' / key[0] / key[1])
             record = {k: row[k] for k in ('case_id', 'arm', 'split', 'domain', 'event')}
             append(rows_path, {**record, 'response': response, **grade})
             used += usage['total_tokens']
+            completed += 1
+            dump(output / 'status.json', {'status': 'running', 'attempts': len(attempted), 'completed_calls': completed})
             print(json.dumps({**record, 'task_success': grade['task_success'], 'stale_proposal': grade['stale_proposal']}), flush=True)
         except Exception as exc:
             append(output / 'errors.jsonl', {'case_id': key[0], 'arm': key[1], 'error': str(exc), 'at': now()})
