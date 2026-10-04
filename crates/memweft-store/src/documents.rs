@@ -257,20 +257,6 @@ pub(crate) fn mutate_checked(
     })
 }
 
-fn references(value: &Value, key: &str) -> bool {
-    match value {
-        Value::Object(map) => map.iter().any(|(name, value)| {
-            (name == "source_keys"
-                && value
-                    .as_array()
-                    .is_some_and(|keys| keys.iter().any(|v| v == key)))
-                || references(value, key)
-        }),
-        Value::Array(items) => items.iter().any(|v| references(v, key)),
-        _ => false,
-    }
-}
-
 /// Caller holds an IMMEDIATE transaction changing or deleting the fact. A
 /// generation guard prevents in-flight evaluations from restoring stale material.
 pub(crate) fn invalidate_private_sources(
@@ -278,43 +264,26 @@ pub(crate) fn invalidate_private_sources(
     scope: &Scope,
     key: &str,
 ) -> StoreResult<()> {
-    let mut stmt = tx.prepare(
-        "SELECT document FROM memweft_documents WHERE tenant_id=? AND user_id=? AND agent_id=?
-        AND namespace >= '[\"learning\",' AND namespace < '[\"learning\"^'",
-    )?;
-    let rows = stmt.query_map(
-        params![scope.tenant_id, scope.user_id, scope.agent_id],
-        |r| r.get::<_, String>(0),
-    )?;
-    let mut docs = Vec::new();
-    for row in rows {
-        docs.push(serde_json::from_str::<Document>(&row?)?);
-    }
-    drop(stmt);
-    let mut epoch = None;
-    for mut doc in docs {
-        if doc.namespace.first().map(String::as_str) != Some("learning") {
-            continue;
-        }
+    let epoch = crate::learning_sources::epoch(tx, scope)?;
+    let docs = crate::learning_sources::dependents(tx, scope, None, key)?;
+    for (_, mut doc) in docs {
+        // The generation is maintained separately, as in the scan implementation.
         if doc.namespace == ["learning", "epoch"] && doc.key == "current" {
-            epoch = Some(doc);
             continue;
         }
-        if references(&doc.value, key) {
-            let namespace = serde_json::to_string(&doc.namespace)?;
-            if doc.namespace == ["learning", "active"] {
-                doc.value = Value::Null;
-                doc.revision = doc
-                    .revision
-                    .checked_add(1)
-                    .ok_or_else(|| StoreError::Storage("revision overflow".into()))?;
-                doc.updated_at = Utc::now();
-                tx.execute("UPDATE memweft_documents SET revision=?,document=? WHERE tenant_id=? AND user_id=? AND agent_id=? AND namespace=? AND key=?",
-                    params![doc.revision,serde_json::to_string(&doc)?,scope.tenant_id,scope.user_id,scope.agent_id,namespace,doc.key])?;
-            } else {
-                tx.execute("DELETE FROM memweft_documents WHERE tenant_id=? AND user_id=? AND agent_id=? AND namespace=? AND key=?",
-                    params![scope.tenant_id,scope.user_id,scope.agent_id,namespace,doc.key])?;
-            }
+        let namespace = serde_json::to_string(&doc.namespace)?;
+        if doc.namespace == ["learning", "active"] {
+            doc.value = Value::Null;
+            doc.revision = doc
+                .revision
+                .checked_add(1)
+                .ok_or_else(|| StoreError::Storage("revision overflow".into()))?;
+            doc.updated_at = Utc::now();
+            tx.execute("UPDATE memweft_documents SET revision=?,document=? WHERE tenant_id=? AND user_id=? AND agent_id=? AND namespace=? AND key=?",
+                params![doc.revision,serde_json::to_string(&doc)?,scope.tenant_id,scope.user_id,scope.agent_id,namespace,doc.key])?;
+        } else {
+            tx.execute("DELETE FROM memweft_documents WHERE tenant_id=? AND user_id=? AND agent_id=? AND namespace=? AND key=?",
+                params![scope.tenant_id,scope.user_id,scope.agent_id,namespace,doc.key])?;
         }
     }
     let now = Utc::now();

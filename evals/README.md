@@ -1135,6 +1135,48 @@ See the [measured report](reports/2026-09-22-confirmed-command.md). The publishe
 run is `data/evals/confirmed-command-v1-run1`; source and fixture hashes remain in
 the report, while raw model logs and databases stay Git-ignored.
 
+## Learning source lookup and invalidation
+
+The offline Rust runner isolates source lookup from unrelated learning-document
+scans. Build it in release mode and give each invocation a **new** directory:
+
+```bash
+cargo +1.89.0 build --release --locked -p memweft \
+  --example benchmark_learning_sources --example benchmark_learning_open
+mkdir -p data/learning-source-run
+target/release/examples/benchmark_learning_sources \
+  data/learning-source-run/indexed-1000-8 1000 20 8
+```
+
+Arguments are directory, facts per private/shared pool, timed repeats, and affected
+document count. The recorded matrix uses `(1000,8)`, `(10000,8)`, `(100000,8)` and
+`(10000,1000)`, with 20 samples after one warmup. It seeds the same number of
+unrelated learning documents as facts per pool. Source updates include commit and
+index maintenance; resetting dependents and checking outcomes are outside timings.
+The generated learning documents are storage fixtures, not model-generated strategies.
+
+For a paired comparison, build the identical example source against baseline
+`9029727` in an isolated checkout, archive the executable, then build the current
+runtime. Keep binaries as `baseline`/`indexed`, the shared source as `runner.rs`,
+and invocation directories as `BUILD-COUNT-FANOUT`. Each `BUILD-build.json` records
+`binary_sha256` and `runner_sha256`; the baseline manifest also records its commit.
+Run builds sequentially, and retain all `result.json` samples and databases.
+
+```bash
+python evals/report_learning_sources.py --input data/learning-source-run \
+  --output data/learning-source-run/report.json \
+  --upgrade-probe target/release/examples/benchmark_learning_open
+```
+
+The validator recomputes quantiles, checks timestamp-normalized authoritative-row
+equality and SQLite integrity, and measures startup/backfill on a **backup** of
+the baseline 100k fixture. It refuses to overwrite an existing migration run.
+Omit `--upgrade-probe` to verify existing migration evidence without rerunning it.
+First-open timing includes SDK initialization, excludes close; final disk sizes
+exclude temporary/WAL peaks. This is a warm single-client experiment, not a soak
+or model-quality evaluation. [Measured results](reports/2026-10-04-learning-sources.md)
+and [consistency assumptions](../docs/learning_lifecycle.md).
+
 ## README performance figures
 
 The versioned SVG/PNG figures read the measured WAL coordination and query

@@ -7,6 +7,13 @@ This preview adds required-fact retrieval without another schema migration.
 Keep the Git revision and native artifacts with each
 deployment so that the old and new builds can be identified independently.
 
+The October 4 source-index build also adds **learning dependency index v1**,
+including when recall is already v3. Its separate backfill preserves learning
+documents and installs transactional dependency triggers. All writers must have
+the new source-extraction function; v3 recall compatibility alone is insufficient
+for learning-document writes. Apply the backup/maintenance process below and read
+the [learning-index migration notes](learning_lifecycle.md#migration-and-operation).
+
 All Rust, Python, Node and CLI clients open the same SQLite schema. The first
 open with the new build automatically migrates it; there is no separate migration
 command or opt-out. The v3 migration preserves lexical ranking. The current
@@ -19,7 +26,7 @@ use `..Default::default()`.
 | No recall index | Backfill postings and bitmaps from authoritative facts | Unsupported |
 | Index v1 | Reorder postings, then backfill bitmaps | Rejected by v1/v2 SDKs |
 | Index v2 | Retain postings and item IDs; backfill bitmaps | Rejected by v1/v2 SDKs |
-| Index v3 | Reuse the existing index | Use a v3-capable build |
+| Index v3 | Reuse recall; newer builds may separately backfill learning dependencies | Check both recall and learning-index compatibility |
 
 Recall migration runs in one immediate transaction. Failure rolls back its
 version, tables, triggers and backfill. Other initialization, including document

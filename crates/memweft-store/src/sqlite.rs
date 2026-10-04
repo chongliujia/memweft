@@ -235,6 +235,7 @@ impl SqliteStore {
 
 fn configure_connection(conn: &mut Connection, use_wal: bool) -> Result<(), rusqlite::Error> {
     crate::indexed_recall::register(conn)?;
+    crate::learning_sources::register(conn)?;
     conn.set_prepared_statement_cache_capacity(64);
     conn.busy_timeout(std::time::Duration::from_secs(5))?;
     if use_wal {
@@ -500,6 +501,7 @@ fn ensure_schema(conn: &Connection) -> StoreResult<()> {
     }
 
     crate::indexed_recall::ensure_schema(conn)?;
+    crate::learning_sources::ensure_schema(conn)?;
     Ok(())
 }
 
@@ -519,6 +521,14 @@ impl Store for SqliteStore {
     }
     fn pool_facts(&self, scope: &Scope, pool: &str) -> StoreResult<Vec<crate::PoolFact>> {
         crate::pools::list(self, scope, pool)
+    }
+    fn pool_fact(&self, scope: &Scope, pool: &str, key: &str) -> StoreResult<Option<crate::PoolFact>> {
+        crate::pools::get(self, scope, pool, key)
+    }
+    fn has_active_fact(&self, scope: &Scope, key: &str) -> StoreResult<bool> {
+        self.with_connection(|conn| Ok(conn.prepare_cached(
+            "SELECT EXISTS(SELECT 1 FROM facts WHERE tenant_id=? AND user_id=? AND agent_id=? AND fact_key=? AND status='active')"
+        )?.query_row(rusqlite::params![scope.tenant_id,scope.user_id,scope.agent_id,key], |r| r.get(0))?))
     }
     fn put_pool_fact(&self, scope: &Scope, pool: &str, fact: Fact, expected: Option<u64>) -> StoreResult<crate::PoolFact> {
         let key = fact.fact_key.clone();

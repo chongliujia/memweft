@@ -211,7 +211,22 @@ The executor sees the shared port, while the planner's work style stays private.
 
 ## Performance
 
-The latest measurements are from **2026-09-27–28 on macOS arm64**, using Rust 1.89.0 release builds. Earlier Linux measurements are retained separately below. Results describe tested workloads, not production SLOs; gains are calculated only within each paired experiment.
+The latest learning-lifecycle measurements are from **2026-10-04**; retrieval and conversation measurements are from **2026-09-27–28**, on macOS arm64 using Rust 1.89.0 release builds. Earlier Linux measurements are retained separately below. Results describe tested workloads, not production SLOs; gains are calculated only within each paired experiment.
+
+### Learning sources and invalidation
+
+Exact source lookups and a transactional reverse dependency index avoid scanning
+unrelated facts and learning records. At 100k facts per pool, starting a job with
+one shared source fell from **127.914 to 0.092 ms p50**. With 100k unrelated learning
+documents, a shared-source update invalidating eight active records fell from
+**164.312 to 0.298 ms p50**. These are warm, single-client Rust API measurements.
+
+The tradeoff is **15.3%** more database space in this fixture and higher document
+write cost (0.031 → 0.102 ms p50). Invalidating 1,000 records still took about
+25 ms. First open adds a version-1 dependency-index backfill, separate from recall
+schema v3; upgrade writers together. The previously pinned preview artifacts do
+not include this change. [Full measurements](evals/reports/2026-10-04-learning-sources.md)
+· [Lifecycle semantics, limits and migration](docs/learning_lifecycle.md)
 
 ### One million facts: exact bitmap retrieval
 
@@ -345,6 +360,7 @@ The [two-day external trial guide](examples/handoff_app/TRIAL.md) and [participa
 | [Indexed retrieval](docs/indexed_retrieval.md) | Ranking, bounded loading, fallbacks and migration |
 | [Upgrade and recovery](docs/upgrade_v3.md) | Schema v3 compatibility, verified backups, migration checks and restoring the old build |
 | [Learning design](docs/rust_learning_and_integrations.md) | Evaluation gates, strategy lifecycle and integration |
+| [Learning lifecycle](docs/learning_lifecycle.md) | Dependency index, consistency arguments, cost model and research scope |
 | [Reference boundaries](docs/reference_boundaries.md) | Python input projection, content pins and information loss |
 | [Confirmed commands](docs/confirmed_commands.md) | Application confirmation, input binding, cancellation and execution checks |
 | [Async maintenance](docs/async_pipeline.md) | Checkpoint configuration, diagnostics and pipeline plans |

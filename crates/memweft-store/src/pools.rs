@@ -53,6 +53,15 @@ pub(crate) fn list(store: &SqliteStore, scope: &Scope, pool: &str) -> StoreResul
     })
 }
 
+pub(crate) fn get(store: &SqliteStore, scope: &Scope, pool: &str, key: &str) -> StoreResult<Option<PoolFact>> {
+    store.with_connection(|conn| {
+        let encoded: Option<String> = conn.prepare_cached(
+            "SELECT record FROM memweft_pool_facts WHERE tenant_id=? AND user_id=? AND pool_id=? AND fact_key=? AND record IS NOT NULL"
+        )?.query_row(params![scope.tenant_id,scope.user_id,pool,key], |r| r.get(0)).optional()?;
+        encoded.map(|s| serde_json::from_str(&s).map_err(StoreError::from)).transpose()
+    })
+}
+
 pub(crate) fn check_revisions(
     tx: &Transaction<'_>,
     scope: &Scope,
@@ -77,43 +86,11 @@ pub(crate) fn check_revisions(
     Ok(())
 }
 
-fn references(value: &Value, pool: &str, key: &str) -> bool {
-    match value {
-        Value::Object(map) => map.iter().any(|(name, value)| {
-            ((name == "source_pools" || name == "pool_revisions")
-                && value.as_array().is_some_and(|refs| {
-                    refs.iter().any(|r| r["pool_id"] == pool && r["key"] == key)
-                }))
-                || references(value, pool, key)
-        }),
-        Value::Array(values) => values.iter().any(|v| references(v, pool, key)),
-        _ => false,
-    }
-}
-
 /// Remove declared derivatives across actors, within this tenant and user only.
 /// Active pointers retain a revision tombstone, so in-flight updates conflict.
 fn invalidate(tx: &Transaction<'_>, scope: &Scope, pool: &str, key: &str) -> StoreResult<()> {
-    let mut stmt = tx.prepare(
-        "SELECT agent_id, document FROM memweft_documents
-        WHERE tenant_id=? AND user_id=?
-        AND namespace >= '[\"learning\",' AND namespace < '[\"learning\"^'",
-    )?;
-    let rows = stmt.query_map(params![scope.tenant_id, scope.user_id], |r| {
-        Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
-    })?;
-    let mut documents = Vec::new();
-    for row in rows {
-        let (agent, value) = row?;
-        documents.push((agent, serde_json::from_str::<crate::Document>(&value)?));
-    }
-    drop(stmt);
+    let documents = crate::learning_sources::dependents(tx, scope, Some(pool), key)?;
     for (agent, mut doc) in documents {
-        if doc.namespace.first().map(String::as_str) != Some("learning")
-            || !references(&doc.value, pool, key)
-        {
-            continue;
-        }
         let namespace = serde_json::to_string(&doc.namespace)?;
         if doc.namespace == ["learning", "active"] {
             doc.value = Value::Null;

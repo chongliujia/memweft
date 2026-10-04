@@ -104,6 +104,14 @@ Upgrade all writers together to obtain these invalidation semantics.
 
 Dependencies must be declared by the application. MemWeft cannot discover copies placed in arbitrary messages, external documents or model-generated text; those are not automatically removed.
 
+SQLite now checks source keys directly and maintains a reverse dependency index
+inside document transactions. Invalidation visits matching learning records;
+large dependency fanout still costs proportional work. First open backfills this
+separate version-1 index. Back up the database and upgrade all writers together:
+older connections lack the function needed by its document triggers. See the
+[lifecycle semantics and migration notes](learning_lifecycle.md) and
+[measured lookup, invalidation and write costs](../evals/reports/2026-10-04-learning-sources.md).
+
 ## TypeScript
 
 SDK options use camelCase; learning proposal fields and returned records use the shared snake_case wire format.

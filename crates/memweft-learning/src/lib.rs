@@ -197,9 +197,7 @@ impl Learning {
         for source in &proposal.source_pools {
             let record = self
                 .store
-                .pool_facts(&self.scope, &source.pool_id)?
-                .into_iter()
-                .find(|r| r.fact.fact_key == source.key)
+                .pool_fact(&self.scope, &source.pool_id, &source.key)?
                 .ok_or_else(|| invalid("proposal references a missing pool memory"))?;
             guards.push(PoolRevision {
                 pool_id: source.pool_id.clone(),
@@ -331,19 +329,8 @@ impl Learning {
             .find("epoch", "current")?
             .map(|d| d.revision)
             .unwrap_or(0);
-        if !proposal.source_keys.is_empty() {
-            let facts = self.store.list_facts(
-                &self.scope,
-                memweft_store::FactFilter {
-                    status: Some(vec![memweft_types::FactStatus::Active]),
-                    ..Default::default()
-                },
-            )?;
-            if proposal
-                .source_keys
-                .iter()
-                .any(|key| !facts.iter().any(|f| &f.fact_key == key))
-            {
+        for key in &proposal.source_keys {
+            if !self.store.has_active_fact(&self.scope, key)? {
                 return Err(invalid("proposal references a missing memory key"));
             }
         }

@@ -9,6 +9,7 @@ use std::sync::RwLock;
 
 mod composer;
 mod documents;
+mod learning_sources;
 mod pools;
 mod indexed_recall;
 mod lexical;
@@ -151,6 +152,16 @@ pub trait Store: Send + Sync {
     }
     fn pool_facts(&self, _scope: &Scope, _pool: &str) -> StoreResult<Vec<PoolFact>> {
         Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
+    }
+    /// Exact shared-source lookup. Backends may retain the enumeration fallback.
+    fn pool_fact(&self, scope: &Scope, pool: &str, key: &str) -> StoreResult<Option<PoolFact>> {
+        Ok(self.pool_facts(scope, pool)?.into_iter().find(|r| r.fact.fact_key == key))
+    }
+    /// Existing learning semantics require active status, not validity-at-now.
+    fn has_active_fact(&self, scope: &Scope, key: &str) -> StoreResult<bool> {
+        Ok(self.list_facts(scope, FactFilter {
+            status: Some(vec![memweft_types::FactStatus::Active]), ..Default::default()
+        })?.iter().any(|f| f.fact_key == key))
     }
     fn put_pool_fact(&self, _scope: &Scope, _pool: &str, _fact: Fact, _expected_revision: Option<u64>) -> StoreResult<PoolFact> {
         Err(StoreError::InvalidInput("memory pools require the sqlite backend".into()))
