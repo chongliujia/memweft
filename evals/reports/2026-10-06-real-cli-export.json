@@ -1,0 +1,115 @@
+{
+  "audit_code_policy": "Saved trial source snapshots are verified; current transport/native outside the fixed SDK are not required to match. No saved source is executed.",
+  "automatic_retries": 0,
+  "cli_commands": {
+    "get": 3,
+    "list": 3
+  },
+  "cli_failures": 0,
+  "cli_processes_during_model_task": 6,
+  "cli_processes_during_offline_preparation": 1,
+  "current_audit_source_sha256": {
+    "evals/output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+    "evals/real_cli_export_task.py": "97169a930c7fcd5eb8e0371236f94944be33b6329b63ba68f49d2c739acdb706",
+    "evals/report_real_cli_export.py": "52d284ae2680cb68aa3c4cb8e531d911558be045cc57523a82f25fdcaa733438"
+  },
+  "date": "2026-10-06",
+  "evidence_root": "data/multistep-real-cli-2026-10-04",
+  "export_runs": 1,
+  "external_humans": 0,
+  "frozen_at": "2026-10-04T14:02:31.287760+00:00",
+  "human_reviews": 0,
+  "independent_grade": {
+    "errors": [],
+    "external_humans": 0,
+    "model_comparison_claim": false,
+    "real_project_continuation_tasks": 1,
+    "task_success": true
+  },
+  "limitations": [
+    "One bounded export-plan task over an existing three-record ledger.",
+    "The trusted driver generated the export and hashes from actual CLI output; the model authored the plan.",
+    "A frozen local copy was read; the original database and pinned SDK were not modified.",
+    "Historical record contents were preserved, not revalidated as current project policy.",
+    "No external system comparison, human trial, causal memory-quality claim, or new CLI implementation."
+  ],
+  "max_completion_tokens": 1024,
+  "model": "kimi-k2.6",
+  "model_calls": 4,
+  "model_latency_ms": [
+    1189.317,
+    1519.677,
+    1794.011,
+    908.63
+  ],
+  "model_usage": {
+    "completion_tokens": 122,
+    "prompt_tokens": 3318,
+    "total_tokens": 3440
+  },
+  "original_source_hashes_unchanged": true,
+  "pre_run_cooldown": "Caller-owned 60s minimum; preceding experiment timing is outside this task evidence.",
+  "protocol_errors": 0,
+  "raw_evidence_sha256": {
+    "attempts.jsonl": "1069430d02a0eac354794c070cdb61ddb200540db8bc05edd233e0f94eae2c55",
+    "freeze.json": "12a2d7df24ac4e479365b9fd102c46402bd1b4413d4fb1feb1282951c4ea2c2d",
+    "initial.json": "1195c7471c8ce858e43b7e621fb8d1f7822721b9de1844d1a0c9ec284402cfb9",
+    "oracle.json": "41a151ee89a8917d137f2c60cda5f0f1fb08ff3626a21f5029f19abc342b836f",
+    "responses.jsonl": "dbdacdef132e12fd76ce88fec366d9baf521447efd67196907fb3f5c1a6352e0",
+    "result.json": "0b4aa1ddd5f630f7458f2704edd5e6a87158986292fe657ab40e619dc0e04957",
+    "source-manifest.json": "2828eff46213fa7abd355a2ec738db95e2ad77ccb692d485b9c2596d5ec51934",
+    "turns.jsonl": "269996716001ff15f6124aaf8cb19bf468ac8d93b7e6fcf8fa912451f2e36345"
+  },
+  "real_project_continuation_tasks": 1,
+  "records": [
+    {
+      "key": "memory.completeness",
+      "source": "docs/required_facts.md:42-46",
+      "value": "complete=true 只表示声明的键已进入上下文，不证明值正确、来源可信或业务条件齐全。"
+    },
+    {
+      "key": "package.provenance",
+      "source": "docs/preview_release.md:56-58",
+      "value": "Build records are not signed attestations or a reproducible-build guarantee."
+    },
+    {
+      "key": "release.channel",
+      "source": "README.md:23,333",
+      "value": "Use the SQLite developer preview 0.2.0-alpha.1 (Python 0.2.0a1) from downloadable CI artifacts; packages are not yet published to registries."
+    }
+  ],
+  "request_byte_cap": 64000,
+  "request_start_gaps_seconds": [
+    21.00303,
+    21.004616,
+    21.004496
+  ],
+  "reviewer_relationship": "Separate collaborating agent reviewed logs; this agent also implemented the task driver. Not an independent external evaluation.",
+  "run_completed_at": "2026-10-06T05:12:40.628239+00:00",
+  "run_started_at": "2026-10-06T05:11:36.687834+00:00",
+  "schema_version": 1,
+  "scope": {
+    "project": "memweft-public",
+    "user": "maintainer"
+  },
+  "sdk_pin": {
+    "machine": "arm64",
+    "platform": "darwin",
+    "python": "3.11.5",
+    "source_commit": "1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d",
+    "version": "0.2.0a1",
+    "wheel_sha256": "7dc4cb853752dc50d5f0a8e9f6c21385e5efb8c1e2c9a832403a91c5df0070e6"
+  },
+  "source_sha256": {
+    "evals/multistep_kimi.py": "c99b2528a3b348a5f7f966e2ce12ec1d708d00fb4dc6213476cf1110d35db3ed",
+    "evals/output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+    "evals/real_cli_export_task.py": "97169a930c7fcd5eb8e0371236f94944be33b6329b63ba68f49d2c739acdb706",
+    "examples/handoff_app/kimi_client.py": "8704c96a46cdd501aa6049aa63b1fd93d3e360b4e7e8abf1f4c0713715a60d2d"
+  },
+  "source_snapshot_date": "2026-10-02",
+  "task": "existing-project-decision-ledger-export",
+  "task_success": true,
+  "tool_errors": 0,
+  "tool_operations": 5,
+  "working_database_bytes_equal_original": true
+}

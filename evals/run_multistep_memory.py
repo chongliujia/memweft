@@ -15,7 +15,7 @@ from run_lifecycle_tasks import (ROOT, MODEL, accounted_usage, append, dump, nat
                                  now, prepare_case, read_api_key, sha)
 from output_contract import PROPOSAL_SCHEMA, strict_json_loads
 from multistep_fixture import cases, create_fixture, grade, smoke, _file
-from multistep_kimi import BoundedKimiClient, RateLimited
+from multistep_kimi import BoundedKimiClient, KimiResponseError, RateLimited
 
 ARMS = ('plain', 'versions', 'full', 'mem0')
 PROTOCOL = ROOT / 'docs/multistep_memory_protocol.md'
@@ -192,25 +192,59 @@ def final_grade(project, case, executions):
     return result
 
 
+def accounting_summary(responses, attempts, rate_limits):
+    """Separate known usage from incomplete request evidence, including crashes.
+
+    A recorded 429 is an explicit rejected request and is excluded from unanswered
+    attempts. No other transport/HTTP failure is presumed free. Token-derived
+    estimates remain estimates, not provider billing receipts.
+    """
+    keys = ('prompt_tokens', 'completion_tokens', 'total_tokens')
+    calls = [r.get('response') if isinstance(r.get('response'), dict) else {} for r in responses]
+    known = [r for r in calls if accounted_usage(r)]
+    def identity(row):
+        fields = ('case_id', 'arm', 'round', 'attempt')
+        return tuple(row[k] for k in fields) if all(k in row for k in fields) else None
+    answered = {identity(r) for r in responses} - {None}
+    rejected = {identity(r) for r in rate_limits} - {None}
+    unanswered = sum(identity(r) is None or identity(r) not in answered | rejected for r in attempts)
+    totals = {k: sum(r['usage'][k] for r in known) for k in keys}
+    unknown = len(calls) - len(known)
+    complete = unknown == 0 and unanswered == 0
+    model_unknown = sum(r.get('model') != MODEL for r in known)
+    priced = [r for r in known if r.get('model') == MODEL]
+    priced_cost = sum(r['usage']['prompt_tokens'] * 6.5 + r['usage']['completion_tokens'] * 27
+                      for r in priced) / 1e6
+    return {'known_usage': totals, 'usage': totals if complete else None,
+            'known_usage_responses': len(known), 'unknown_usage_responses': unknown,
+            'unanswered_attempts': unanswered, 'rate_limited_requests': len(rate_limits),
+            'usage_complete': complete, 'known_usage_responses_with_unknown_pricing': model_unknown,
+            'known_usage_estimated_cny_uncached': priced_cost,
+            'estimated_cny_uncached': priced_cost if complete and model_unknown == 0 else None}
+
+
 def summarize(output):
     results, turns = read_rows(output / 'results.jsonl'), read_rows(output / 'turns.jsonl')
     inputs, responses = read_rows(output / 'inputs.jsonl'), read_rows(output / 'responses.jsonl')
+    attempts, rate_limits = read_rows(output / 'attempts.jsonl'), read_rows(output / 'rate_limits.jsonl')
     summary = {'completed_tasks': len(results), 'model_calls': len(responses),
-               'requests': len(read_rows(output / 'attempts.jsonl')), 'by_arm': {}}
+               'requests': len(attempts), 'by_arm': {}}
     for arm in ARMS:
         rr, tt = [r for r in results if r['arm'] == arm], [t for t in turns if t['arm'] == arm]
         ii = [r for r in inputs if r['arm'] == arm]
-        calls = [r['response'] for r in responses if r['arm'] == arm]
+        response_rows = [r for r in responses if r['arm'] == arm]
+        calls = [r.get('response') if isinstance(r.get('response'), dict) else {} for r in response_rows]
+        latencies = [r['latency_ms'] for r in calls if type(r.get('latency_ms')) in (int, float)]
         summary['by_arm'][arm] = {'tasks': len(rr), 'success': sum(r['task_success'] for r in rr),
             'stale_returned': sum(r['stale_returned'] for r in ii),
             'tasks_with_wrong_writes': len({t['case_id'] for t in tt if t['execution']['wrong_writes']}),
             'source_reads': sum(x.get('tool') == 'read_source' for t in tt for x in t['execution']['results']),
             'tool_operations': sum(len(t['execution']['results']) for t in tt), 'model_calls': len(calls),
             'protocol_errors': sum(t['execution']['protocol_error'] for t in tt),
-            'usage': {k: sum(r['usage'][k] for r in calls) for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')},
-            'http_median_ms': statistics.median(r['latency_ms'] for r in calls) if calls else None}
-    usage = {k: sum(r['usage'][k] for r in [x['response'] for x in responses]) for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')}
-    summary.update(usage=usage, estimated_cny_uncached=(usage['prompt_tokens'] * 6.5 + usage['completion_tokens'] * 27) / 1e6)
+            'http_median_ms': statistics.median(latencies) if latencies else None,
+            **accounting_summary(response_rows, [r for r in attempts if r['arm'] == arm],
+                                 [r for r in rate_limits if r['arm'] == arm])}
+    summary.update(accounting_summary(responses, attempts, rate_limits))
     summary['case_results'] = results
     summary['paired_success'] = {}
     keyed = {(r['case_id'], r['arm']): r['task_success'] for r in results}
@@ -259,6 +293,13 @@ def run(output, client):
                         if attempt == manifest['rate_limit_retries']:
                             raise
                         time.sleep(manifest['rate_limit_cooldown_seconds'])
+                    except KimiResponseError as error:
+                        append(output / 'responses.jsonl', {**turn_id, 'attempt': attempt,
+                                                           'response': error.response})
+                        if accounted_usage(error.response):
+                            count += 1
+                            used += error.response['usage']['total_tokens']
+                        raise
                 append(output / 'responses.jsonl', {**turn_id, 'attempt': attempt, 'response': response})
                 if not accounted_usage(response) or response.get('model') != MODEL:
                     raise ValueError('Unexpected model or invalid usage; response retained')
@@ -279,7 +320,14 @@ def run(output, client):
     except Exception as error:
         append(output / 'errors.jsonl', {'error': str(error), 'at': now()})
         dump(output / 'status.json', {'status': 'stopped_error', 'calls': count, 'requests': requests, 'tokens': used})
-        summarize(output)
+        try:
+            summarize(output)
+        except Exception as summary_error:
+            # Diagnostics must not replace the original API/budget failure.
+            try:
+                append(output / 'errors.jsonl', {'summary_error_type': type(summary_error).__name__, 'at': now()})
+            except Exception:
+                pass
         raise
     return summarize(output)
 

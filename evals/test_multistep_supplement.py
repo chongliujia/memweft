@@ -13,6 +13,12 @@ from run_multistep_memory import (ROOT, append, dump, initial_messages, native,
 
 class SupplementTests(unittest.TestCase):
     def setUp(self):
+        # These micro fixtures isolate preparation behavior. The full 60-task
+        # replay path is exercised separately by SupplementAuditTests below.
+        audit = patch('prepare_multistep_supplement.report_multistep_memory.audit',
+                      return_value={'test_micro_fixture_audit_stub': True})
+        audit.start()
+        self.addCleanup(audit.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.original = Path(self.temp.name) / 'original'
@@ -182,6 +188,108 @@ class SupplementTests(unittest.TestCase):
         self.assertTrue(hashes)
         self.assertTrue(all('\\' not in name for name in hashes))
         self.assertIn('sources/evals/multistep_fixture.py', hashes)
+
+
+class SupplementAuditTests(unittest.TestCase):
+    """Genuine report audit with synthetic completed-prefix/partial-turn logs."""
+    def setUp(self):
+        from test_report_multistep_memory import fixture_logs, replace_rows, rows
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.original = Path(self.temp.name) / 'original'
+        self.output = Path(self.temp.name) / 'supplement'
+        self.original.mkdir()
+        fixture_logs(self.original)
+        inputs = rows(self.original / 'inputs.jsonl')
+        completed, pending = inputs[:41], inputs[41]
+        task_key = lambda row: (row['case_id'], row['arm'])
+        finished = {task_key(row) for row in completed}
+        keep = lambda row: task_key(row) in finished or task_key(row) == task_key(pending) and row['round'] == 0
+        for name in ('responses', 'turns', 'attempts'):
+            path = self.original / (name + '.jsonl')
+            replace_rows(path, [row for row in rows(path) if keep(row)])
+        append(self.original / 'attempts.jsonl', {**SupplementTests.ident(pending),
+                                                'round': 1, 'attempt': 0, 'started_at': 'synthetic-unanswered'})
+        replace_rows(self.original / 'results.jsonl', rows(self.original / 'results.jsonl')[:41])
+        by_id = {case['id']: case for case in cases()}
+        for row in inputs[41:]:
+            project = self.original / 'tasks' / row['case_id'] / row['arm'] / 'project'
+            shutil.rmtree(project)
+            create_fixture(project, by_id[row['case_id']])
+            if task_key(row) == task_key(pending):
+                from run_multistep_memory import execute_actions
+                response = next(r['response'] for r in rows(self.original / 'responses.jsonl')
+                                if task_key(r) == task_key(row))
+                execute_actions(project, by_id[row['case_id']], row, response['content'], response['finish_reason'])
+        dump(self.original / 'status.json', {'status': 'stopped_error', 'calls': 83, 'requests': 84, 'tokens': 1660})
+        append(self.original / 'errors.jsonl', {'error': 'Kimi connection failed or timed out; no automatic retry was made.',
+                                              'at': 'synthetic-stop'})
+        (self.original / 'rate_limits.jsonl').touch()
+        path = self.original / 'freeze.json'
+        manifest = json.loads(path.read_text(encoding='utf-8'))
+        manifest.update(native_sha256=sha(Path(native.__file__)), interval_seconds=1.1)
+        dump(path, manifest)
+
+    def rewrite(self, name, transform):
+        path = self.original / (name + '.jsonl')
+        values = read_rows(path)
+        changed = transform(values)
+        path.write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in changed), encoding='utf-8')
+
+    def assert_rejected(self, pattern):
+        with self.assertRaisesRegex(ValueError, pattern):
+            prepare_supplement(self.original, self.output)
+        self.assertFalse(self.output.exists())
+
+    def test_full_replay_is_saved_before_selection(self):
+        before = tree_hashes(self.original)
+        manifest = prepare_supplement(self.original, self.output, expected_unfinished=19)
+        evidence = json.loads((self.output / 'original-audit.json').read_text(encoding='utf-8'))
+        self.assertEqual(evidence['completed_tasks'], 41)
+        self.assertEqual(evidence['model_calls'], 83)
+        self.assertEqual(evidence['interrupted_tasks'], 1)
+        self.assertEqual(len(evidence['unanswered_attempts']), 1)
+        for name in ('original_audit', 'original_auditor'):
+            self.assertEqual(sha(self.output / manifest['supplement'][name + '_file']),
+                             manifest['supplement'][name + '_sha256'])
+        self.assertEqual(len(read_rows(self.output / 'inputs.jsonl')), 19)
+        self.assertEqual(tree_hashes(self.original), before)
+
+    def test_deleted_final_result_cannot_be_reselected(self):
+        self.rewrite('results', lambda rows: rows[:-1])
+        self.assert_rejected('next unfinished task')
+
+    def test_reordered_results_are_not_a_completed_prefix(self):
+        self.rewrite('results', lambda rows: [rows[1], rows[0], *rows[2:]])
+        self.assert_rejected('completed prefix')
+
+    def test_changed_result_score_rejected(self):
+        def change(rows):
+            rows[0]['task_success'] = not rows[0]['task_success']
+            return rows
+        self.rewrite('results', change)
+        self.assert_rejected('Final result does not reproduce')
+
+    def test_changed_tool_turn_rejected(self):
+        def change(rows):
+            rows[0]['execution']['results'] = []
+            return rows
+        self.rewrite('turns', change)
+        self.assert_rejected('Tool execution does not reproduce')
+
+    def test_changed_actual_model_request_rejected(self):
+        def change(rows):
+            rows[0]['response']['request']['messages'][0]['content'] = 'changed'
+            return rows
+        self.rewrite('responses', change)
+        self.assert_rejected('Actual request or message history differs')
+
+    def test_changed_generated_artifact_rejected(self):
+        row = read_rows(self.original / 'inputs.jsonl')[0]
+        project = self.original / 'tasks' / row['case_id'] / row['arm'] / 'project'
+        path = project / row['files']['generated'][0]
+        path.write_text('{}', encoding='utf-8')
+        self.assert_rejected('On-disk final grade changed|On-disk artifact bytes differ')
 
 
 if __name__ == '__main__':

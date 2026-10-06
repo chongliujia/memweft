@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 import shutil
 
+import report_multistep_memory
 from run_multistep_memory import (ROOT, accounted_usage, create_fixture, dump,
                                   now, read_rows, sha, verify_freeze)
 
@@ -84,6 +85,13 @@ def prepare_supplement(original, output, *, expected_unfinished=None):
     if status.get('status') != 'stopped_error':
         raise ValueError('Only a stopped_error run may supply this supplement')
     before = tree_hashes(original)
+    # A stable snapshot alone cannot establish that the preexisting ledger is
+    # internally consistent. Replay it before deciding which tasks lack results.
+    auditor = Path(report_multistep_memory.__file__).resolve()
+    auditor_bytes = auditor.read_bytes()
+    original_audit = report_multistep_memory.audit(original, allow_partial=True)
+    if auditor.read_bytes() != auditor_bytes:
+        raise ValueError('Original-run auditor changed during replay')
     rows = read_rows(original / 'inputs.jsonl')
     results = read_rows(original / 'results.jsonl')
     all_ids, done = {task_id(row) for row in rows}, {task_id(row) for row in results}
@@ -96,6 +104,8 @@ def prepare_supplement(original, output, *, expected_unfinished=None):
     accounting = ledger(original, selected_ids)
     suite = {case['id']: case for case in json.loads((original / 'suite.json').read_text(encoding='utf-8'))['cases']}
     output.mkdir(parents=True, exist_ok=False)
+    dump(output / 'original-audit.json', original_audit)
+    (output / 'original-audit-reporter.py').write_bytes(auditor_bytes)
     shutil.copytree(original / 'sources', output / 'sources')
     shutil.copy2(original / 'suite.json', output / 'suite.json')
     # Preserve exact original JSONL bytes, including ordering and serialization.
@@ -145,6 +155,10 @@ def prepare_supplement(original, output, *, expected_unfinished=None):
     supplement = {
         'cohort_id': output.name, 'reason': 'Original frozen run stopped after a connection timeout; complete only tasks without final results.',
         'original_run': original_name,
+        'original_audit_file': 'original-audit.json',
+        'original_audit_sha256': sha(output / 'original-audit.json'),
+        'original_auditor_file': 'original-audit-reporter.py',
+        'original_auditor_sha256': sha(output / 'original-audit-reporter.py'),
         **{'original_' + name + '_sha256': sha(original / (name + extension))
            for name, extension in [('freeze', '.json'), ('inputs', '.jsonl'), ('results', '.jsonl'),
                                    ('status', '.json'), ('attempts', '.jsonl'), ('responses', '.jsonl'),

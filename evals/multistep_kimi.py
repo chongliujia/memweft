@@ -20,6 +20,19 @@ class RateLimited(KimiError):
     status_code = 429
 
 
+class KimiResponseError(KimiError):
+    """An HTTP response arrived, but no usable completion can be executed.
+
+    Only accounting fields and the credential-free request are retained. This
+    permits persistence before stopping without saving arbitrary provider bodies.
+    """
+
+    def __init__(self, message, response):
+        super().__init__(message)
+        self.response = response
+        self.usage = response.get('usage')
+
+
 class BoundedKimiClient(KimiClient):
     """Keep the example's transport restrictions with a 1,024-token budget."""
 
@@ -63,7 +76,30 @@ class BoundedKimiClient(KimiClient):
             if not isinstance(content, str) or not content.strip():
                 raise ValueError
         except (KeyError, IndexError, TypeError, ValueError):
-            raise KimiError("Kimi returned no text completion.") from None
+            metadata = raw if isinstance(raw, dict) else {}
+            def safe_text(value):
+                if not isinstance(value, str):
+                    return None
+                value = value.replace(self._api_key, '[REDACTED]')
+                value = re.sub(r'sk-[A-Za-z0-9_-]+', '[REDACTED]', value)
+                return re.sub(r'[\x00-\x1f\x7f]', ' ', value)[:256]
+            usage = metadata.get('usage')
+            if isinstance(usage, dict):
+                # Missing/invalid quantities stay unknown, never coerced to zero.
+                usage = {k: v if type(v) is int else None for k in
+                         ('prompt_tokens', 'completion_tokens', 'total_tokens')
+                         for v in [usage.get(k)]}
+            else:
+                usage = None
+            choices = metadata.get('choices')
+            first = choices[0] if isinstance(choices, list) and choices and isinstance(choices[0], dict) else {}
+            response = {'request': payload, 'content': None, 'usage': usage,
+                        'response_id': safe_text(metadata.get('id')),
+                        'model': safe_text(metadata.get('model')),
+                        'finish_reason': safe_text(first.get('finish_reason')),
+                        'latency_ms': round((time.perf_counter() - start) * 1000, 3),
+                        'response_error': 'missing_or_empty_completion'}
+            raise KimiResponseError('Kimi returned no text completion.', response) from None
         return {
             "request": payload,
             "content": content,
