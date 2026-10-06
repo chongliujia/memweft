@@ -1,9 +1,9 @@
 use std::{io, path::Path, time::Duration};
 
 /// Remove a test database only after all of its Memory/UserMemory handles drop.
-/// r2d2's initializer/reaper can briefly retain a pool Arc after the last owner
-/// drops. Windows cannot unlink the database until those connections close.
-/// This is bounded test cleanup, not a synchronous SDK shutdown guarantee.
+/// The last SqliteStore owner now waits for its own pool connections to close.
+/// Keep this historical, Windows-only sharing-violation retry for integration
+/// cleanup; storage regressions separately require immediate database removal.
 pub fn remove_database(path: impl AsRef<Path>) -> io::Result<()> {
     remove_with_retry(
         || std::fs::remove_file(path.as_ref()),

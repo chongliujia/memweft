@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-06",
+  "interpretation": "Descriptive coverage inventory across two interrupted cohorts and one completed continuation, not one uninterrupted run or causal quality comparison.",
+  "planned_unique_tasks": 60,
+  "completed_unique_tasks": 60,
+  "strict_success": 51,
+  "remaining_unique_tasks": [],
+  "by_arm_descriptive": {
+    "plain": {
+      "tasks": 15,
+      "success": 13,
+      "artifact_only_success": 15,
+      "missing_final_public_run": 2,
+      "tasks_with_wrong_writes": 0,
+      "source_reads": 15,
+      "model_calls": 59
+    },
+    "versions": {
+      "tasks": 15,
+      "success": 12,
+      "artifact_only_success": 15,
+      "missing_final_public_run": 3,
+      "tasks_with_wrong_writes": 0,
+      "source_reads": 15,
+      "model_calls": 54
+    },
+    "full": {
+      "tasks": 15,
+      "success": 13,
+      "artifact_only_success": 15,
+      "missing_final_public_run": 2,
+      "tasks_with_wrong_writes": 0,
+      "source_reads": 16,
+      "model_calls": 60
+    },
+    "mem0": {
+      "tasks": 15,
+      "success": 13,
+      "artifact_only_success": 15,
+      "missing_final_public_run": 2,
+      "tasks_with_wrong_writes": 0,
+      "source_reads": 16,
+      "model_calls": 57
+    }
+  },
+  "cohorts": [
+    {
+      "report": "2026-10-06-multistep-memory-partial.json",
+      "sha256": "38504226105cd9a04d7724e1f1349a1c67edd3628324e7990fc7f470e1567395",
+      "planned_tasks": 60,
+      "completed_tasks": 41,
+      "model_calls": 155,
+      "requests": 205,
+      "known_reported_subtotal_cny_uncached": 1.0045605,
+      "unanswered_attempts": [
+        {
+          "case_id": "export-forget",
+          "arm": "mem0",
+          "domain": "export",
+          "event": "forget",
+          "round": 2,
+          "attempt": 0,
+          "started_at": "2026-10-04T18:23:08.917648+00:00"
+        }
+      ]
+    },
+    {
+      "report": "2026-10-06-multistep-memory-supplement.json",
+      "sha256": "ff1aa5deb7d08be1a5ba254278918b9d19ae5031486a43b83375a76458a3ea3e",
+      "planned_tasks": 19,
+      "completed_tasks": 9,
+      "model_calls": 36,
+      "requests": 37,
+      "known_reported_subtotal_cny_uncached": 0.214326,
+      "unanswered_attempts": [
+        {
+          "case_id": "handoff-delete_recreate",
+          "arm": "full",
+          "domain": "handoff",
+          "event": "delete_recreate",
+          "round": 2,
+          "attempt": 0,
+          "started_at": "2026-10-06T08:21:37.239556+00:00"
+        }
+      ]
+    },
+    {
+      "report": "2026-10-06-multistep-memory-continuation.json",
+      "sha256": "a5a83c40747446558c929df5ed26af7ea6c3fdc44cb4f3f699d389848c96943c",
+      "planned_tasks": 10,
+      "completed_tasks": 10,
+      "model_calls": 39,
+      "requests": 39,
+      "known_reported_subtotal_cny_uncached": 0.2278975,
+      "unanswered_attempts": []
+    }
+  ],
+  "known_model_usage": {
+    "prompt_tokens": 185156,
+    "completion_tokens": 9010,
+    "total_tokens": 194166
+  },
+  "model_calls_with_response": 230,
+  "known_reported_subtotal_cny_uncached": 1.446784,
+  "unanswered_requests": 2,
+  "total_usage": null,
+  "total_billing_cost": null,
+  "real_cli": {
+    "report": "2026-10-06-real-cli-export.json",
+    "sha256": "9e4ed2fe2c12868ca2af157a968c4789592c96dc583de2136b94f64ac0f9cfd5",
+    "success": true,
+    "model_calls": 4,
+    "usage": {
+      "completion_tokens": 122,
+      "prompt_tokens": 3318,
+      "total_tokens": 3440
+    },
+    "posthoc_estimate_cny_uncached_using_v2_prices": 0.024861
+  },
+  "combined_known_reported_estimate_cny_uncached": 1.471645,
+  "pricing_note": "Uncached input 6.5 CNY/M, output 27 CNY/M as frozen in v2 on 2026-10-04; real CLI monetary estimate is post-hoc. Not a billing receipt.",
+  "runtime_commit": "8f460291746fbe0ac713113fa1e36f8fc176df71",
+  "power_evidence": "data/multistep-audit-2026-10-06/supplement-power-events.json",
+  "wall_time_limitation": "Local pmset log confirms clamshell sleep and periodic dark wake in the supplemental run. Idle-sleep prevention was active but did not prevent clamshell sleep; no storage/model throughput claim from total wall time.",
+  "external_humans": 0,
+  "paper_claim_supported": "Lifecycle consistency and reproducible bounded workflow evidence; no demonstrated causal task-quality improvement or superiority to semantic Mem0/Graphiti."
+}

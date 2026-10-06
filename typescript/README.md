@@ -47,6 +47,10 @@ console.log((await chat.context({ query: "Explain ownership", maxTokens: 1000 })
 
 `user.memories()`, `user.forget(key)`, `chat.messages()` and `chat.clear()` support inspection and deletion. `user.learning` provides `feedback`, `start`, `submit`, `get`, `jobs`, `cancel`, `active`, and `rollback`. Learning request/result fields use the shared Rust/Python snake_case contract; ordinary SDK options use camelCase.
 
+Call `memory.close()` when finished, normally in `finally`. Releasing the last
+owner of a SQLite store waits for its checkpoint worker and pooled connections
+to close. Other open stores or still-live shared owners retain their resources.
+
 `await chat.context({ query: "current deployment port", maxFacts: 30 })` ranks
 facts by lexical relevance before applying context limits. Inspect
 `context.explain().recall` for matched terms and scores. `LangGraphMemory.context`

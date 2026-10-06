@@ -3,15 +3,16 @@ use memweft_types::{
     CompressionLevel, Episode, Fact, FactStatus, InsightItem, InsightTrigger, InsightType,
     MemoryPacket, Procedure, Scope, ScopeLevel, ValidationState, WorkingState,
 };
-use r2d2::Pool;
+use r2d2::{ManageConnection, Pool, PooledConnection};
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::types::{Type, Value as SqlValue};
 use rusqlite::{params_from_iter, Connection, OptionalExtension};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashSet;
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Condvar, Mutex};
 
 use crate::{
     EpisodeFilter, Event, EventKind, FactFilter, InsightFilter, StmState, Store, StoreError,
@@ -30,6 +31,112 @@ fn pool_workers() -> Arc<scheduled_thread_pool::ScheduledThreadPool> {
         .thread_name_pattern("memweft-pool-{}")
         .on_drop_behavior(scheduled_thread_pool::OnPoolDropBehavior::DiscardPendingScheduled)
         .build())
+}
+
+#[derive(Default)]
+struct PoolClosed {
+    finished: Mutex<bool>,
+    ready: Condvar,
+}
+
+struct PoolLifetime(Arc<PoolClosed>);
+
+impl Drop for PoolLifetime {
+    fn drop(&mut self) {
+        let mut finished = self.0.finished.lock().unwrap_or_else(|err| err.into_inner());
+        *finished = true;
+        self.0.ready.notify_all();
+    }
+}
+
+struct TrackedSqliteConnection {
+    // Fields drop in declaration order: close SQLite before releasing the guard.
+    connection: Connection,
+    _lifetime: Arc<PoolLifetime>,
+}
+
+impl Deref for TrackedSqliteConnection {
+    type Target = Connection;
+
+    fn deref(&self) -> &Self::Target { &self.connection }
+}
+
+impl DerefMut for TrackedSqliteConnection {
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.connection }
+}
+
+struct TrackedSqliteManager {
+    // The manager can also own an in-memory keepalive connection.
+    manager: SqliteConnectionManager,
+    lifetime: Arc<PoolLifetime>,
+}
+
+impl ManageConnection for TrackedSqliteManager {
+    type Connection = TrackedSqliteConnection;
+    type Error = rusqlite::Error;
+
+    fn connect(&self) -> Result<Self::Connection, Self::Error> {
+        self.manager.connect().map(|connection| TrackedSqliteConnection {
+            connection,
+            _lifetime: self.lifetime.clone(),
+        })
+    }
+
+    fn is_valid(&self, connection: &mut Self::Connection) -> Result<(), Self::Error> {
+        self.manager.is_valid(&mut connection.connection)
+    }
+
+    fn has_broken(&self, connection: &mut Self::Connection) -> bool {
+        self.manager.has_broken(&mut connection.connection)
+    }
+}
+
+// Keep pool clones and checked-out connections private to synchronous store
+// operations: dropping this owner waits for every connection in this pool.
+struct SqlitePool {
+    pool: Option<Pool<TrackedSqliteManager>>,
+    closed: Arc<PoolClosed>,
+}
+
+impl SqlitePool {
+    fn new(manager: SqliteConnectionManager, max_size: u32) -> StoreResult<Self> {
+        Self::build_with(manager, |manager| {
+            Pool::builder().max_size(max_size).thread_pool(pool_workers()).build(manager)
+        })
+    }
+
+    fn build_with(
+        manager: SqliteConnectionManager,
+        build: impl FnOnce(TrackedSqliteManager) -> Result<Pool<TrackedSqliteManager>, r2d2::Error>,
+    ) -> StoreResult<Self> {
+        let closed = Arc::new(PoolClosed::default());
+        let manager = TrackedSqliteManager {
+            manager,
+            lifetime: Arc::new(PoolLifetime(closed.clone())),
+        };
+        let mut owner = Self { pool: None, closed };
+        // On build failure, owner still waits for any in-flight initializer.
+        owner.pool = Some(build(manager).map_err(|err| StoreError::Storage(err.to_string()))?);
+        Ok(owner)
+    }
+
+    fn get(&self) -> Result<PooledConnection<TrackedSqliteManager>, r2d2::Error> {
+        self.pool.as_ref().expect("pool is present until drop").get()
+    }
+}
+
+impl Drop for SqlitePool {
+    fn drop(&mut self) {
+        drop(self.pool.take());
+        // r2d2's running initializer/reaper can retain the final pool Arc.
+        // Its manager and every connection share a guard; the last guard only
+        // signals after all SQLite handles owned by this pool have closed.
+        // Queued jobs only hold Weak references and cannot prolong this wait.
+        let mut finished = self.closed.finished.lock().unwrap_or_else(|err| err.into_inner());
+        while !*finished {
+            finished = self.closed.ready.wait(finished).unwrap_or_else(|err| err.into_inner());
+        }
+    }
 }
 
 /// Storage-level options, independent of Agent memory-pool bindings.
@@ -65,7 +172,7 @@ pub struct SqliteStore {
     path: PathBuf,
     // Stop/join maintenance before closing the pool's connections.
     checkpoint: Option<crate::checkpoint::Checkpointer>,
-    pool: Pool<SqliteConnectionManager>,
+    pool: SqlitePool,
 }
 
 impl std::fmt::Debug for SqliteStore {
@@ -116,8 +223,7 @@ impl SqliteStore {
                 if background { conn.pragma_update(None, "wal_autocheckpoint", 0)?; }
                 Ok(())
             });
-        let pool = Pool::builder().thread_pool(pool_workers()).build(manager)
-            .map_err(|err| StoreError::Storage(err.to_string()))?;
+        let pool = SqlitePool::new(manager, 10)?;
         
         Ok(Self {
             path,
@@ -132,8 +238,7 @@ impl SqliteStore {
         // Shared-cache memory databases return SQLITE_LOCKED (not SQLITE_BUSY),
         // so busy_timeout cannot serialize concurrent writers. One connection
         // keeps in-memory semantics deterministic; file stores retain their pool.
-        let pool = Pool::builder().max_size(1).thread_pool(pool_workers()).build(manager)
-            .map_err(|err| StoreError::Storage(err.to_string()))?;
+        let pool = SqlitePool::new(manager, 1)?;
             
         let mut conn = pool.get().map_err(|err| StoreError::Storage(err.to_string()))?;
         ensure_schema(&mut conn)?;
@@ -1669,6 +1774,117 @@ fn parse_enum<T>(value: &str, parser: fn(&str) -> Option<T>) -> rusqlite::Result
 
 #[cfg(test)]
 mod tests {
+    fn shutdown_test_path() -> std::path::PathBuf {
+        static NEXT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+        std::env::temp_dir().join(format!("memweft-pool-close-{}-{}.db",
+            std::process::id(), NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)))
+    }
+
+    #[test]
+    fn pool_close_waits_for_running_initializer_and_sqlite_destructor() {
+        use std::sync::{mpsc, Barrier};
+        use std::time::Duration;
+
+        struct ConnectionDrop {
+            started: mpsc::Sender<()>,
+            release: Arc<Barrier>,
+        }
+        impl Drop for ConnectionDrop {
+            fn drop(&mut self) {
+                self.started.send(()).unwrap();
+                self.release.wait();
+            }
+        }
+
+        let path = shutdown_test_path();
+        let (init_started, init_ready) = mpsc::channel();
+        let init_release = Arc::new(Barrier::new(2));
+        let worker_init_release = init_release.clone();
+        let (drop_started, drop_ready) = mpsc::channel();
+        let drop_release = Arc::new(Barrier::new(2));
+        let worker_drop_release = drop_release.clone();
+        let manager = SqliteConnectionManager::file(&path).with_init(move |connection| {
+            // SQLite drops a scalar function's captured values while closing
+            // the connection. Hold that destructor to test guard ordering too.
+            let probe = ConnectionDrop { started: drop_started.clone(), release: worker_drop_release.clone() };
+            connection.create_scalar_function("close_probe", 0, rusqlite::functions::FunctionFlags::SQLITE_UTF8,
+                move |_| { let _keep_alive = &probe; Ok(0_i64) })?;
+            init_started.send(()).unwrap();
+            worker_init_release.wait();
+            Ok(())
+        });
+        let pool = SqlitePool::build_with(manager, |manager| Ok(Pool::builder()
+            .max_size(1).thread_pool(pool_workers()).build_unchecked(manager))).unwrap();
+        init_ready.recv_timeout(Duration::from_secs(5)).unwrap();
+        let (close_started, closing) = mpsc::channel();
+        let (close_finished, closed) = mpsc::channel();
+        let closer = std::thread::spawn(move || {
+            close_started.send(()).unwrap();
+            drop(pool);
+            close_finished.send(()).unwrap();
+        });
+        closing.recv_timeout(Duration::from_secs(5)).unwrap();
+        let during_init = closed.recv_timeout(Duration::from_millis(100));
+        init_release.wait();
+        drop_ready.recv_timeout(Duration::from_secs(5)).unwrap();
+        let during_sqlite_drop = closed.recv_timeout(Duration::from_millis(100));
+        drop_release.wait();
+        assert_eq!(during_init, Err(mpsc::RecvTimeoutError::Timeout));
+        assert_eq!(during_sqlite_drop, Err(mpsc::RecvTimeoutError::Timeout));
+        closed.recv_timeout(Duration::from_secs(5)).unwrap();
+        closer.join().unwrap();
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn pool_build_failure_waits_for_running_initializer() {
+        use std::sync::{mpsc, Barrier};
+        use std::time::Duration;
+
+        let path = shutdown_test_path();
+        let (init_started, init_ready) = mpsc::channel();
+        let init_release = Arc::new(Barrier::new(2));
+        let worker_release = init_release.clone();
+        let manager = SqliteConnectionManager::file(&path).with_init(move |_| {
+            init_started.send(()).unwrap();
+            worker_release.wait();
+            Err(rusqlite::Error::InvalidQuery)
+        });
+        let (finished, result) = mpsc::channel();
+        let builder = std::thread::spawn(move || {
+            let pool = SqlitePool::build_with(manager, |manager| Pool::builder()
+                .max_size(1).connection_timeout(Duration::from_millis(20))
+                .thread_pool(pool_workers()).build(manager));
+            finished.send(pool.is_err()).unwrap();
+        });
+        init_ready.recv_timeout(Duration::from_secs(5)).unwrap();
+        let during_init = result.recv_timeout(Duration::from_millis(100));
+        init_release.wait();
+        assert_eq!(during_init, Err(mpsc::RecvTimeoutError::Timeout));
+        assert!(result.recv_timeout(Duration::from_secs(5)).unwrap());
+        builder.join().unwrap();
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn dropped_store_allows_immediate_database_removal() {
+        for background_checkpoint_ms in [None, Some(100)] {
+            for _ in 0..30 {
+                let path = shutdown_test_path();
+                let store = SqliteStore::new_with_options(&path, SqliteOptions {
+                    background_checkpoint_ms, ..Default::default()
+                }).unwrap();
+                store.with_connection(|connection| {
+                    connection.execute("CREATE TABLE shutdown_probe(value)", [])?;
+                    Ok(())
+                }).unwrap();
+                drop(store);
+                // In particular, Windows must not see ERROR_SHARING_VIOLATION.
+                std::fs::remove_file(path).unwrap();
+            }
+        }
+    }
+
     #[test]
     fn closed_pool_discards_delayed_housekeeping() {
         use std::sync::mpsc;

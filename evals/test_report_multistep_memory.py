@@ -101,27 +101,29 @@ def fixture_logs(output, rate_limited=False, diagnostic_case=False, blocked_with
                                  'requests': calls + int(rate_limited), 'tokens': calls * 20})
 
 
-def truncate_after_unanswered_request(output):
+def truncate_after_unanswered_request(output, completed_count=1):
     """Preserve one completed task, one answered partial turn, then a timeout."""
     inputs = rows(output / 'inputs.jsonl')
-    first, pending = inputs[:2]
+    completed, pending = inputs[:completed_count], inputs[completed_count]
     task_key = lambda r: (r['case_id'], r['arm'])
-    keep = lambda r: task_key(r) == task_key(first) or task_key(r) == task_key(pending) and r['round'] == 0
+    finished = {task_key(r) for r in completed}
+    keep = lambda r: task_key(r) in finished or task_key(r) == task_key(pending) and r['round'] == 0
     for name in ('responses', 'turns', 'attempts'):
         path = output / (name + '.jsonl')
         replace_rows(path, [r for r in rows(path) if keep(r)])
     append(output / 'attempts.jsonl', {**{f: pending[f] for f in ('case_id', 'arm', 'domain', 'event')},
         'round': 1, 'attempt': 0, 'started_at': 'synthetic-unanswered'})
-    replace_rows(output / 'results.jsonl', rows(output / 'results.jsonl')[:1])
+    replace_rows(output / 'results.jsonl', rows(output / 'results.jsonl')[:completed_count])
     by_id = {c['id']: c for c in cases()}
-    for row in inputs[1:]:
+    for row in inputs[completed_count:]:
         project = output / 'tasks' / row['case_id'] / row['arm'] / 'project'
         shutil.rmtree(project)
         create_fixture(project, by_id[row['case_id']])
         if task_key(row) == task_key(pending):
             response = next(r['response'] for r in rows(output / 'responses.jsonl') if task_key(r) == task_key(row))
             execute_actions(project, by_id[row['case_id']], row, response['content'], response['finish_reason'])
-    dump(output / 'status.json', {'status': 'stopped_error', 'calls': 3, 'requests': 4, 'tokens': 60})
+    calls = len(rows(output / 'responses.jsonl'))
+    dump(output / 'status.json', {'status': 'stopped_error', 'calls': calls, 'requests': calls + 1, 'tokens': calls * 20})
     append(output / 'errors.jsonl', {'error': 'Kimi connection failed or timed out; no automatic retry was made.',
                                    'at': 'synthetic-stop'})
 
@@ -168,6 +170,50 @@ def fixture_supplement(original, output):
     freeze = json.loads((output / 'freeze.json').read_text())
     freeze.update(supplement=supplement, inputs_sha256=sha(output / 'inputs.jsonl'),
                   interval_seconds=21, max_requests=len(selected) * 12, max_successful_calls=len(selected) * 4)
+    dump(output / 'freeze.json', freeze)
+    count = len(rows(output / 'responses.jsonl'))
+    dump(output / 'status.json', {'status': 'completed', 'calls': count, 'requests': count, 'tokens': count * 20})
+
+
+def fixture_continuation(original, supplement, output):
+    """Third synthetic cohort keeps all prior finals, including failed ones."""
+    output.mkdir()
+    fixture_logs(output)
+    prior_paths = [original, supplement]
+    completed = [{k: row[k] for k in ('case_id', 'arm')} for prior in prior_paths for row in rows(prior / 'results.jsonl')]
+    completed_keys = {(row['case_id'], row['arm']) for row in completed}
+    selected = [r for r in rows(original / 'inputs.jsonl') if (r['case_id'], r['arm']) not in completed_keys]
+    selected_keys = {(r['case_id'], r['arm']) for r in selected}
+    for name in ('inputs', 'results', 'attempts', 'responses', 'turns'):
+        path = output / (name + '.jsonl')
+        replace_rows(path, [r for r in rows(path) if (r['case_id'], r['arm']) in selected_keys])
+    script = output / 'preparation/test_continuation.py'
+    script.parent.mkdir()
+    script.write_text('# Synthetic continuation preparation.\n')
+    dump(output / 'continuation-accounting.json', {'prior_total_cost_unknown': True})
+    original_freeze = json.loads((original / 'freeze.json').read_text())
+    shutil.copytree(original / 'sources', output / 'isolated-runtime')
+    support = output / 'isolated-runtime/python/src/memweft/support_fixture.py'
+    support.write_text('# Synthetic support fixture.\n')
+    launcher = output / 'run_frozen.py'
+    launcher.write_text('# Synthetic launch fixture.\n')
+    freeze = json.loads((output / 'freeze.json').read_text())
+    freeze.update(inputs_sha256=sha(output / 'inputs.jsonl'), interval_seconds=21,
+                  max_successful_calls=len(selected) * 4, max_requests=len(selected) * 12,
+                  continuation={'cohort_id': 'synthetic-third-cohort', 'original_run': original.name,
+                      'root_freeze_sha256': sha(original / 'freeze.json'),
+                      'prior_cohorts': [{'run': p.name, 'evidence_sha256':
+                          {n: sha(p / n) if (p / n).exists() else None for n in report.COHORT_EVIDENCE}} for p in prior_paths],
+                      'previous_completed_tasks': completed,
+                      'selected_tasks': [{k: r[k] for k in ('case_id', 'arm')} for r in selected],
+                      'context_restarted': True, 'retained_prior_partial_responses': True,
+                      'initial_messages_byte_equivalent': True, 'backend_preparation_copied_unchanged': True,
+                      'fixture_recreated_from_frozen_create_function': True,
+                      'preparation_script': script.relative_to(output).as_posix(), 'preparation_script_sha256': sha(script),
+                      'accounting_file': 'continuation-accounting.json', 'runtime_root': 'isolated-runtime',
+                      'runtime_source_sha256': original_freeze['source_sha256'],
+                      'runtime_support_sha256': {'support_fixture.py': sha(support)},
+                      'launcher': 'run_frozen.py', 'launcher_sha256': sha(launcher)})
     dump(output / 'freeze.json', freeze)
     count = len(rows(output / 'responses.jsonl'))
     dump(output / 'status.json', {'status': 'completed', 'calls': count, 'requests': count, 'tokens': count * 20})
@@ -324,6 +370,62 @@ class MultistepReportTests(unittest.TestCase):
             dump(output / 'freeze.json', freeze)
             with self.assertRaisesRegex(ValueError, 'all and only original unfinished'):
                 report.audit(output)
+
+    def continuation_fixture(self):
+        original, supplement, continuation = [self.root / name for name in ('previous', 'prior-supplement', 'third')]
+        original.mkdir(); supplement.mkdir()
+        fixture_logs(original, blocked_without_run=True)
+        truncate_after_unanswered_request(original, completed_count=5)
+        fixture_supplement(original, supplement)
+        truncate_after_unanswered_request(supplement)
+        fixture_continuation(original, supplement, continuation)
+        return original, supplement, continuation
+
+    def test_continuation_preserves_failed_finals_and_each_prior_unknown_cost(self):
+        original, supplement, continuation = self.continuation_fixture()
+        with patch.object(report, 'ROOT', self.root):
+            report.publish(continuation, continuation / 'third-report')
+        summary = json.loads((continuation / 'third-report.json').read_text())['summary']
+        self.assertEqual(summary['cohort_kind'], 'continuation')
+        self.assertEqual(summary['completed_tasks'], 54)
+        self.assertEqual(summary['model_calls'], 108)
+        reference = summary['continuation_reference']
+        self.assertEqual(reference['previous_completed_tasks'], 6)
+        self.assertEqual(len(reference['prior_unanswered_attempts']), 2)
+        self.assertEqual(reference['prior_known_reported_usage']['total_tokens'], 280)
+        self.assertFalse(reference['prior_usage_complete'])
+        self.assertFalse(reference['combined_cohorts'])
+        self.assertTrue(summary['usage_complete'])
+        self.assertFalse(rows(original / 'results.jsonl')[-1]['task_success'])
+        self.assertNotIn(('deploy-forget', 'plain'), {(r['case_id'], r['arm']) for r in rows(continuation / 'inputs.jsonl')})
+        self.assertIn('独立后续 cohort', (continuation / 'third-report.md').read_text())
+
+    def test_continuation_rejects_duplicate_finals_and_runtime_tampering(self):
+        original, supplement, continuation = self.continuation_fixture()
+        frozen_path = continuation / 'freeze.json'
+        frozen = json.loads(frozen_path.read_text())
+        runtime_file = continuation / 'isolated-runtime/evals/multistep_kimi.py'
+        before = runtime_file.read_bytes()
+        runtime_file.write_bytes(before + b'\n# tampered\n')
+        with patch.object(report, 'ROOT', self.root):
+            with self.assertRaisesRegex(ValueError, 'Isolated continuation runtime changed'):
+                report.audit(continuation)
+            runtime_file.write_bytes(before)
+            for relative, pattern in [('run_frozen.py', 'launcher changed'),
+                                      ('isolated-runtime/python/src/memweft/support_fixture.py', 'SDK support changed')]:
+                target = continuation / relative
+                saved = target.read_bytes()
+                target.write_bytes(saved + b'# tampered\n')
+                with self.assertRaisesRegex(ValueError, pattern):
+                    report.audit(continuation)
+                target.write_bytes(saved)
+            records = rows(supplement / 'results.jsonl')
+            records[0] = rows(original / 'results.jsonl')[0]
+            replace_rows(supplement / 'results.jsonl', records)
+            frozen['continuation']['prior_cohorts'][1]['evidence_sha256']['results.jsonl'] = sha(supplement / 'results.jsonl')
+            dump(frozen_path, frozen)
+            with self.assertRaisesRegex(ValueError, 'Duplicate final result across prior cohorts'):
+                report.audit(continuation)
 
     def test_snapshot_rejects_unsafe_platform_paths(self):
         freeze_path = self.root / 'freeze.json'

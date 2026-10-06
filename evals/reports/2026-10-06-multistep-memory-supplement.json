@@ -334,6 +334,7 @@
       "context_restarted": true,
       "combined_cohorts": false
     },
+    "continuation_reference": null,
     "original_planned_tasks": 60,
     "planned_tasks": 19,
     "completed_tasks": 9,
@@ -940,7 +941,7 @@
     }
   },
   "trace_sha256": "19feb705435cf33b373395e2d87c3484fab9ed7297c743540113bde5d4ea1333",
-  "reporter_sha256": "781e174842cc82149200479f2fa7f80f534b1e9cd1aa1967d441205cc4352c7c",
+  "reporter_sha256": "960f9660ced5808573b455b3a1837dae3a44537d44d51451ebf1fb88d79722cb",
   "replay_source_sha256": {
     "run_multistep_memory.py": "07b2f31f71f711aabf7f15b79891130d28fd43867bc71f985440ff4be48b6a2b",
     "multistep_fixture.py": "d925780d9c48b970b3b492d730580843890997aa667434d403639986e90931ef",

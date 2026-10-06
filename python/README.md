@@ -18,6 +18,11 @@ with Memory("data/memweft.db") as memory:
 
 The high-level API supports SQLite and an optional evaluated-learning workflow.
 
+Use the context manager or call `memory.close()` when finished. Releasing the
+last owner of a SQLite store waits for its checkpoint worker and pooled SQLite
+connections to close, including any in-flight pool initialization. Other open
+stores or still-live shared owners retain their own resources.
+
 ### Read structured facts
 
 `user.memories()` returns fact records, not just the values passed to `remember`.

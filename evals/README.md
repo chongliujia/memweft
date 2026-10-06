@@ -10,6 +10,14 @@ writes JSON files, and runs a trusted program. A separate final checker grades t
 actual artifacts. These 15 situations are derived from three templates; they are
 not 15 independent human tasks or an external developer study.
 
+The [October 6 evidence overview](reports/2026-10-06-multistep-memory-overview.md)
+records all 60 distinct final outcomes across two interrupted cohorts and a
+completed continuation. Nine completed tasks failed the frozen requirement to
+run after their last file modification, despite correct file contents. Both
+unknown-cost requests and the separate successful real CLI continuation remain
+visible. Each arm now covers all 15 cases; cross-day restarts and single samples
+do not establish causal task-quality superiority.
+
 Build/install the current MemWeft Python extension in the main `.venv` first. On a
 fresh checkout, use a separate Python 3.11 environment for the external backend:
 
@@ -41,7 +49,9 @@ The recipe was also checked in a second venv with system packages disabled:
 58 resolved packages installed successfully and the two actual Mem0 integration
 tests passed, using the same existing local model files. That check does not
 replace the original experiment's recorded environment or prove portability to
-other Python versions or operating systems.
+other Python versions or operating systems. The full verified version list is
+[`requirements-external-baseline-macos-arm64-py311.txt`](requirements-external-baseline-macos-arm64-py311.txt);
+it is platform-specific and does not include distribution hashes.
 
 Prepare all 60 inputs offline into a **new** output directory, then run that same
 frozen directory with the paid Kimi API:
@@ -78,6 +88,62 @@ outcomes and project artifacts remain in the run directory. The summary separate
 reports stale memory exposure, wrong writes, source queries, task success, usage
 and latency. A missing or failed task must not be counted as successful.
 
+Publish a complete run only after replaying every request, tool result and file:
+
+```bash
+PYTHONPATH=python/src .venv/bin/python evals/report_multistep_memory.py \
+  --input data/evals/multistep-new --prefix evals/reports/multistep-new
+```
+
+The report retains the frozen primary success definition. Artifact-only success
+and missing-public-run counts are explicitly labelled post-hoc diagnostics.
+Published 429 records preserve request identities while omitting account identifiers;
+raw local error logs and their hashes remain available for the audit.
+
+For a run stopped by a connection error, `--allow-partial` explicitly audits its
+completed prefix, interrupted task and unstarted suffix. It requires exactly one
+final unanswered attempt and replays every recorded response; missing outcomes
+are not scored as failed tasks. The total token cost remains unknown, alongside
+the reported-token subtotal. The [interrupted October 4 run](reports/2026-10-06-multistep-memory-partial.md)
+retains 41 completed outcomes, 155 responses and one unanswered attempt.
+
+An explicit supplemental cohort can restart only the unfinished tasks in a new
+directory. Its initial inputs and backend evidence come from the original frozen
+run; project files and model conversations start afresh. Completed failures are
+not selected again. The supplement uses 21-second request spacing and retains
+the original call, tool and grading contracts:
+
+```bash
+PYTHONPATH=python/src .venv/bin/python evals/prepare_multistep_supplement.py \
+  --original data/evals/multistep-new \
+  --output data/evals/multistep-supplement
+PYTHONPATH=python/src .venv/bin/python evals/run_multistep_memory.py run \
+  --output data/evals/multistep-supplement --prompt-key
+```
+
+Preparation still requires the original runtime and native hashes to match. A
+supplement is a separately declared restarted cohort, not an uninterrupted run;
+keep its report and cost ledger separate. Reporting re-audits the original cohort
+and verifies that every supplemental task was originally unfinished.
+The [supplemental run](reports/2026-10-06-multistep-memory-supplement.md) also stopped
+on a connection error. Local power logs confirm repeated clamshell sleep;
+unattended execution needs a continuously awake machine. This preparation helper
+does not silently chain further supplemental cohorts.
+
+The [final continuation](reports/2026-10-06-multistep-memory-continuation.md)
+completed the remaining 10 tasks, using the original frozen runner, client, SDK
+sources and native binary in an isolated runtime directory. The explicit
+`prepare_multistep_continuation.py` audits the ordered prior cohorts, excludes
+every existing final result, and records prior partial responses and unknown
+requests. Its `run_frozen.py --prompt-key` entry point executes that saved
+runtime; it does not switch a measurement to the subsequently patched client.
+
+After both trials stopped, accounting was hardened to preserve known response
+usage separately from unanswered requests, and preparation gained a complete
+audit before selecting unfinished tasks. The saved trial sources and outcomes
+were not changed. Reports replay against saved inputs and preserve source hashes
+so later transport fixes do not invalidate past evidence.
+
 The external arm uses Mem0's actual `add(infer=False)`, `update`, `get_all`, `get`,
 `delete` and `history` with local Qdrant persistence and real CPU embeddings.
 `get_all` performs exact metadata filtering, followed by ID-based `get`; no
@@ -86,6 +152,37 @@ addressing, source revision labels and strategy selection are application
 adaptation. Native atomic derived-policy invalidation and rollback are outside
 this common CRUD contract. The [baseline review](../docs/lifecycle_baseline_review.md)
 records the executed compatibility fixture and these interpretation limits.
+
+## Existing project ledger export continuation
+
+`real_cli_export_task.py` is one separate case using the previously delivered
+`decision_log.py` and the three actual public project records from 2026-10-02.
+It is not part of the constructed four-arm comparison and is not a human study.
+It requires the archived project and the original CPython 3.11/macOS arm64 SDK
+wheel pinned to `1ee6b3b`; it refuses a silently upgraded SDK.
+
+`prepare(output)` copies the original ledger and records hashes, source snapshots
+and an independent historical receipt. `run(output, client)` accepts a bounded
+Kimi client and gives the model read/write/run tools to discover records and
+write an export plan. A trusted driver performs actual read-only CLI `list/get`
+operations in separate processes and creates `handoff.json`; the checker verifies
+all records, sources, SDK provenance and preservation of the originals.
+The exported records describe that historical snapshot, not newly verified current
+project status. Never run `inspect` on the untouched model workspace before the
+experiment if doing so would pre-complete its discovery step.
+
+The case allows four calls with 21-second request-start spacing and no retries.
+The caller must leave at least 60 seconds after other jobs on a 3 RPM account.
+A used directory cannot be rerun; preserve its attempts, responses, CLI receipts
+and result. Local integration tests require the archived project; portable CI
+only runs the independent contract tests.
+
+The [October 6 completed continuation](reports/2026-10-06-real-cli-export.md)
+exported all three records with four model calls and six actual CLI processes.
+`report_real_cli_export.py --output RUN_DIR --report REPORT_STEM` audits saved
+requests, immutable source snapshots, records, SDK files and CLI receipts. Its
+published traces redact personal absolute paths. The audit does not require the
+current Kimi transport source to equal the saved trial version.
 
 ## Low-cost Kimi smoke test
 
@@ -1305,8 +1402,3 @@ existing Kimi K2.6 client. `--prompt-key` reads a key without echo or saving;
 otherwise use `MOONSHOT_API_KEY`. Keep original run directories.
 The reporter requires all 90 results and replays the saved proposals; incomplete
 runs remain explicitly incomplete and cannot produce a complete report.
-
-The clean macOS arm64 / Python 3.11 verification resolved and installed 58 packages;
-its full version list is [`requirements-external-baseline-macos-arm64-py311.txt`](requirements-external-baseline-macos-arm64-py311.txt).
-This is a platform-specific resolution, not a hash-locked cross-platform package guarantee.
-The main experiment retains its original recorded environment.

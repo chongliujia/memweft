@@ -20,7 +20,7 @@ MemWeft gives agents persistent facts, resumable conversations and relevant mode
 
 **Local-first:** memory operations need no model service or API key. The high-level APIs use SQLite; optional PostgreSQL/MySQL support is currently limited to the older low-level API.
 
-**Development status (2026-10-01):** the SQLite SDK is a developer preview, version `0.2.0-alpha.1` (Python `0.2.0a1`), with downloadable CI artifacts. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and external workflow pilot acceptance remain open. The current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database. See the [preview release guide](docs/preview_release.md) for scope, package provenance and acceptance checks.
+**Development status (2026-10-06):** the SQLite SDK is a developer preview, version `0.2.0-alpha.1` (Python `0.2.0a1`), with downloadable CI artifacts. Million-fact retrieval and multiwriter recovery have local benchmark evidence; registry distribution and external human workflow acceptance remain open. The current SQLite recall index is **schema v3**. Before opening an existing database with this build, follow the [backup, upgrade and recovery guide](docs/upgrade_v3.md). Older v1/v2 SDKs cannot open a migrated v3 database. See the [preview release guide](docs/preview_release.md) for scope, package provenance and acceptance checks.
 
 For commit [`1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d`](https://github.com/chongliujia/memweft/commit/1ee6b3bafaf2f54230f1830b7cd47d4e368f0a7d), [CI run 36822104764](https://github.com/chongliujia/memweft/actions/runs/36822104764) passed all **12 jobs on the first attempt**. This evidence applies to that exact commit; later commits need their own verification.
 
@@ -297,6 +297,16 @@ We test with **real LangGraph + the Python SDK + a locally deployed `qwen3-8b`**
 | Confirmed commands | 1,272 calls; **0 unauthorized grants** across 1,200 audited sandbox decisions | Fresh learned-mode accuracy: rules + quoted input **42/56**, input omitted **28/56**. Command guards block unsafe effects; input omission is not an overall model-quality improvement; [report](evals/reports/2026-09-22-confirmed-command.md) |
 
 A passing schema or a learned strategy is not authorization. Optional [reference projection](docs/reference_boundaries.md) filters model inputs; application-side checks must still validate actions against current state. Evaluator scores are trusted application inputs, so adoption gates cannot independently prove their truth.
+
+The newer Kimi evaluations use bounded file tools and a real Mem0 OSS structured
+CRUD baseline. [Three separately recorded cohorts](evals/reports/2026-10-06-multistep-memory-overview.md)
+cover all 60 planned task outcomes: 51 strictly passed, and nine wrote correct
+artifacts but omitted final execution. Two interrupted cohorts and their unknown
+request costs are retained; these results do not establish task-quality superiority. A separate
+[existing-ledger continuation](evals/reports/2026-10-06-real-cli-export.md) exported
+three actual project records through the previously delivered CLI, using four
+model calls. These are constructed comparisons and an assistant-driven project
+continuation; neither is an external human study.
 
 <details>
 <summary><b>Run a local Agent evaluation</b></summary>

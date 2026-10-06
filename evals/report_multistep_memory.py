@@ -25,6 +25,8 @@ from run_multistep_memory import ARMS, ROOT, execute_actions, final_grade, initi
 USAGE = ('prompt_tokens', 'completion_tokens', 'total_tokens')
 GROUP = ('case_id', 'arm', 'domain', 'event')
 PUBLISHED_RATE_LIMIT = 'Kimi HTTP 429: provider rate limit (account identifiers omitted)'
+COHORT_EVIDENCE = ('freeze.json', 'inputs.jsonl', 'results.jsonl', 'status.json', 'attempts.jsonl',
+                   'responses.jsonl', 'turns.jsonl', 'rate_limits.jsonl', 'errors.jsonl')
 LIMITS = [
     'Three constructed workflows, five related lifecycle events each; not 15 independent applications.',
     'One model and one session per case/arm within each cohort; interrupted sessions may have a separately reported restarted supplement. No independent external developers or human participants.',
@@ -119,8 +121,11 @@ def _snapshot(output):
     if not re.fullmatch(r'[a-f0-9]{64}', freeze['native_sha256']):
         raise ValueError('Missing recorded native binary digest')
     planned = 60
-    if 'supplement' in freeze:
-        planned = len(freeze['supplement']['selected_tasks'])
+    if 'supplement' in freeze and 'continuation' in freeze:
+        raise ValueError('A cohort cannot be both supplement and continuation')
+    continuation = freeze.get('continuation', freeze.get('supplement'))
+    if continuation is not None:
+        planned = len(continuation['selected_tasks'])
         if not 0 < planned < 60:
             raise ValueError('Supplement must declare a nonempty proper task subset')
         _same(freeze['interval_seconds'], 21, 'Unexpected supplement pacing')
@@ -134,7 +139,7 @@ def _snapshot(output):
     return freeze
 
 
-def _supplement_reference(output, freeze, inputs, all_tasks):
+def _supplement_reference(output, freeze, inputs, all_tasks, ancestors=()):
     """Audit the original cohort separately before validating an explicit subset."""
     supplement = freeze['supplement']
     original = ROOT / _relative_path(supplement['original_run'])
@@ -146,9 +151,9 @@ def _supplement_reference(output, freeze, inputs, all_tasks):
         if sha(original / (name + suffix)) != supplement['original_' + name + '_sha256']:
             raise ValueError('Original cohort evidence changed: ' + name)
     original_freeze = _read(original / 'freeze.json')
-    if 'supplement' in original_freeze:
+    if 'supplement' in original_freeze or 'continuation' in original_freeze:
         raise ValueError('Chained supplements need a separate explicit protocol')
-    original_summary = audit(original, allow_partial=True)
+    original_summary = audit(original, allow_partial=True, _ancestors=ancestors)
     original_inputs = _rows(original / 'inputs.jsonl')
     original_results = _rows(original / 'results.jsonl')
     identity = lambda r: {k: r[k] for k in ('case_id', 'arm')}
@@ -187,9 +192,110 @@ def _supplement_reference(output, freeze, inputs, all_tasks):
             'context_restarted': True, 'combined_cohorts': False}
 
 
-def audit(output, *, allow_partial=False):
+def _continuation_reference(output, freeze, inputs, all_tasks, ancestors):
+    """Verify every prior cohort independently; only absent final results qualify."""
+    continuation = freeze['continuation']
+    priors = continuation['prior_cohorts']
+    if not isinstance(priors, list) or len(priors) < 2:
+        raise ValueError('Continuation must explicitly declare at least two prior cohorts')
+    root = ROOT / _relative_path(continuation['original_run'])
+    prior_paths = [ROOT / _relative_path(prior['run']) for prior in priors]
+    if prior_paths[0].resolve() != root.resolve() or len({p.resolve() for p in prior_paths}) != len(prior_paths):
+        raise ValueError('Continuation prior cohorts must start with the original and be distinct')
+    if output.resolve() in {p.resolve() for p in prior_paths}:
+        raise ValueError('Continuation cannot reference itself')
+    completed, completed_keys, summaries, unknown = [], set(), [], []
+    root_freeze = None
+    for index, (prior, path) in enumerate(zip(priors, prior_paths)):
+        evidence = prior['evidence_sha256']
+        if set(evidence) != set(COHORT_EVIDENCE):
+            raise ValueError('Continuation must declare each prior evidence file or its absence')
+        for name in COHORT_EVIDENCE:
+            target = path / name
+            actual = sha(target) if target.exists() else None
+            _same(actual, evidence[name], 'Prior cohort evidence changed: ' + prior['run'] + '/' + name)
+        prior_freeze = _read(path / 'freeze.json')
+        if index == 0:
+            if 'supplement' in prior_freeze or 'continuation' in prior_freeze:
+                raise ValueError('First prior cohort must be the original experiment')
+            root_freeze = prior_freeze
+            _same(continuation['root_freeze_sha256'], sha(path / 'freeze.json'), 'Original freeze anchor differs')
+        else:
+            for field in ('suite_sha256', 'native_sha256', 'source_sha256'):
+                _same(prior_freeze[field], root_freeze[field], 'Prior cohorts do not share frozen runtime/suite')
+            if 'supplement' in prior_freeze:
+                _same(prior_freeze['supplement']['original_run'], continuation['original_run'], 'Prior supplement belongs to another root')
+            elif 'continuation' in prior_freeze:
+                _same(prior_freeze['continuation']['prior_cohorts'], priors[:index], 'Prior continuation omitted or reordered its history')
+            else:
+                raise ValueError('Later prior cohorts need explicit supplement/continuation provenance')
+        result_rows = _rows(path / 'results.jsonl', optional=True)
+        for result in result_rows:
+            key = (result['case_id'], result['arm'])
+            if key in completed_keys:
+                raise ValueError('Duplicate final result across prior cohorts')
+            completed_keys.add(key)
+            completed.append({k: result[k] for k in ('case_id', 'arm')})
+        summary = audit(path, allow_partial=True, _ancestors=ancestors)
+        summaries.append({'run': prior['run'], 'cohort_status': summary['cohort_status'],
+            'completed_tasks': summary['completed_tasks'], 'model_calls': summary['model_calls'],
+            'requests': summary['requests'], 'known_reported_usage': summary['usage'],
+            'known_reported_subtotal_cny_uncached': summary['known_reported_subtotal_cny_uncached'],
+            'unanswered_requests': len(summary['unanswered_attempts']), 'usage_complete': summary['usage_complete']})
+        unknown.extend({'cohort': prior['run'], **attempt} for attempt in summary['unanswered_attempts'])
+    for field in ('suite_sha256', 'native_sha256', 'source_sha256'):
+        _same(freeze[field], root_freeze[field], 'Continuation changed original frozen runtime/suite: ' + field)
+    selected_rows = [r for r in _rows(root / 'inputs.jsonl') if (r['case_id'], r['arm']) not in completed_keys]
+    selected = [{k: r[k] for k in ('case_id', 'arm')} for r in selected_rows]
+    _same(continuation['previous_completed_tasks'], completed, 'Continuation changed prior completed-task selection')
+    _same(continuation['selected_tasks'], selected, 'Continuation must select all and only tasks without prior final results')
+    _same(inputs, selected_rows, 'Continuation inputs differ from original frozen contexts')
+    if completed_keys | {(r['case_id'], r['arm']) for r in selected} != all_tasks:
+        raise ValueError('Continuation selection does not cover original task matrix')
+    for field in ('context_restarted', 'retained_prior_partial_responses', 'initial_messages_byte_equivalent',
+                  'backend_preparation_copied_unchanged', 'fixture_recreated_from_frozen_create_function'):
+        _same(continuation[field], True, 'Continuation restart/provenance declaration missing: ' + field)
+    preparation = output / _relative_path(continuation['preparation_script'])
+    if sha(preparation) != continuation['preparation_script_sha256']:
+        raise ValueError('Continuation preparation snapshot changed')
+    runtime = output / _relative_path(continuation['runtime_root'])
+    _same(continuation['runtime_source_sha256'], root_freeze['source_sha256'], 'Isolated runtime source manifest differs from original')
+    for name, digest in continuation['runtime_source_sha256'].items():
+        if sha(runtime / _relative_path(name)) != digest:
+            raise ValueError('Isolated continuation runtime changed: ' + name)
+    if 'runtime_native_file' in continuation:
+        if sha(output / _relative_path(continuation['runtime_native_file'])) != root_freeze['native_sha256']:
+            raise ValueError('Isolated continuation native binary changed')
+    for name, digest in continuation.get('runtime_support_sha256', {}).items():
+        if sha(runtime / 'python/src/memweft' / _relative_path(name)) != digest:
+            raise ValueError('Isolated continuation SDK support changed: ' + name)
+    for name in ('launcher', 'auditor_script'):
+        if name in continuation and sha(output / _relative_path(continuation[name])) != continuation[name + '_sha256']:
+            raise ValueError('Continuation ' + name + ' changed')
+    backend_files = 0
+    for row in selected:
+        relative = Path('tasks') / row['case_id'] / row['arm']
+        original_backend = {n: h for n, h in _inventory(root / relative).items() if not n.startswith('project/')}
+        actual_backend = {n: h for n, h in _inventory(output / relative).items() if not n.startswith('project/')}
+        _same(actual_backend, original_backend, 'Continuation backend evidence differs from original')
+        backend_files += len(actual_backend)
+    return {'cohort_id': continuation['cohort_id'], 'original_run': continuation['original_run'],
+            'prior_cohorts': summaries, 'previous_completed_tasks': len(completed),
+            'prior_unanswered_attempts': unknown, 'prior_usage_complete': not unknown,
+            'prior_known_reported_usage': {k: sum(s['known_reported_usage'][k] for s in summaries) for k in USAGE},
+            'prior_known_reported_subtotal_cny_uncached': sum(s['known_reported_subtotal_cny_uncached'] for s in summaries),
+            'duplicate_final_results_rejected': True, 'selected_tasks_verified_against_all_priors': True,
+            'backend_evidence_bytes_verified': True, 'backend_evidence_files': backend_files,
+            'prior_cohorts_independently_audited': True, 'isolated_runtime_bytes_verified': True,
+            'context_restarted': True, 'combined_cohorts': False}
+
+
+def audit(output, *, allow_partial=False, _ancestors=()):
     """Reject incomplete or inconsistent evidence; return a replayed summary."""
     output = Path(output)
+    if output.resolve() in _ancestors:
+        raise ValueError('Cyclic cohort reference')
+    ancestors = (*_ancestors, output.resolve())
     freeze = _snapshot(output)
     suite = _read(output / 'suite.json')['cases']
     cases = _index(suite, lambda c: c['id'], 'case')
@@ -216,9 +322,10 @@ def audit(output, *, allow_partial=False):
     input_map = _index(inputs, task_key, 'input task')
     result_map = _index(results, task_key, 'result task')
     original_wanted = {(c, arm) for c in cases for arm in ARMS}
-    supplement_reference = _supplement_reference(output, freeze, inputs, original_wanted) if 'supplement' in freeze else None
-    wanted = ({(r['case_id'], r['arm']) for r in freeze['supplement']['selected_tasks']}
-              if supplement_reference else original_wanted)
+    supplement_reference = _supplement_reference(output, freeze, inputs, original_wanted, ancestors) if 'supplement' in freeze else None
+    continuation_reference = _continuation_reference(output, freeze, inputs, original_wanted, ancestors) if 'continuation' in freeze else None
+    selection = freeze.get('continuation', freeze.get('supplement'))
+    wanted = ({(r['case_id'], r['arm']) for r in selection['selected_tasks']} if selection else original_wanted)
     planned = len(wanted)
     if set(input_map) != wanted or (not partial and set(result_map) != wanted):
         raise ValueError('Incomplete case/arm coverage; expected all planned cohort tasks')
@@ -357,8 +464,9 @@ def audit(output, *, allow_partial=False):
         _same(status, expected, 'Final status is not complete or disagrees with accounting')
     started = {task_key(a) for a in attempts}
     summary = {'cohort_status': 'stopped_error_partial' if partial else 'completed',
-               'cohort_kind': 'supplement' if supplement_reference else 'original',
-               'supplement_reference': supplement_reference, 'original_planned_tasks': 60,
+               'cohort_kind': 'continuation' if continuation_reference else 'supplement' if supplement_reference else 'original',
+               'supplement_reference': supplement_reference, 'continuation_reference': continuation_reference,
+               'original_planned_tasks': 60,
                'planned_tasks': planned, 'completed_tasks': len(results), 'interrupted_tasks': int(partial),
                'unstarted_tasks': planned - len(started), 'incomplete_tasks': planned - len(results),
                'task_states': task_states, 'model_calls': len(responses), 'requests': len(attempts),
@@ -462,8 +570,9 @@ def publish(output, prefix, *, allow_partial=False):
         'responses.jsonl', 'turns.jsonl', 'results.jsonl', 'rate_limits.jsonl', 'status.json', 'errors.jsonl')
         if (output / name).exists()]
     freeze = _read(output / 'freeze.json')
-    if 'supplement' in freeze:
-        for name in (freeze['supplement']['preparation_script'], freeze['supplement']['accounting_file']):
+    preparation_metadata = freeze.get('continuation', freeze.get('supplement'))
+    if preparation_metadata:
+        for name in (preparation_metadata['preparation_script'], preparation_metadata['accounting_file']):
             name = _relative_path(name)
             if (output / name).exists():
                 evidence_names.append(name)
@@ -497,6 +606,15 @@ def publish(output, prefix, *, allow_partial=False):
                   f"{summary['planned_tasks']} 项，初始会话和项目文件均重置。当前输入和后端证据已与原实验逐项核对。"
                   '调用间隔预先改为 21 秒，本表只统计本批；原中断任务已答轮次仍属于原批次费用和证据。'
                   '原超时请求用量及收费仍未知，两个批次没有被当作一次连续实验或合并重算成功率。']
+    if summary['continuation_reference']:
+        reference = summary['continuation_reference']
+        lines += ['', f"独立后续 cohort：{reference['cohort_id']}。此前 {len(reference['prior_cohorts'])} 个批次各自重放审计，"
+                  f"共保留 {reference['previous_completed_tasks']} 个最终结果（包括失败）；本批仅运行仍无最终结果的 "
+                  f"{summary['planned_tasks']} 项。原提示、工具、评分规则及隔离运行代码逐文件核对一致，"
+                  '各任务从初始会话和项目文件重新开始，已完成的失败任务未重试。', '',
+                  f"此前各批次已报告费用小计之和为 ¥{reference['prior_known_reported_subtotal_cny_uncached']:.4f}，"
+                  f"仍有 {len(reference['prior_unanswered_attempts'])} 次历史未答请求用量与收费未知。"
+                  '这些费用和中断轮次保留在各自批次，未并入本表的模型调用或任务结果，也未描述为单次连续实验。']
     if not summary['usage_complete']:
         lines += ['', '本报告显式使用 --allow-partial 审计已停止实验。唯一最后请求没有响应，其服务端执行、'
                   'token 用量和收费未知。未完成及未启动任务不计作业务失败；各组已完成分母不同，'
