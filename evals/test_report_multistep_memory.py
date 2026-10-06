@@ -1,6 +1,7 @@
 """Synthetic logs exercise complete audit/replay without any API or Mem0 call."""
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -20,7 +21,7 @@ def replace_rows(path, values):
     path.write_text(''.join(json.dumps(v, ensure_ascii=False) + '\n' for v in values))
 
 
-def fixture_logs(output, rate_limited=False, diagnostic_case=False):
+def fixture_logs(output, rate_limited=False, diagnostic_case=False, blocked_without_run=False):
     """Write known action outcomes as test fixtures, never as live experiment data."""
     suite, inputs = cases(), []
     dump(output / 'suite.json', {'cases': suite})
@@ -65,6 +66,8 @@ def fixture_logs(output, rate_limited=False, diagnostic_case=False):
             [{'tool': 'write', 'path': name, 'value': case['expected']['files'][name]}
              for name in row['files']['writable'] if name in case['expected']['files']] + [{'tool': 'run'}],
         ]
+        if blocked_without_run and case['id'] == 'deploy-forget':
+            actions[1] = [a for a in actions[1] if a['tool'] != 'run']
         diagnostic = diagnostic_case and index == 0
         if diagnostic:
             actions[0].append({'tool': 'unsupported'})
@@ -96,6 +99,78 @@ def fixture_logs(output, rate_limited=False, diagnostic_case=False):
     calls = len(rows(output / 'responses.jsonl'))
     dump(output / 'status.json', {'status': 'completed', 'calls': calls,
                                  'requests': calls + int(rate_limited), 'tokens': calls * 20})
+
+
+def truncate_after_unanswered_request(output):
+    """Preserve one completed task, one answered partial turn, then a timeout."""
+    inputs = rows(output / 'inputs.jsonl')
+    first, pending = inputs[:2]
+    task_key = lambda r: (r['case_id'], r['arm'])
+    keep = lambda r: task_key(r) == task_key(first) or task_key(r) == task_key(pending) and r['round'] == 0
+    for name in ('responses', 'turns', 'attempts'):
+        path = output / (name + '.jsonl')
+        replace_rows(path, [r for r in rows(path) if keep(r)])
+    append(output / 'attempts.jsonl', {**{f: pending[f] for f in ('case_id', 'arm', 'domain', 'event')},
+        'round': 1, 'attempt': 0, 'started_at': 'synthetic-unanswered'})
+    replace_rows(output / 'results.jsonl', rows(output / 'results.jsonl')[:1])
+    by_id = {c['id']: c for c in cases()}
+    for row in inputs[1:]:
+        project = output / 'tasks' / row['case_id'] / row['arm'] / 'project'
+        shutil.rmtree(project)
+        create_fixture(project, by_id[row['case_id']])
+        if task_key(row) == task_key(pending):
+            response = next(r['response'] for r in rows(output / 'responses.jsonl') if task_key(r) == task_key(row))
+            execute_actions(project, by_id[row['case_id']], row, response['content'], response['finish_reason'])
+    dump(output / 'status.json', {'status': 'stopped_error', 'calls': 3, 'requests': 4, 'tokens': 60})
+    append(output / 'errors.jsonl', {'error': 'Kimi connection failed or timed out; no automatic retry was made.',
+                                   'at': 'synthetic-stop'})
+
+
+def fixture_supplement(original, output):
+    """Synthetic separate cohort whose selection is anchored to the old logs."""
+    fixture_logs(output)
+    original_inputs = rows(original / 'inputs.jsonl')
+    completed = [{k: r[k] for k in ('case_id', 'arm')} for r in rows(original / 'results.jsonl')]
+    keys = {(r['case_id'], r['arm']) for r in completed}
+    selected = [r for r in original_inputs if (r['case_id'], r['arm']) not in keys]
+    selected_keys = {(r['case_id'], r['arm']) for r in selected}
+    for name in ('inputs', 'results', 'attempts', 'responses', 'turns'):
+        path = output / (name + '.jsonl')
+        replace_rows(path, [r for r in rows(path) if (r['case_id'], r['arm']) in selected_keys])
+    for row in selected:
+        relative = Path('tasks') / row['case_id'] / row['arm']
+        for child in (original / relative).iterdir():
+            if child.name == 'project':
+                continue
+            if child.is_dir():
+                shutil.copytree(child, output / relative / child.name)
+            else:
+                shutil.copy2(child, output / relative / child.name)
+    if not (original / 'rate_limits.jsonl').exists():
+        (original / 'rate_limits.jsonl').write_text('')
+    preparation = output / 'preparation/test_prepare.py'
+    preparation.parent.mkdir()
+    preparation.write_text('# Synthetic preparation fixture; no API calls.\n')
+    dump(output / 'supplement-accounting.json', {'billing_complete': False})
+    supplement = {'cohort_id': 'synthetic-supplement', 'original_run': original.name,
+        'original_completed_tasks': completed,
+        'selected_tasks': [{k: r[k] for k in ('case_id', 'arm')} for r in selected],
+        'original_unanswered_attempts': rows(original / 'attempts.jsonl')[-1:],
+        'context_restarted': True, 'retained_original_partial_responses': True,
+        'initial_messages_byte_equivalent': True, 'backend_preparation_copied_unchanged': True,
+        'fixture_recreated_from_frozen_create_function': True,
+        'preparation_script': 'preparation/test_prepare.py', 'preparation_script_sha256': sha(preparation),
+        'accounting_file': 'supplement-accounting.json'}
+    for name, suffix in [('freeze', '.json'), ('inputs', '.jsonl'), ('results', '.jsonl'),
+                         ('status', '.json'), ('attempts', '.jsonl'), ('responses', '.jsonl'),
+                         ('turns', '.jsonl'), ('rate_limits', '.jsonl'), ('errors', '.jsonl')]:
+        supplement['original_' + name + '_sha256'] = sha(original / (name + suffix))
+    freeze = json.loads((output / 'freeze.json').read_text())
+    freeze.update(supplement=supplement, inputs_sha256=sha(output / 'inputs.jsonl'),
+                  interval_seconds=21, max_requests=len(selected) * 12, max_successful_calls=len(selected) * 4)
+    dump(output / 'freeze.json', freeze)
+    count = len(rows(output / 'responses.jsonl'))
+    dump(output / 'status.json', {'status': 'completed', 'calls': count, 'requests': count, 'tokens': count * 20})
 
 
 class MultistepReportTests(unittest.TestCase):
@@ -138,6 +213,117 @@ class MultistepReportTests(unittest.TestCase):
         self.assertEqual(report.audit(self.root)['completed_tasks'], 60)
         self.assertEqual(freeze_path.read_bytes(), before_manifest)
         self.assertEqual(report._inventory(self.root / 'sources'), before_sources)
+
+    def test_partial_is_explicit_and_never_counts_unfinished_as_failure(self):
+        truncate_after_unanswered_request(self.root)
+        with self.assertRaisesRegex(ValueError, 'error-stopped'):
+            report.audit(self.root)
+        report.publish(self.root, self.root / 'partial', allow_partial=True)
+        evidence = json.loads((self.root / 'partial.json').read_text())
+        summary = evidence['summary']
+        self.assertEqual(summary['completed_tasks'], 1)
+        self.assertEqual(summary['interrupted_tasks'], 1)
+        self.assertEqual(summary['unstarted_tasks'], 58)
+        self.assertEqual(summary['model_calls'], 3)
+        self.assertEqual(summary['requests'], 4)
+        self.assertEqual(summary['by_arm']['plain']['tasks'], 1)
+        self.assertEqual(summary['by_arm']['plain']['success'], 1)
+        self.assertEqual(summary['by_arm']['versions']['tasks'], 0)
+        self.assertEqual(summary['by_arm']['versions']['planned_tasks'], 15)
+        self.assertEqual(summary['paired_success']['plain_vs_full']['pairs'], 0)
+        self.assertIsNone(summary['estimated_cny_uncached'])
+        self.assertGreater(summary['known_reported_subtotal_cny_uncached'], 0)
+        self.assertTrue(evidence['pricing']['total_cost_unknown'])
+        traces = rows(self.root / 'partial.traces.jsonl')
+        self.assertEqual(sum(t['result'] is None for t in traces), 59)
+        self.assertEqual(traces[1]['task_status'], 'interrupted')
+        self.assertEqual(len(traces[1]['responses']), 1)
+        self.assertEqual(len(traces[1]['attempts']), 2)
+        self.assertIn('总费用未知', (self.root / 'partial.md').read_text())
+        self.assertIn('1/1（计划 15）', (self.root / 'partial.md').read_text())
+
+    def test_partial_requires_unique_final_unanswered_request(self):
+        truncate_after_unanswered_request(self.root)
+        path = self.root / 'attempts.jsonl'
+        original = rows(path)
+        replace_rows(path, original[:-1])
+        with self.assertRaisesRegex(ValueError, 'one final unanswered'):
+            report.audit(self.root, allow_partial=True)
+        replace_rows(path, original + [{**original[-1], 'round': 2}])
+        with self.assertRaisesRegex(ValueError, 'one final unanswered'):
+            report.audit(self.root, allow_partial=True)
+
+    def test_partial_still_replays_interrupted_turn_and_untouched_suffix(self):
+        truncate_after_unanswered_request(self.root)
+        path = self.root / 'turns.jsonl'
+        original = rows(path)
+        changed = rows(path)
+        changed[-1]['execution']['done'] = True
+        replace_rows(path, changed)
+        with self.assertRaisesRegex(ValueError, 'Tool execution'):
+            report.audit(self.root, allow_partial=True)
+        replace_rows(path, original)
+        unstarted = rows(self.root / 'inputs.jsonl')[2]
+        stray = self.root / 'tasks' / unstarted['case_id'] / unstarted['arm'] / 'project/extra.txt'
+        stray.write_text('unexpected file in unstarted fixture')
+        with self.assertRaisesRegex(ValueError, 'artifact bytes'):
+            report.audit(self.root, allow_partial=True)
+
+    def test_partial_refuses_result_selection_and_post_budget_unanswered_call(self):
+        truncate_after_unanswered_request(self.root)
+        path = self.root / 'results.jsonl'
+        original = rows(path)
+        replace_rows(path, [{**original[0], 'arm': 'versions'}])
+        with self.assertRaisesRegex(ValueError, 'completed prefix'):
+            report.audit(self.root, allow_partial=True)
+        replace_rows(path, original)
+        response_path = self.root / 'responses.jsonl'
+        values = rows(response_path)
+        values[-1]['response']['usage'] = {'prompt_tokens': 499990, 'completion_tokens': 10, 'total_tokens': 500000}
+        replace_rows(response_path, values)
+        with self.assertRaisesRegex(ValueError, 'Unanswered request.*budget'):
+            report.audit(self.root, allow_partial=True)
+
+    def test_supplement_is_a_separate_audited_cohort_with_original_unknown_cost(self):
+        truncate_after_unanswered_request(self.root)
+        with tempfile.TemporaryDirectory() as temp, patch.object(report, 'ROOT', self.root.parent):
+            output = Path(temp)
+            fixture_supplement(self.root, output)
+            report.publish(output, output / 'supplement')
+            summary = json.loads((output / 'supplement.json').read_text())['summary']
+            self.assertEqual(summary['cohort_kind'], 'supplement')
+            self.assertEqual(summary['planned_tasks'], 59)
+            self.assertEqual(summary['completed_tasks'], 59)
+            self.assertEqual(summary['by_arm']['plain']['tasks'], 14)
+            self.assertEqual(summary['by_arm']['plain']['original_planned_tasks'], 15)
+            self.assertEqual(summary['supplement_reference']['original_completed_tasks'], 1)
+            self.assertTrue(summary['supplement_reference']['original_total_cost_unknown'])
+            self.assertFalse(summary['supplement_reference']['combined_cohorts'])
+            self.assertTrue(summary['usage_complete'])
+            self.assertEqual(summary['model_calls'], 118)
+            self.assertIn('独立补充 cohort', (output / 'supplement.md').read_text())
+
+    def test_supplement_rejects_backend_tampering_and_result_based_reselection(self):
+        truncate_after_unanswered_request(self.root)
+        original_input = rows(self.root / 'inputs.jsonl')[1]
+        relative = Path('tasks') / original_input['case_id'] / original_input['arm'] / 'backend.json'
+        (self.root / relative).write_text('frozen backend fixture')
+        with tempfile.TemporaryDirectory() as temp, patch.object(report, 'ROOT', self.root.parent):
+            output = Path(temp)
+            fixture_supplement(self.root, output)
+            summary = report.audit(output)
+            self.assertEqual(summary['supplement_reference']['backend_evidence_files'], 1)
+            (output / relative).write_text('modified backend fixture')
+            with self.assertRaisesRegex(ValueError, 'backend preparation evidence'):
+                report.audit(output)
+            (output / relative).write_bytes((self.root / relative).read_bytes())
+            freeze = json.loads((output / 'freeze.json').read_text())
+            freeze['supplement']['selected_tasks'].pop()
+            freeze['max_requests'] -= 12
+            freeze['max_successful_calls'] -= 4
+            dump(output / 'freeze.json', freeze)
+            with self.assertRaisesRegex(ValueError, 'all and only original unfinished'):
+                report.audit(output)
 
     def test_snapshot_rejects_unsafe_platform_paths(self):
         freeze_path = self.root / 'freeze.json'
@@ -268,6 +454,28 @@ class MultistepReportTests(unittest.TestCase):
             self.assertEqual(summary['by_arm']['full']['tool_action_errors'], 0)
             self.assertEqual(summary['by_arm']['full']['round_limit_without_done'], 0)
             self.assertIn('synthetic error', summary['metric_definitions']['tool_action_errors'])
+
+    def test_blocked_artifact_without_run_stays_primary_failure_in_all_arms(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            fixture_logs(output, blocked_without_run=True)
+            report.publish(output, output / 'diagnostic')
+            evidence = json.loads((output / 'diagnostic.json').read_text())
+            summary = evidence['summary']
+            for arm in ARMS:
+                with self.subTest(arm=arm):
+                    group = summary['by_arm'][arm]
+                    self.assertEqual(group['success'], 14)
+                    self.assertEqual(group['artifact_only_success'], 15)
+                    self.assertEqual(group['missing_final_public_run'], 1)
+                    result = next(r for r in summary['case_results'] if r['case_id'] == 'deploy-forget' and r['arm'] == arm)
+                    self.assertFalse(result['task_success'])
+                    self.assertEqual(result['errors'], ['Successful public execution required after final file modification'])
+                    self.assertEqual(json.loads((output / 'tasks/deploy-forget' / arm / 'project/blocked.json').read_text()),
+                                     {'status': 'blocked', 'reason': 'source_unavailable'})
+            self.assertTrue(summary['post_hoc_diagnostics']['introduced_after_observing_failures'])
+            self.assertTrue(summary['post_hoc_diagnostics']['primary_success_definition_unchanged'])
+            self.assertIn('post-hoc diagnostic', (output / 'diagnostic.md').read_text())
 
 
 if __name__ == '__main__':

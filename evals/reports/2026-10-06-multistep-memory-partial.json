@@ -1,0 +1,1429 @@
+{
+  "freeze": {
+    "frozen_at": "2026-10-04T13:49:54.110046+00:00",
+    "base_commit": "8f460291746fbe0ac713113fa1e36f8fc176df71",
+    "source_sha256": {
+      "evals/run_multistep_memory.py": "96ab8a513a2cc4b9e4dc78a7ec71b5946fd5468769eb9ee8c45471200c7339dc",
+      "evals/multistep_fixture.py": "d925780d9c48b970b3b492d730580843890997aa667434d403639986e90931ef",
+      "evals/multistep_kimi.py": "c99b2528a3b348a5f7f966e2ce12ec1d708d00fb4dc6213476cf1110d35db3ed",
+      "evals/external_lifecycle_baseline.py": "f921defbd13a9bb094a1ab0f6cb16233f91fbafe669e00326f7d40442b93d41a",
+      "evals/run_lifecycle_tasks.py": "75c3290009fd4343cb5a7d5abd76fad90f70ec9e5c822ff9e09552f69ddc485a",
+      "evals/output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8",
+      "docs/multistep_memory_protocol.md": "14b5e377b44b599b8983388b4ffe83e410a6ab7597a8513f18f1e3efd42a575b",
+      "examples/handoff_app/kimi_client.py": "8704c96a46cdd501aa6049aa63b1fd93d3e360b4e7e8abf1f4c0713715a60d2d",
+      "python/src/memweft/__init__.py": "a5131c3f3c3fbe709164f09b9077e5d83ace725ea8d7c7683dbc8dbcc34613da",
+      "python/src/memweft/api.py": "90ff44586ae261b2f7c0a79ed6d6853e197821dce5c18ccb8cb567e7306a7a99",
+      "python/src/memweft/client.py": "fbefad43e6bb3486250215345bd02882699c2498a0966926062c48242449192f"
+    },
+    "native_sha256": "bcbbe79ecfb52fc2a318e78ab82c961b2a8f2c73f79b0da20d445156b9040de0",
+    "inputs_sha256": "ab41c292e1449f501ecc39a1f1d5a0cd92e5cb662d3a8ad8c58762be193c8c93",
+    "suite_sha256": "760f6db75da495cd9fee2567979c9a5bfb4d7bf54c5c58f653c13bcdd5bb947f",
+    "model": "kimi-k2.6",
+    "max_rounds": 4,
+    "max_actions": 3,
+    "max_completion_tokens": 1024,
+    "max_requests": 720,
+    "max_successful_calls": 240,
+    "reported_token_stop_threshold": 500000,
+    "request_byte_cap": 64000,
+    "interval_seconds": 1.1,
+    "rate_limit_retries": 2,
+    "rate_limit_cooldown_seconds": 60,
+    "other_retries": 0,
+    "seed": 20261004,
+    "provenance": "Three constructed executable workflows, five events each; no human or independent external participant."
+  },
+  "summary": {
+    "cohort_status": "stopped_error_partial",
+    "cohort_kind": "original",
+    "supplement_reference": null,
+    "original_planned_tasks": 60,
+    "planned_tasks": 60,
+    "completed_tasks": 41,
+    "interrupted_tasks": 1,
+    "unstarted_tasks": 18,
+    "incomplete_tasks": 19,
+    "task_states": {
+      "handoff-unrelated_update/plain": "completed",
+      "handoff-unrelated_update/versions": "completed",
+      "handoff-unrelated_update/full": "completed",
+      "handoff-unrelated_update/mem0": "completed",
+      "export-unrelated_update/versions": "completed",
+      "export-unrelated_update/full": "completed",
+      "export-unrelated_update/mem0": "completed",
+      "export-unrelated_update/plain": "completed",
+      "handoff-rollback/full": "completed",
+      "handoff-rollback/mem0": "completed",
+      "handoff-rollback/plain": "completed",
+      "handoff-rollback/versions": "completed",
+      "export-delete_recreate/mem0": "completed",
+      "export-delete_recreate/plain": "completed",
+      "export-delete_recreate/versions": "completed",
+      "export-delete_recreate/full": "completed",
+      "deploy-forget/plain": "completed",
+      "deploy-forget/versions": "completed",
+      "deploy-forget/full": "completed",
+      "deploy-forget/mem0": "completed",
+      "export-update/versions": "completed",
+      "export-update/full": "completed",
+      "export-update/mem0": "completed",
+      "export-update/plain": "completed",
+      "handoff-update/full": "completed",
+      "handoff-update/mem0": "completed",
+      "handoff-update/plain": "completed",
+      "handoff-update/versions": "completed",
+      "deploy-rollback/mem0": "completed",
+      "deploy-rollback/plain": "completed",
+      "deploy-rollback/versions": "completed",
+      "deploy-rollback/full": "completed",
+      "export-rollback/plain": "completed",
+      "export-rollback/versions": "completed",
+      "export-rollback/full": "completed",
+      "export-rollback/mem0": "completed",
+      "handoff-forget/versions": "completed",
+      "handoff-forget/full": "completed",
+      "handoff-forget/mem0": "completed",
+      "handoff-forget/plain": "completed",
+      "export-forget/full": "completed",
+      "export-forget/mem0": "interrupted",
+      "export-forget/plain": "unstarted",
+      "export-forget/versions": "unstarted",
+      "deploy-unrelated_update/mem0": "unstarted",
+      "deploy-unrelated_update/plain": "unstarted",
+      "deploy-unrelated_update/versions": "unstarted",
+      "deploy-unrelated_update/full": "unstarted",
+      "handoff-delete_recreate/plain": "unstarted",
+      "handoff-delete_recreate/versions": "unstarted",
+      "handoff-delete_recreate/full": "unstarted",
+      "handoff-delete_recreate/mem0": "unstarted",
+      "deploy-update/versions": "unstarted",
+      "deploy-update/full": "unstarted",
+      "deploy-update/mem0": "unstarted",
+      "deploy-update/plain": "unstarted",
+      "deploy-delete_recreate/full": "unstarted",
+      "deploy-delete_recreate/mem0": "unstarted",
+      "deploy-delete_recreate/plain": "unstarted",
+      "deploy-delete_recreate/versions": "unstarted"
+    },
+    "model_calls": 155,
+    "requests": 205,
+    "unanswered_attempts": [
+      {
+        "case_id": "export-forget",
+        "arm": "mem0",
+        "domain": "export",
+        "event": "forget",
+        "round": 2,
+        "attempt": 0,
+        "started_at": "2026-10-04T18:23:08.917648+00:00"
+      }
+    ],
+    "usage_complete": false,
+    "total_billing_cost_known": false,
+    "rate_limits": 49,
+    "by_arm": {
+      "plain": {
+        "planned_tasks": 15,
+        "original_planned_tasks": 15,
+        "tasks": 10,
+        "success": 8,
+        "incomplete_tasks": 5,
+        "started_tasks": 10,
+        "stale_returned": 8,
+        "stale_prepared": 12,
+        "tasks_with_wrong_writes": 0,
+        "source_reads": 10,
+        "tool_operations": 50,
+        "model_calls": 39,
+        "protocol_errors": 4,
+        "tool_action_errors": 4,
+        "round_limit_without_done": 2,
+        "artifact_only_success": 10,
+        "missing_final_public_run": 2,
+        "usage": {
+          "prompt_tokens": 33656,
+          "completion_tokens": 1482,
+          "total_tokens": 35138
+        },
+        "http_median_ms": 1052.324,
+        "events": {
+          "delete_recreate": {
+            "planned_tasks": 3,
+            "tasks": 1,
+            "success": 1
+          },
+          "forget": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 0
+          },
+          "rollback": {
+            "planned_tasks": 3,
+            "tasks": 3,
+            "success": 3
+          },
+          "unrelated_update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          },
+          "update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          }
+        }
+      },
+      "versions": {
+        "planned_tasks": 15,
+        "original_planned_tasks": 15,
+        "tasks": 10,
+        "success": 8,
+        "incomplete_tasks": 5,
+        "started_tasks": 10,
+        "stale_returned": 0,
+        "stale_prepared": 0,
+        "tasks_with_wrong_writes": 0,
+        "source_reads": 10,
+        "tool_operations": 47,
+        "model_calls": 36,
+        "protocol_errors": 4,
+        "tool_action_errors": 4,
+        "round_limit_without_done": 2,
+        "artifact_only_success": 10,
+        "missing_final_public_run": 2,
+        "usage": {
+          "prompt_tokens": 30001,
+          "completion_tokens": 1416,
+          "total_tokens": 31417
+        },
+        "http_median_ms": 1071.0639999999999,
+        "events": {
+          "delete_recreate": {
+            "planned_tasks": 3,
+            "tasks": 1,
+            "success": 1
+          },
+          "forget": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 0
+          },
+          "rollback": {
+            "planned_tasks": 3,
+            "tasks": 3,
+            "success": 3
+          },
+          "unrelated_update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          },
+          "update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          }
+        }
+      },
+      "full": {
+        "planned_tasks": 15,
+        "original_planned_tasks": 15,
+        "tasks": 11,
+        "success": 9,
+        "incomplete_tasks": 4,
+        "started_tasks": 11,
+        "stale_returned": 0,
+        "stale_prepared": 0,
+        "tasks_with_wrong_writes": 0,
+        "source_reads": 11,
+        "tool_operations": 57,
+        "model_calls": 42,
+        "protocol_errors": 6,
+        "tool_action_errors": 6,
+        "round_limit_without_done": 4,
+        "artifact_only_success": 11,
+        "missing_final_public_run": 2,
+        "usage": {
+          "prompt_tokens": 34395,
+          "completion_tokens": 1586,
+          "total_tokens": 35981
+        },
+        "http_median_ms": 995.9275,
+        "events": {
+          "delete_recreate": {
+            "planned_tasks": 3,
+            "tasks": 1,
+            "success": 1
+          },
+          "forget": {
+            "planned_tasks": 3,
+            "tasks": 3,
+            "success": 1
+          },
+          "rollback": {
+            "planned_tasks": 3,
+            "tasks": 3,
+            "success": 3
+          },
+          "unrelated_update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          },
+          "update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          }
+        }
+      },
+      "mem0": {
+        "planned_tasks": 15,
+        "original_planned_tasks": 15,
+        "tasks": 10,
+        "success": 8,
+        "incomplete_tasks": 5,
+        "started_tasks": 11,
+        "stale_returned": 9,
+        "stale_prepared": 12,
+        "tasks_with_wrong_writes": 0,
+        "source_reads": 11,
+        "tool_operations": 54,
+        "model_calls": 38,
+        "protocol_errors": 5,
+        "tool_action_errors": 5,
+        "round_limit_without_done": 4,
+        "artifact_only_success": 10,
+        "missing_final_public_run": 2,
+        "usage": {
+          "prompt_tokens": 31473,
+          "completion_tokens": 1540,
+          "total_tokens": 33013
+        },
+        "http_median_ms": 1035.2595000000001,
+        "events": {
+          "delete_recreate": {
+            "planned_tasks": 3,
+            "tasks": 1,
+            "success": 1
+          },
+          "forget": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 0
+          },
+          "rollback": {
+            "planned_tasks": 3,
+            "tasks": 3,
+            "success": 3
+          },
+          "unrelated_update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          },
+          "update": {
+            "planned_tasks": 3,
+            "tasks": 2,
+            "success": 2
+          }
+        }
+      }
+    },
+    "case_results": [
+      {
+        "case_id": "handoff-unrelated_update",
+        "arm": "plain",
+        "domain": "handoff",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+          "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+          "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+        }
+      },
+      {
+        "case_id": "handoff-unrelated_update",
+        "arm": "versions",
+        "domain": "handoff",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+          "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+          "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+        }
+      },
+      {
+        "case_id": "handoff-unrelated_update",
+        "arm": "full",
+        "domain": "handoff",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+          "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+          "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+        }
+      },
+      {
+        "case_id": "handoff-unrelated_update",
+        "arm": "mem0",
+        "domain": "handoff",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+          "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+          "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+        }
+      },
+      {
+        "case_id": "export-unrelated_update",
+        "arm": "versions",
+        "domain": "export",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+          "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+        }
+      },
+      {
+        "case_id": "export-unrelated_update",
+        "arm": "full",
+        "domain": "export",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+          "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+        }
+      },
+      {
+        "case_id": "export-unrelated_update",
+        "arm": "mem0",
+        "domain": "export",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+          "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+        }
+      },
+      {
+        "case_id": "export-unrelated_update",
+        "arm": "plain",
+        "domain": "export",
+        "event": "unrelated_update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+          "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+        }
+      },
+      {
+        "case_id": "handoff-rollback",
+        "arm": "full",
+        "domain": "handoff",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-rollback",
+        "arm": "mem0",
+        "domain": "handoff",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-rollback",
+        "arm": "plain",
+        "domain": "handoff",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-rollback",
+        "arm": "versions",
+        "domain": "handoff",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "export-delete_recreate",
+        "arm": "mem0",
+        "domain": "export",
+        "event": "delete_recreate",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-delete_recreate",
+        "arm": "plain",
+        "domain": "export",
+        "event": "delete_recreate",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-delete_recreate",
+        "arm": "versions",
+        "domain": "export",
+        "event": "delete_recreate",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-delete_recreate",
+        "arm": "full",
+        "domain": "export",
+        "event": "delete_recreate",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "arm": "plain",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 4,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "arm": "versions",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 2,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "arm": "full",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 3,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "arm": "mem0",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 3,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "arm": "versions",
+        "domain": "export",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "arm": "full",
+        "domain": "export",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "arm": "mem0",
+        "domain": "export",
+        "event": "update",
+        "rounds": 3,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "arm": "plain",
+        "domain": "export",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "handoff-update",
+        "arm": "full",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-update",
+        "arm": "mem0",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-update",
+        "arm": "plain",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-update",
+        "arm": "versions",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 3,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "deploy-rollback",
+        "arm": "mem0",
+        "domain": "deploy",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588"
+        }
+      },
+      {
+        "case_id": "deploy-rollback",
+        "arm": "plain",
+        "domain": "deploy",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588"
+        }
+      },
+      {
+        "case_id": "deploy-rollback",
+        "arm": "versions",
+        "domain": "deploy",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588"
+        }
+      },
+      {
+        "case_id": "deploy-rollback",
+        "arm": "full",
+        "domain": "deploy",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588"
+        }
+      },
+      {
+        "case_id": "export-rollback",
+        "arm": "plain",
+        "domain": "export",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-rollback",
+        "arm": "versions",
+        "domain": "export",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-rollback",
+        "arm": "full",
+        "domain": "export",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-rollback",
+        "arm": "mem0",
+        "domain": "export",
+        "event": "rollback",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "arm": "versions",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 3,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "arm": "full",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 3,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "arm": "mem0",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 2,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "arm": "plain",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 3,
+        "task_success": false,
+        "errors": [
+          "Successful public execution required after final file modification"
+        ],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      },
+      {
+        "case_id": "export-forget",
+        "arm": "full",
+        "domain": "export",
+        "event": "forget",
+        "rounds": 4,
+        "task_success": true,
+        "errors": [],
+        "artifact_hashes": {
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 129525,
+      "completion_tokens": 6024,
+      "total_tokens": 135549
+    },
+    "paired_success": {
+      "plain_vs_full": {
+        "original_planned_pairs": 15,
+        "planned_pairs": 15,
+        "pairs": 10,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "versions_vs_full": {
+        "original_planned_pairs": 15,
+        "planned_pairs": 15,
+        "pairs": 10,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "mem0_vs_full": {
+        "original_planned_pairs": 15,
+        "planned_pairs": 15,
+        "pairs": 10,
+        "a_only": 0,
+        "b_only": 0
+      }
+    },
+    "artifact_sha256": {
+      "handoff-unrelated_update/plain": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+        "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+      },
+      "handoff-unrelated_update/versions": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+        "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+      },
+      "handoff-unrelated_update/full": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+        "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+      },
+      "handoff-unrelated_update/mem0": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "104491277bfb1ed9aaef8360d9e43ad17795efaee057bd24db55f2fe52065c4a",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "f67ec4f28c890bdcb469f42e8f721b4539fd1c6de6a373e7eb531cbb56ace79e",
+        "output/verification.json": "767f8198a117c16cc01599fbe82b38d328f5714d2c416c6aaf560c1b04ad8b2c"
+      },
+      "export-unrelated_update/versions": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+      },
+      "export-unrelated_update/full": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+      },
+      "export-unrelated_update/mem0": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+      },
+      "export-unrelated_update/plain": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "5fea5ab937e2a6db87c16cf5888fd5794069b376778d9411a2aa2a0946f980ad",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "1aef930c0c85e26b50d3e9e68b3f337069033cc88e92e347ae8d5d6054a0e68e"
+      },
+      "handoff-rollback/full": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-rollback/mem0": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-rollback/plain": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-rollback/versions": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "export-delete_recreate/mem0": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-delete_recreate/plain": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-delete_recreate/versions": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-delete_recreate/full": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "deploy-forget/plain": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-forget/versions": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-forget/full": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-forget/mem0": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "export-update/versions": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-update/full": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-update/mem0": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-update/plain": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "handoff-update/full": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-update/mem0": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-update/plain": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "handoff-update/versions": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+        "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+        "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+      },
+      "deploy-rollback/mem0": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+        "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+        "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+        "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+      },
+      "deploy-rollback/plain": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+        "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+        "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+        "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+      },
+      "deploy-rollback/versions": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+        "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+        "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+        "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+      },
+      "deploy-rollback/full": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+        "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+        "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+        "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+      },
+      "export-rollback/plain": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-rollback/versions": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-rollback/full": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "export-rollback/mem0": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+        "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+      },
+      "handoff-forget/versions": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-forget/full": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-forget/mem0": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-forget/plain": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "export-forget/full": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+      },
+      "export-forget/mem0": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+      },
+      "export-forget/plain": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+      },
+      "export-forget/versions": {
+        "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+        "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+      },
+      "deploy-unrelated_update/mem0": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-unrelated_update/plain": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-unrelated_update/versions": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-unrelated_update/full": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "handoff-delete_recreate/plain": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-delete_recreate/versions": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-delete_recreate/full": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "handoff-delete_recreate/mem0": {
+        "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+        "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+        "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+        "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+      },
+      "deploy-update/versions": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-update/full": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-update/mem0": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-update/plain": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-delete_recreate/full": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-delete_recreate/mem0": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-delete_recreate/plain": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      },
+      "deploy-delete_recreate/versions": {
+        "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+        "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+      }
+    },
+    "metric_definitions": {
+      "stale_returned": "Prepared stale context for tasks with a recorded request attempt; does not establish that an unanswered request reached the provider.",
+      "recorded_turn_metrics": "Tool, response and token counts include all recorded turns, including interrupted tasks; success denominators include completed tasks only.",
+      "tool_action_errors": "Count of execution.results entries containing error, including the synthetic error entry for a rejected envelope; can overlap protocol_errors.",
+      "round_limit_without_done": "Tasks with four recorded turns and done=false in the final execution, independent of task success.",
+      "artifact_only_success": "Post-hoc diagnostic: task_success from the final recorded turn.grade; checks artifacts without the final public-run requirement.",
+      "missing_final_public_run": "Post-hoc diagnostic: final result contains the required successful public execution error; may overlap other failures."
+    },
+    "post_hoc_diagnostics": {
+      "fields": [
+        "artifact_only_success",
+        "missing_final_public_run"
+      ],
+      "introduced_after_observing_failures": true,
+      "primary_success_definition_unchanged": true
+    },
+    "audit": {
+      "replayed_tasks": 42,
+      "replayed_turns": 155,
+      "verified_fixture_tasks": 60,
+      "replayed_completed_tasks": 41,
+      "partial_mode_explicit": true,
+      "request_accounting_complete": true,
+      "equal_current_sources": true,
+      "versions_full_initial_messages_identical": true,
+      "plain_mem0_initial_messages_identical": true,
+      "saved_source_snapshots_verified": true,
+      "actual_artifact_bytes_verified": true,
+      "current_native_digest_required": false
+    },
+    "known_reported_subtotal_cny_uncached": 1.0045605,
+    "estimated_cny_uncached": null,
+    "external_baseline": {
+      "prepared_tasks": 15,
+      "manifest": {
+        "system": "Mem0 OSS",
+        "track": "structured CRUD with exact metadata addressing",
+        "python": "3.11.5",
+        "packages": {
+          "mem0ai": "2.2.1",
+          "qdrant-client": "1.19.1",
+          "sentence-transformers": "2.2.2",
+          "transformers": "4.32.1",
+          "torch": "2.1.0",
+          "numpy": "1.26.4",
+          "huggingface-hub": "0.16.4",
+          "pydantic": "2.11.7",
+          "openai": "1.102.0"
+        },
+        "mem0_official_wheel_sha256": "fe91bb91ac8926231993a4aa58df00a60c6c74c709e6a338fe399500776eef4d",
+        "embedding": {
+          "name": "sentence-transformers/all-MiniLM-L12-v2",
+          "dimensions": 384,
+          "device": "cpu",
+          "local_files_sha256": {
+            "pytorch_model.bin": "54609dea3ff88f3167f049eeadbfe780b1173a3117bfac862134ebcd8ce33661",
+            "config.json": "ae8eb28eeebfed037bc91d77a98b336ee3a215b04c21deff81388868b4321f97",
+            "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+            "tokenizer.json": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+            "tokenizer_config.json": "fba7637034542f691ef4b1ad735d664971e8d9723012a1973d4ee985742e8e72",
+            "special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+            "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+            "config_sentence_transformers.json": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3",
+            "sentence_bert_config.json": "70f4448f31320443fe3557cacea5abf2dcc4915dda8c80646bec9f3bb0aa5a1f",
+            "1_Pooling/config.json": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23"
+          }
+        },
+        "telemetry": false,
+        "llm_calls": 0,
+        "llm_attempts": 0,
+        "semantic_search_calls": 0,
+        "extraction": false,
+        "init_ms": 2519.3907499779016,
+        "adapter_features": [
+          "JSON serialization",
+          "scope/kind/key addressing",
+          "sequential update-or-add",
+          "explicit Qdrant client close"
+        ],
+        "outside_common_contract": [
+          "atomic source/derivative invalidation",
+          "atomic publication",
+          "native strategy rollback",
+          "hard erasure of history"
+        ]
+      },
+      "init_median_ms": 2500.5375831387937,
+      "reopen_init_median_ms": 251.07379211112857,
+      "native_operation_count": 270,
+      "native_operation_total_ms": 1836.1762452404946,
+      "scope": "Native structured CRUD with local embedding; exact addressing and strategy lifecycle are adapter operations."
+    }
+  },
+  "trace_sha256": "4051b1d4b19cfa03c4e2d241521c934e07c501e5f1c0380dbe022fe131dd4760",
+  "reporter_sha256": "781e174842cc82149200479f2fa7f80f534b1e9cd1aa1967d441205cc4352c7c",
+  "replay_source_sha256": {
+    "run_multistep_memory.py": "96ab8a513a2cc4b9e4dc78a7ec71b5946fd5468769eb9ee8c45471200c7339dc",
+    "multistep_fixture.py": "d925780d9c48b970b3b492d730580843890997aa667434d403639986e90931ef",
+    "output_contract.py": "2e82e736185580a89d6df4e58553ee60b983d491f0cad15c3ea3493f638d87b8"
+  },
+  "evidence_sha256": {
+    "freeze.json": "744806f7560463676628513848d24df91746b65496421f86a978638cd46cbfd3",
+    "suite.json": "760f6db75da495cd9fee2567979c9a5bfb4d7bf54c5c58f653c13bcdd5bb947f",
+    "inputs.jsonl": "ab41c292e1449f501ecc39a1f1d5a0cd92e5cb662d3a8ad8c58762be193c8c93",
+    "attempts.jsonl": "a7952924212a44b42d1340586b59d2ff4402b4ea5dc008eae72c0057110af36a",
+    "responses.jsonl": "3b4b01da9a51d8c180cbc5dc2dd27122d471127e70e902da37ce8fb88fe606b1",
+    "turns.jsonl": "16882c18b85ca0b72494cab4000767927940e1796f6329aa0a1b2d2d827abd3d",
+    "results.jsonl": "c83b279a7180cd238b099816d450c159daf573dd6952ecf20d670d1b9bcb1bd4",
+    "rate_limits.jsonl": "ffdf754c6f7b175be4b9e4b7202d76a1d704531f751afd2f49ed70622432f09c",
+    "status.json": "8fa144c437c3eafc426125a990da1beda3ff7ef1de8095956c5ff5cccdacbccb",
+    "errors.jsonl": "68b5f3275c6acc7ae214873b44e2a861fa255433e10849064ee92c05604eacd4"
+  },
+  "publication_redactions": {
+    "rate_limit_error_details": "Kimi HTTP 429: provider rate limit (account identifiers omitted)",
+    "all_rate_limit_events_retained": true,
+    "raw_local_logs_unchanged": true,
+    "terminal_error_body_omitted": true
+  },
+  "pricing": {
+    "source": "https://platform.kimi.com/docs/pricing/chat",
+    "checked": "2026-10-04",
+    "cny_per_million_uncached_input": 6.5,
+    "cny_per_million_output": 27,
+    "estimated_cny_uncached": null,
+    "known_reported_subtotal_cny_uncached": 1.0045605,
+    "total_cost_unknown": true,
+    "not_billing_statement": true
+  },
+  "limits": [
+    "Three constructed workflows, five related lifecycle events each; not 15 independent applications.",
+    "One model and one session per case/arm within each cohort; interrupted sessions may have a separately reported restarted supplement. No independent external developers or human participants.",
+    "Trusted programs execute JSON configurations; no model-authored arbitrary code is executed.",
+    "Mem0 uses native structured CRUD and local embeddings with adapter addressing; semantic extraction/search and hosted Mem0 are outside this contract.",
+    "Current source tools replay prepared storage snapshots; their calls do not measure online retrieval latency.",
+    "Sequential lifecycle schedules precede each model session; no mid-turn concurrency or production safety claim.",
+    "Task success and tool cost are descriptive outcomes; no statistical significance or broad quality advantage is established."
+  ]
+}
