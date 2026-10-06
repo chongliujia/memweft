@@ -57,6 +57,18 @@ def inventory(root):
     return found
 
 
+def source_paths(frozen_hashes):
+    """Canonical lookup only; preserve the original frozen manifest keys."""
+    normalized, aliases = {}, set()
+    for name, digest in frozen_hashes.items():
+        relative = report._relative_path(name)
+        if relative.casefold() in aliases:
+            raise ValueError('Duplicate normalized snapshot path')
+        aliases.add(relative.casefold())
+        normalized[relative] = digest
+    return normalized
+
+
 def prepare_continuation(priors, output, *, expected_unfinished=10):
     priors, output = [Path(path).resolve() for path in priors], Path(output).resolve()
     if len(priors) < 2 or len(set(priors)) != len(priors):
@@ -72,18 +84,19 @@ def prepare_continuation(priors, output, *, expected_unfinished=10):
         raise ValueError('Auditor changed during preparation')
     original = priors[0]
     original_manifest = json.loads((original / 'freeze.json').read_text(encoding='utf-8'))
+    sources = source_paths(original_manifest['source_sha256'])
     if 'supplement' in original_manifest or 'continuation' in original_manifest:
         raise ValueError('First prior must be the original cohort')
     for prior in priors[1:]:
         manifest = json.loads((prior / 'freeze.json').read_text(encoding='utf-8'))
         if any(manifest[name] != original_manifest[name] for name in ('suite_sha256', 'source_sha256', 'native_sha256')):
             raise ValueError('Prior cohort runtime or suite differs from original')
-    if sha(Path(multistep_fixture.__file__)) != original_manifest['source_sha256']['evals/multistep_fixture.py']:
+    if sha(Path(multistep_fixture.__file__)) != sources['evals/multistep_fixture.py']:
         raise ValueError('Fixture implementation differs from frozen original')
     if sha(Path(native.__file__)) != original_manifest['native_sha256']:
         raise ValueError('Installed native binary differs from original')
     package = Path(memweft.__file__).resolve().parent
-    for name, digest in original_manifest['source_sha256'].items():
+    for name, digest in sources.items():
         if name.startswith('python/src/memweft/') and sha(package / Path(name).name) != digest:
             raise ValueError('Installed SDK source differs from original: ' + name)
     completed, completed_keys, accounting, unknown = [], set(), [], []
@@ -142,12 +155,12 @@ def prepare_continuation(priors, output, *, expected_unfinished=10):
     shutil.copytree(original / 'sources', runtime)
     sdk_copy = runtime / 'python/src/memweft'
     shutil.copytree(package, sdk_copy, dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
-    for name in original_manifest['source_sha256']:
+    for name in sources:
         shutil.copy2(original / 'sources' / name, runtime / name)
     runtime_native = sdk_copy / Path(native.__file__).name
     if sha(runtime_native) != original_manifest['native_sha256']:
         raise ValueError('Copied native binary differs from original')
-    for name, digest in original_manifest['source_sha256'].items():
+    for name, digest in sources.items():
         if sha(runtime / name) != digest:
             raise ValueError('Isolated runtime source changed: ' + name)
     launcher = output / 'run_frozen.py'

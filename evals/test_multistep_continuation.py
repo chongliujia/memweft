@@ -83,6 +83,18 @@ class ContinuationPreparationTests(unittest.TestCase):
             mock.start()
             self.addCleanup(mock.stop)
 
+    def windows_manifest_keys(self):
+        """Change only synthetic test manifests, preserving their parent link."""
+        for prior in self.priors:
+            path = prior / 'freeze.json'
+            manifest = json.loads(path.read_text(encoding='utf-8'))
+            manifest['source_sha256'] = {name.replace('/', '\\'): digest
+                                         for name, digest in manifest['source_sha256'].items()}
+            if 'supplement' in manifest:
+                manifest['supplement']['original_freeze_sha256'] = sha(self.priors[0] / 'freeze.json')
+            dump(path, manifest)
+        return json.loads((self.priors[0] / 'freeze.json').read_text(encoding='utf-8'))['source_sha256']
+
     def test_two_audited_cohorts_select_only_remaining_ten_and_verify_runtime(self):
         before = [continuation.inventory(path) for path in self.priors]
         manifest = continuation.prepare_continuation(self.priors, self.output)
@@ -165,6 +177,57 @@ class ContinuationPreparationTests(unittest.TestCase):
                 continuation.prepare_continuation(self.priors, self.output)
         self.assertFalse((self.output / 'preparation-validation.json').exists())
         self.assertFalse((self.output / 'attempts.jsonl').exists())
+
+
+    def test_windows_keys_map_fixture_sdk_and_runtime_without_rewriting_identity(self):
+        frozen_hashes = self.windows_manifest_keys()
+        before = [continuation.inventory(path) for path in self.priors]
+        runtime = self.output / 'isolated-runtime'
+        copied_native = runtime / 'python/src/memweft' / Path(native.__file__).name
+        fake = SimpleNamespace(stdout=json.dumps({'root': str(runtime), 'native': str(copied_native),
+                                                  'native_sha256': sha(Path(native.__file__))}))
+        # Exercise real prior audit, fixture/SDK checks, and source copying. Only
+        # the terminal old verifier is mocked: on POSIX it cannot interpret the
+        # preserved Windows keys. The existing unmocked test runs on each CI OS.
+        with patch.object(continuation.subprocess, 'run', return_value=fake) as verifier:
+            manifest = continuation.prepare_continuation(self.priors, self.output)
+        verifier.assert_called_once()
+        self.assertEqual(manifest['source_sha256'], frozen_hashes)
+        self.assertEqual(manifest['continuation']['runtime_source_sha256'], frozen_hashes)
+        self.assertIn('evals\\multistep_fixture.py', manifest['source_sha256'])
+        for name, digest in frozen_hashes.items():
+            canonical = name.replace('\\', '/')
+            self.assertEqual(sha(runtime / canonical), digest)
+            self.assertEqual(sha(self.output / 'sources' / canonical), digest)
+        self.assertEqual([continuation.inventory(path) for path in self.priors], before)
+
+    def test_windows_sdk_prefix_still_enforces_installed_source_digest(self):
+        self.windows_manifest_keys()
+        actual_sha = continuation.sha
+        sdk_path = Path(continuation.memweft.__file__).resolve().parent / 'api.py'
+        def changed(path):
+            return '0' * 64 if Path(path).resolve() == sdk_path else actual_sha(path)
+        with patch.object(continuation, 'sha', side_effect=changed):
+            with self.assertRaisesRegex(ValueError, 'Installed SDK source differs'):
+                continuation.prepare_continuation(self.priors, self.output)
+        self.assertFalse(self.output.exists())
+
+
+class SourceManifestPathTests(unittest.TestCase):
+    def test_windows_lookup_is_canonical_without_mutating_input(self):
+        frozen = {'evals\\multistep_fixture.py': 'fixture', 'python\\src\\memweft\\api.py': 'sdk'}
+        before = dict(frozen)
+        self.assertEqual(continuation.source_paths(frozen),
+                         {'evals/multistep_fixture.py': 'fixture', 'python/src/memweft/api.py': 'sdk'})
+        self.assertEqual(frozen, before)
+
+    def test_unsafe_windows_paths_and_ambiguous_aliases_are_rejected(self):
+        for name in ('..\\fixture.py', 'C:\\fixture.py', '\\\\server\\share\\fixture.py'):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, 'Unsafe snapshot path'):
+                continuation.source_paths({name: 'digest'})
+        for alias in ('evals/fixture.py', 'EVALS\\fixture.py'):
+            with self.subTest(alias=alias), self.assertRaisesRegex(ValueError, 'Duplicate normalized'):
+                continuation.source_paths({'evals\\fixture.py': 'first', alias: 'second'})
 
 
 if __name__ == '__main__':
