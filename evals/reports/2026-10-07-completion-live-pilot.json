@@ -1,0 +1,431 @@
+{
+  "freeze": {
+    "protocol": "completion-pilot-v1",
+    "frozen_at": "2026-10-07T12:36:23.050579+00:00",
+    "model": "kimi-k2.6",
+    "base_commit": "24ee23079a215592fc3a8a857c1ffcd790173f00",
+    "worktree_dirty": false,
+    "limits": {
+      "max_rounds": 4,
+      "max_actions": 3,
+      "max_completion_tokens": 1024,
+      "max_responses": 48,
+      "max_requests": 144,
+      "token_stop_threshold": 100000,
+      "request_byte_cap": 64000,
+      "interval_seconds": 21,
+      "rate_limit_retries": 2,
+      "rate_limit_cooldown_seconds": 60
+    },
+    "source_sha256": {
+      "evals/run_completion_pilot.py": "fa81f906753d237516613598fc9f704b2d7e0e66044f77e4ac976c9363a8a540",
+      "evals/multistep_fixture.py": "d925780d9c48b970b3b492d730580843890997aa667434d403639986e90931ef",
+      "evals/verified_multistep.py": "3d96e98126995e8325b6a0984c138a44ddb27b0aab3acba6411101e0fa0eecaa",
+      "examples/verified_completion.py": "9036f46db81947843dd1cf692b23e670089470b386b64e09c7530d8857750ac5",
+      "evals/multistep_kimi.py": "645116f4cfbda7141bf67ce123061b3b06d41f1908f17dc3b16f86115cc8f163",
+      "examples/handoff_app/kimi_client.py": "8704c96a46cdd501aa6049aa63b1fd93d3e360b4e7e8abf1f4c0713715a60d2d",
+      "docs/completion_pilot_protocol.md": "4a2c4375f31ae5a41f435fd39b6eb2e95a5e22e08a73ce589a88944a35a55c03"
+    },
+    "suite_sha256": "960a7210e5f2c4c087c61117791e26f7fe1d8a4dbc28c256b59cc3ed47e13a32",
+    "inputs_sha256": "54ec7eac69b9d69e8921a4fc09a8615a67eee56e6521723218082a8fa5cce3ef",
+    "seed": 20261007,
+    "pricing": {
+      "input_cny_per_million": 6.5,
+      "output_cny_per_million": 27,
+      "kind": "fixed_uncached_reference_from_2026-10-04_not_current_bill"
+    },
+    "provenance": "Six constructed situations from three templates; one sample per mode; no humans or storage-system comparison."
+  },
+  "summary": {
+    "status": "completed",
+    "planned_tasks": 12,
+    "completed_attempts": 12,
+    "by_mode": {
+      "control": {
+        "completed_attempts": 6,
+        "correct_completion": 4,
+        "false_completion": 1,
+        "artifact_only_success": 6,
+        "verified_without_accepted_done": 1,
+        "rounds": 21,
+        "budget_exhausted": 1,
+        "recovery_numerator": null,
+        "recovery_denominator": null,
+        "recovery_rate": null,
+        "tool_operations": 31,
+        "responses": 21,
+        "known_tokens": 18214
+      },
+      "guarded": {
+        "completed_attempts": 6,
+        "correct_completion": 6,
+        "false_completion": 0,
+        "artifact_only_success": 6,
+        "verified_without_accepted_done": 0,
+        "rounds": 23,
+        "budget_exhausted": 0,
+        "recovery_numerator": 0,
+        "recovery_denominator": 0,
+        "recovery_rate": null,
+        "tool_operations": 30,
+        "responses": 23,
+        "known_tokens": 20930
+      }
+    },
+    "pairs": [
+      {
+        "case_id": "deploy-update",
+        "control_correct": true,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": -1,
+        "guarded_minus_control_known_tokens": -779
+      },
+      {
+        "case_id": "deploy-forget",
+        "control_correct": false,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": 0,
+        "guarded_minus_control_known_tokens": -97
+      },
+      {
+        "case_id": "export-update",
+        "control_correct": true,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": 1,
+        "guarded_minus_control_known_tokens": 1399
+      },
+      {
+        "case_id": "export-forget",
+        "control_correct": true,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": 1,
+        "guarded_minus_control_known_tokens": 1744
+      },
+      {
+        "case_id": "handoff-update",
+        "control_correct": true,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": 1,
+        "guarded_minus_control_known_tokens": 823
+      },
+      {
+        "case_id": "handoff-forget",
+        "control_correct": false,
+        "guarded_correct": true,
+        "guarded_minus_control_rounds": 0,
+        "guarded_minus_control_known_tokens": -374
+      }
+    ],
+    "case_results": [
+      {
+        "case_id": "handoff-update",
+        "mode": "control",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 3,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+          "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+          "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "handoff-update",
+        "mode": "guarded",
+        "domain": "handoff",
+        "event": "update",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+          "handoff.json": "b17ab04a35ab420c7031f3bc9cb1efa574038d065e0fdad521e69c7e83634999",
+          "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+          "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+          "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45",
+          "manifest.json": "4135d7182d0d5e08197b94cce830496d2921b9fea15251a5dd475982cfa225e6",
+          "output/verification.json": "7054e90f2399ab209212ab01001865ab9fb6f1c752f8eefe4c3d871fe85c67cd"
+        }
+      },
+      {
+        "case_id": "export-forget",
+        "mode": "guarded",
+        "domain": "export",
+        "event": "forget",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+        }
+      },
+      {
+        "case_id": "export-forget",
+        "mode": "control",
+        "domain": "export",
+        "event": "forget",
+        "rounds": 3,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "mode": "control",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": false,
+        "false_completion": true,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": false,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+          "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+          "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+        }
+      },
+      {
+        "case_id": "handoff-forget",
+        "mode": "guarded",
+        "domain": "handoff",
+        "event": "forget",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "25adccf955eb41d2dcbff4643bec3b1ae68d59be80855d1a245e10faa757a642",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/package.txt": "d2268eee6bf3139074d1683036fda08904cda2d1d1c35a581c9ac0ef14482089",
+          "inputs/receipt.json": "33f4177da59cb551fd5374d2259a508cc88271279fd5da29b65f7948637e04f9",
+          "inputs/release.json": "74d9bece37b513b94be05e324a98614212817845d07e0a934ecf4e6552432b45"
+        }
+      },
+      {
+        "case_id": "deploy-update",
+        "mode": "guarded",
+        "domain": "deploy",
+        "event": "update",
+        "rounds": 3,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+          "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+        }
+      },
+      {
+        "case_id": "deploy-update",
+        "mode": "control",
+        "domain": "deploy",
+        "event": "update",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+          "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2",
+          "output/probe.json": "28bbeef8a545e5c0a3eda31892a26708ba05a8bb0c8d3a69fcea100a331d5588",
+          "route.json": "be36266e1f8e47daaeceb368cd594a6292eaedde591203dfb88426d918ea5ac6",
+          "service.json": "37930cf8bf96d10cabcc7a26684229d9e6c98bbea853163926950767c2569c63"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "mode": "control",
+        "domain": "export",
+        "event": "update",
+        "rounds": 3,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "export-update",
+        "mode": "guarded",
+        "domain": "export",
+        "event": "update",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "562bd6c99e35b227dfa0b46d84b946195ab9db6298660d9f7b2498f3d4773f6b",
+          "export.json": "a14aa6cc380c2630ae2488c1e471ec41ea97171a3eec898eafccd7d6203846fa",
+          "inputs/records.json": "768e052b8f20de7c628c52edcea086f6076f5754e7d64de196ac62380768628d",
+          "output/report.json": "5a6ba6a68b5861316e5a4b28aaa5e41f09dfccf0929f1f072194783d264c738a"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "mode": "guarded",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 4,
+        "status": "completed",
+        "correct_completion": true,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": true,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": false,
+        "artifact_sha256": {
+          "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+        }
+      },
+      {
+        "case_id": "deploy-forget",
+        "mode": "control",
+        "domain": "deploy",
+        "event": "forget",
+        "rounds": 4,
+        "status": "budget_exhausted",
+        "correct_completion": false,
+        "false_completion": false,
+        "artifact_only_success": true,
+        "artifact_errors": [],
+        "public_verified": true,
+        "done_accepted": false,
+        "rejected_done_rounds": [],
+        "recovered_after_rejection": false,
+        "verified_without_accepted_done": true,
+        "artifact_sha256": {
+          "README.txt": "4b8f65dd30365ea8b1c695fc06af717cc2e6455fbf48905058a681ae1980d461",
+          "blocked.json": "c55602854ba8ff02a3c888aad9dfa38812f008341019d1bd2acc11ac39e93c1e",
+          "inputs/service.json": "2ecc54fcd7cefee7e658060bc2946f7ec3a5fe11a59d21479635df8e36967ae2"
+        }
+      }
+    ],
+    "responses": 44,
+    "requests": 44,
+    "rate_limits": 0,
+    "known_usage": {
+      "prompt_tokens": 37578,
+      "completion_tokens": 1566,
+      "total_tokens": 39144
+    },
+    "unknown_usage_responses": 0,
+    "unanswered_attempts": [],
+    "usage_complete": true,
+    "known_reference_estimate_cny_uncached": 0.286539,
+    "reference_estimate_cny_uncached": 0.286539,
+    "actual_billed_cost": null
+  },
+  "auditor_sha256": "fa81f906753d237516613598fc9f704b2d7e0e66044f77e4ac976c9363a8a540",
+  "evidence_sha256": {
+    "freeze.json": "6e5fce4db6deb4955640821188322b882e82fb04e524662c2780e6bc6ac10afb",
+    "suite.json": "960a7210e5f2c4c087c61117791e26f7fe1d8a4dbc28c256b59cc3ed47e13a32",
+    "inputs.jsonl": "54ec7eac69b9d69e8921a4fc09a8615a67eee56e6521723218082a8fa5cce3ef",
+    "attempts.jsonl": "faf7d30237442c7fd749b3c25d6ee3522f6470e512b67ab36af87ae8a32f1c6d",
+    "responses.jsonl": "cee447e440e1bba78d4bc55dada02bd2aa64b73d24bc043849db4a9af35b451a",
+    "turns.jsonl": "2842489aef7fa9f46279331d7d4208fb63a18a3700608d70e41da4d1804e88c3",
+    "results.jsonl": "1695551edc5abd4f84cd89d01cb3f514679e0fff0275e849227e5ab30f6abdb2",
+    "status.json": "e35e5a8a30256812630f0710f32f3f60896739fdc74f9fa19602fdf4a61dfd27"
+  },
+  "limits": "Six constructed pairs, one sample per mode; no human participants or causal ranking.",
+  "trace_sha256": "8925752a328ed0700f2d21b8586164d7be7c2a2d5bbbc69c5f5094a3828cadc4"
+}

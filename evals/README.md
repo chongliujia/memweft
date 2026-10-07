@@ -29,6 +29,47 @@ historically successful tasks had verified artifacts but never requested
 completion within their budget. Published JSON evidence is checked out with LF
 line endings so Windows does not change the bytes used by its integrity hashes.
 
+### Prospective live completion pilot
+
+The [frozen pilot protocol](../docs/completion_pilot_protocol.md) pairs the same
+six constructed situations across a control executor and the completion gate.
+Both use the same initial prompt, files, public tools, source snapshots, model,
+four rounds and three actions per round. Only completion acceptance changes.
+The public verifier does not replace independent business grading. Source data
+comes from fixed synthetic fixtures; this pilot does not measure online SDK
+retrieval or compare memory systems.
+
+Run the scripted regression suite without credentials:
+
+```bash
+.venv/bin/python -B -m unittest discover -s evals -p 'test_completion_pilot.py' -v
+```
+
+The protocol documents separate preparation, paid execution, local audit and
+publication commands. After publication, the saved trace can also be replayed
+without the original `data/` directory or any model calls:
+
+```bash
+.venv/bin/python -B evals/audit_completion_publication.py \
+  evals/reports/2026-10-07-completion-live-pilot.json
+```
+
+This replay requires the trusted implementation to match the recorded source
+hashes and the originating file newline conventions. A differing checkout fails
+instead of silently dropping byte checks. It reconstructs each task, compares
+model context, tool feedback, business grades, final artifacts and accounting,
+then checks the published summary and journal hashes. It cannot authenticate
+provider origin or prove that no unpublished trials exist.
+
+The [October 7 live pilot](reports/2026-10-07-completion-live-pilot.md) recorded
+4/6 correct completions in control and 6/6 in guarded, with correct file contents
+in all 12 attempts. Control had one completion after its verification receipt
+was invalidated and one verified task that never requested completion before its
+budget ended. There were **no guarded completion refusals**, so recovery is
+unknown and the group difference does not demonstrate a gate benefit. The 44
+responses reported 39,144 tokens. Six first replies omitted the required `done`
+field; protocol-error recovery is recorded separately from completion refusal.
+
 ## Frozen multistep file tasks with an external structured baseline
 
 The [v2 protocol](../docs/multistep_memory_protocol.md) evaluates three constructed

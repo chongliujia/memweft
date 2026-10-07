@@ -314,6 +314,11 @@ after the last mutation and the captured state still matches. It returns feedbac
 within the existing round budget; it never runs verification or repairs files on
 the model's behalf. This application example does not change SDK defaults or
 replace business authorization and independent acceptance checks.
+The [prospective Kimi pilot](evals/reports/2026-10-07-completion-live-pilot.md)
+compares completion acceptance on six paired constructed situations with identical
+initial inputs and fixed budgets. It separates valid completion, false completion
+and recovery after an actual refusal; it does not establish external-user or
+memory-system performance. Its published traces support zero-call offline replay.
 
 <details>
 <summary><b>Run a local Agent evaluation</b></summary>

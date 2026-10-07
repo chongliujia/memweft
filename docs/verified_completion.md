@@ -132,3 +132,8 @@ while True:
 旧回复没有读到新的反馈，回放不能推断模型会如何补做验证，也不能计为新的模型成功率。
 既有 [v2 多步协议](multistep_memory_protocol.md)、提示、主评分和 60 个最终任务结果保持原口径。
 本轮[离线回放记录](../evals/reports/2026-10-07-verified-completion.md)包含逐例完成状态、剩余预算和来源哈希。
+
+后续[真实 Kimi 小试协议](completion_pilot_protocol.md)为同样六个构造情境设置对照与门控两组，
+让模型实际收到反馈并在固定四轮内继续。共同成功指标同时检查完成接受、有效公开验证和业务正确性。
+只有确实被拒绝过完成请求的任务才进入恢复率分母；没有拒绝事件时，恢复率保持未知。
+完整轨迹可用[公开报告回放器](../evals/audit_completion_publication.py)在零 API 调用下复核。

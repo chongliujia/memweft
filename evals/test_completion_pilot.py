@@ -3,12 +3,14 @@ from contextlib import redirect_stdout
 from copy import deepcopy
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
 import run_completion_pilot as pilot
+from audit_completion_publication import audit_publication
 from multistep_kimi import KimiResponseError, RateLimited
 
 
@@ -245,6 +247,49 @@ class CompletionPilotTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'new report stem'):
             pilot.publish(self.output, stem)
         self.assertEqual([path.read_bytes() for path in paths], before)
+
+    def test_published_evidence_replays_without_original_directory_or_model(self):
+        expected = self.run_scripted(reject_then_recover=True)
+        stem = self.root / 'published'
+        pilot.publish(self.output, stem)
+        self.output.rename(self.root / 'unavailable-original')
+        with patch.object(pilot.BoundedKimiClient, 'complete', side_effect=AssertionError('No API')):
+            audited = audit_publication(stem.with_suffix('.json'))
+        self.assertEqual(audited['summary'], expected)
+        self.assertEqual(audited['model_calls'], 0)
+        saved = pilot.read(stem.with_suffix('.json'))
+        saved['summary']['by_mode']['control']['correct_completion'] = 6
+        pilot.dump(stem.with_suffix('.json'), saved)
+        with self.assertRaisesRegex(ValueError, 'summary or evidence hashes'):
+            audit_publication(stem.with_suffix('.json'))
+
+    def test_rehashed_published_tool_tampering_is_rejected(self):
+        self.run_scripted()
+        stem = self.root / 'published'
+        pilot.publish(self.output, stem)
+        trace = stem.with_suffix('.traces.jsonl')
+        records = pilot.rows(trace)
+        next(row for row in records if row['kind'] == 'turns')['record']['execution']['completion']['verified'] = True
+        trace.write_text('', encoding='utf-8')
+        for row in records:
+            pilot.append(trace, row)
+        saved = pilot.read(stem.with_suffix('.json'))
+        saved['trace_sha256'] = pilot.sha(trace)
+        pilot.dump(stem.with_suffix('.json'), saved)
+        with self.assertRaisesRegex(ValueError, 'Tool replay'):
+            audit_publication(stem.with_suffix('.json'))
+
+
+class PublishedLivePilotTests(unittest.TestCase):
+    @unittest.skipIf(os.name == 'nt', 'Published run uses LF source/artifact bytes; Windows runs generated-cohort replay tests above')
+    def test_committed_live_report_replays_without_api(self):
+        report = Path(__file__).resolve().parent / 'reports/2026-10-07-completion-live-pilot.json'
+        if not report.exists():
+            self.skipTest('Live pilot not yet published')
+        with patch.object(pilot.BoundedKimiClient, 'complete', side_effect=AssertionError('No API')):
+            result = audit_publication(report)
+        self.assertTrue(result['verified'])
+        self.assertEqual((result['model_calls'], result['tasks']), (0, 12))
 
 
 if __name__ == '__main__':
