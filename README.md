@@ -308,6 +308,13 @@ three actual project records through the previously delivered CLI, using four
 model calls. These are constructed comparisons and an assistant-driven project
 continuation; neither is an external human study.
 
+For bounded tool loops, the optional [verified completion example](docs/verified_completion.md)
+rejects a model's completion request until an application-owned check has passed
+after the last mutation and the captured state still matches. It returns feedback
+within the existing round budget; it never runs verification or repairs files on
+the model's behalf. This application example does not change SDK defaults or
+replace business authorization and independent acceptance checks.
+
 <details>
 <summary><b>Run a local Agent evaluation</b></summary>
 

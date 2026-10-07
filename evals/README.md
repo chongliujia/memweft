@@ -1,5 +1,34 @@
 # Local model scenario evaluation
 
+## Verified completion regression
+
+The optional [application completion gate](../docs/verified_completion.md) requires
+an explicit completion request backed by a fresh trusted check. Mutations and
+failed verification revoke the in-memory receipt. Rejected completion consumes
+the existing turn budget; no verification, repair, extra turn or model call is
+inserted automatically.
+
+Run its portable regression tests and replay the published October 6 replies:
+
+```bash
+.venv/bin/python -B -m unittest discover -s evals -p 'test_verified*.py' -v
+.venv/bin/python -B evals/replay_verified_completion.py \
+  --output data/verified-completion-new
+```
+
+The replay uses temporary project directories and **zero model calls**. Original
+replies did not observe the new feedback, so accepted completion counts are not a
+new model success rate. An original task may have passed the v2 final checker
+while exhausting its rounds without ever requesting completion; the new session
+does not treat that as an accepted completion. The frozen v2 runner, prompts,
+scoring, and historical results remain unchanged.
+
+The [October 7 replay](reports/2026-10-07-verified-completion.md) rejected all nine
+historical unverified completion requests. It accepted 33 requests; another 18
+historically successful tasks had verified artifacts but never requested
+completion within their budget. Published JSON evidence is checked out with LF
+line endings so Windows does not change the bytes used by its integrity hashes.
+
 ## Frozen multistep file tasks with an external structured baseline
 
 The [v2 protocol](../docs/multistep_memory_protocol.md) evaluates three constructed

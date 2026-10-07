@@ -1,0 +1,1086 @@
+{
+  "schema_version": 1,
+  "kind": "offline_fixed_response_regression",
+  "model_api_calls": 0,
+  "overview_sha256": "b9c42f7395fa759add09a001b3db9d09aa876e09760486be2f377651e4026bf1",
+  "sources": [
+    {
+      "report": "2026-10-06-multistep-memory-partial.json",
+      "report_sha256": "38504226105cd9a04d7724e1f1349a1c67edd3628324e7990fc7f470e1567395",
+      "trace": "2026-10-06-multistep-memory-partial.traces.jsonl",
+      "trace_sha256": "4051b1d4b19cfa03c4e2d241521c934e07c501e5f1c0380dbe022fe131dd4760"
+    },
+    {
+      "report": "2026-10-06-multistep-memory-supplement.json",
+      "report_sha256": "ff1aa5deb7d08be1a5ba254278918b9d19ae5031486a43b83375a76458a3ea3e",
+      "trace": "2026-10-06-multistep-memory-supplement.traces.jsonl",
+      "trace_sha256": "19feb705435cf33b373395e2d87c3484fab9ed7297c743540113bde5d4ea1333"
+    },
+    {
+      "report": "2026-10-06-multistep-memory-continuation.json",
+      "report_sha256": "a5a83c40747446558c929df5ed26af7ea6c3fdc44cb4f3f699d389848c96943c",
+      "trace": "2026-10-06-multistep-memory-continuation.traces.jsonl",
+      "trace_sha256": "bec7da9e3b380b8e8cde174ac02131354d13306dc438885ee51bee703567cc54"
+    }
+  ],
+  "implementation_sha256": {
+    "examples/verified_completion.py": "9036f46db81947843dd1cf692b23e670089470b386b64e09c7530d8857750ac5",
+    "evals/replay_verified_completion.py": "2e28cd81dd2242a95af25886e1876a408d41ef1b31ab74bb6efdf349c3156ea8",
+    "evals/verified_multistep.py": "3d96e98126995e8325b6a0984c138a44ddb27b0aab3acba6411101e0fa0eecaa",
+    "evals/multistep_fixture.py": "d925780d9c48b970b3b492d730580843890997aa667434d403639986e90931ef"
+  },
+  "tasks": 60,
+  "historical_strict_success": 51,
+  "gate_done_accepted": 33,
+  "historical_failures_accepted": 0,
+  "tasks_with_rejected_done": 9,
+  "budget_exhausted": 19,
+  "verified_without_accepted_done": 18,
+  "incomplete_when_historical_trace_ended": 8,
+  "case_results": [
+    {
+      "case_id": "handoff-unrelated_update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-unrelated_update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-unrelated_update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-unrelated_update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-unrelated_update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-unrelated_update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-unrelated_update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-unrelated_update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-rollback",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-rollback",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-rollback",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-rollback",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-delete_recreate",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-delete_recreate",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-delete_recreate",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "export-delete_recreate",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-forget",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [
+        4
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-forget",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 2,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 2,
+      "done_rejected_rounds": [
+        2
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "deploy-forget",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 3,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [
+        3
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "deploy-forget",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 3,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [
+        3
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "export-update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 3,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 3,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-rollback",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-rollback",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-rollback",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-rollback",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-rollback",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-rollback",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-rollback",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-rollback",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-forget",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 3,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [
+        3
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "handoff-forget",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 3,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [
+        3
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "handoff-forget",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 2,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 2,
+      "done_rejected_rounds": [
+        2
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "handoff-forget",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": false,
+      "historical_rounds": 3,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [
+        3
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "export-forget",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-partial",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-forget",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-forget",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "export-forget",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": false,
+      "historical_rounds": 2,
+      "gate_status": "active",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": false,
+        "reason": "verification_required"
+      },
+      "rounds_remaining": 2,
+      "done_rejected_rounds": [
+        2
+      ],
+      "artifact_only_success": true,
+      "stop_reason": "historical_trace_ended"
+    },
+    {
+      "case_id": "deploy-unrelated_update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-unrelated_update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-unrelated_update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-unrelated_update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-delete_recreate",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "handoff-delete_recreate",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-supplement",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-delete_recreate",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "handoff-delete_recreate",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 3,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 1,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-update",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-update",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-update",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-update",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-delete_recreate",
+      "arm": "full",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-delete_recreate",
+      "arm": "mem0",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    },
+    {
+      "case_id": "deploy-delete_recreate",
+      "arm": "plain",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "completed",
+      "gate_done_accepted": true,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "completed"
+    },
+    {
+      "case_id": "deploy-delete_recreate",
+      "arm": "versions",
+      "cohort": "2026-10-06-multistep-memory-continuation",
+      "historical_success": true,
+      "historical_rounds": 4,
+      "gate_status": "budget_exhausted",
+      "gate_done_accepted": false,
+      "public_verification": {
+        "verified": true,
+        "reason": "verified"
+      },
+      "rounds_remaining": 0,
+      "done_rejected_rounds": [],
+      "artifact_only_success": true,
+      "stop_reason": "budget_exhausted"
+    }
+  ],
+  "limits": [
+    "Recorded replies did not observe new feedback; no new model success-rate claim.",
+    "No automatic verification, repair, invented reply, or extra round.",
+    "Public verification completion does not establish business correctness.",
+    "Original v2 protocol, scores, reports and traces remain unchanged."
+  ]
+}

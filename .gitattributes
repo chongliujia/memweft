@@ -1,0 +1,4 @@
+# Published evidence links use SHA-256 of the exact JSON/JSONL bytes.
+# Preserve those bytes when checking out the reports on Windows.
+evals/reports/*.json text eol=lf
+evals/reports/*.jsonl text eol=lf
